@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Sistemas - Supervisores</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Paleta de Cores - Supervisores */
+        :root {
+            --bg-color: #0f172a; /* Fundo principal escuro */
+            --sidebar-bg: #1e293b; /* Fundo da barra lateral */
+            --primary-color: #fbbf24; /* Dourado/Amarelo para destaque */
+            --primary-hover: #f59e0b;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* TELA DE LOGIN */
+        #login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--bg-color);
+            position: absolute;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .login-box h2 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+        }
+
+        button.btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        button.btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #login-error {
+            color: var(--danger-color);
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* PAINEL PRINCIPAL (SIDEBAR + CONTEÚDO) */
+        #dashboard {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .sidebar-menu li {
+            padding: 15px 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-left: 3px solid transparent;
+            transition: 0.2s;
+        }
+
+        .sidebar-menu li:hover, .sidebar-menu li.active {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .sidebar-footer button {
+            width: 100%;
+            padding: 10px;
+            background-color: transparent;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .sidebar-footer button:hover {
+            background-color: var(--danger-color);
+            color: #fff;
+        }
+
+        /* ÁREA DE CONTEÚDO */
+        .content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            margin-bottom: 30px;
+        }
+
+        .content-header h1 {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .module-section {
+            display: none;
+        }
+
+        .module-section.active {
+            display: block;
+        }
+
+        /* CARD DO CALCULADOR DE AVAIS */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            max-width: 600px;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        #resultado-aval {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(251, 191, 36, 0.1);
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            display: none;
+        }
+
+        #resultado-aval h4 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>Central dos Supervisores</h2>
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="email@exemplo.com">
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" placeholder="Sua senha">
+            </div>
+            <button class="btn-primary" onclick="fazerLogin()">Entrar</button>
+            <p id="login-error">Credenciais inválidas ou sem permissão.</p>
+        </div>
+    </div>
+
+    <div id="dashboard">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h3>SUPERVISORES</h3>
+                <span style="font-size: 12px; color: var(--text-muted)">Painel Administrativo</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active" onclick="mudarModulo('modulo-avais', this)">Cálculo de Avais</li>
+                <li onclick="mudarModulo('modulo-futuro', this)">Sistema Futuro</li>
+            </ul>
+            <div class="sidebar-footer">
+                <button onclick="fazerLogout()">Sair da Central</button>
+            </div>
+        </nav>
+
+        <main class="content">
+            <section id="modulo-avais" class="module-section active">
+                <div class="content-header">
+                    <h1>Cálculo Automático de Avais</h1>
+                    <p style="color: var(--text-muted); margin-top: 5px;">Calcule os dias de ausência desconsiderando o período congelado pelo aval.</p>
+                </div>
+
+                <div class="card">
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="data-login">Último Login</label>
+                            <input type="date" id="data-login">
+                        </div>
+                        <div class="form-group">
+                            <label for="data-consulta">Data da Consulta</label>
+                            <input type="date" id="data-consulta">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="data-aval">Início do Aval</label>
+                            <input type="date" id="data-aval">
+                        </div>
+                        <div class="form-group">
+                            <label for="dias-aval">Dias de Aval</label>
+                            <input type="number" id="dias-aval" min="1" placeholder="Ex: 7">
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" style="width: auto; padding: 10px 20px;" onclick="processarCalculo()">Calcular Ausência</button>
+
+                    <div id="resultado-aval">
+                        <h4>Resultado</h4>
+                        <p id="texto-resultado"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="modulo-futuro" class="module-section">
+                <div class="content-header">
+                    <h1>Novo Sistema</h1>
+                    <p style="color: var(--text-muted); margin-top: 5px;">Em desenvolvimento...</p>
+                </div>
+                <div class="card">
+                    <p>Este espaço está reservado para os próximos sistemas que você desenvolverá para os Sps.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <script>
+        // ==========================================
+        // CONFIGURAÇÃO DO FIREBASE
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCvyt0IyruvPqZPb6OqX5yiGuvIjUWpktA",
+            authDomain: "central-supervisores.firebaseapp.com",
+            projectId: "central-supervisores",
+            storageBucket: "central-supervisores.firebasestorage.app",
+            messagingSenderId: "882541677437",
+            appId: "1:882541677437:web:ed25d1e7aa273ca40cda14"
+        };
+
+        // Inicializa o Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        // ==========================================
+        // AUTENTICAÇÃO E CONTROLE DE TELA
+        // ==========================================
+        const auth = firebase.auth();
+
+        // Monitora o estado da autenticação
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Usuário logado
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'flex';
+                // Preenche a data de consulta com a data de hoje automaticamente
+                document.getElementById('data-consulta').valueAsDate = new Date();
+            } else {
+                // Usuário não logado
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('dashboard').style.display = 'none';
+            }
+        });
+
+        function fazerLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('login-error');
+
+            if(!email || !password) {
+                errorElement.innerText = "Preencha todos os campos.";
+                errorElement.style.display = "block";
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    errorElement.style.display = "none";
+                })
+                .catch((error) => {
+                    errorElement.innerText = "Credenciais inválidas ou usuário sem permissão.";
+                    errorElement.style.display = "block";
+                    console.error(error);
+                });
+        }
+
+        function fazerLogout() {
+            auth.signOut();
+        }
+
+        // ==========================================
+        // NAVEGAÇÃO DA BARRA LATERAL
+        // ==========================================
+        function mudarModulo(idModulo, elementoMenu) {
+            // Esconde todas as sessões
+            document.querySelectorAll('.module-section').forEach(el => el.classList.remove('active'));
+            // Remove a classe active de todos os itens do menu
+            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
+            
+            // Ativa a sessão clicada
+            document.getElementById(idModulo).classList.add('active');
+            elementoMenu.classList.add('active');
+        }
+
+        // ==========================================
+        // LÓGICA DO SISTEMA DE AVAIS
+        // ==========================================
+        function processarCalculo() {
+            const dataLoginStr = document.getElementById('data-login').value;
+            const dataAvalStr = document.getElementById('data-aval').value;
+            const diasAval = parseInt(document.getElementById('dias-aval').value);
+            const dataConsultaStr = document.getElementById('data-consulta').value;
+
+            if (!dataLoginStr || !dataAvalStr || isNaN(diasAval) || !dataConsultaStr) {
+                alert("Por favor, preencha todos os campos do formulário de Aval.");
+                return;
+            }
+
+            // O input type="date" retorna "AAAA-MM-DD". Vamos converter diretamente para Date considerando o fuso horário local para evitar bugs de virada de dia.
+            const ultimoLogin = new Date(dataLoginStr + 'T00:00:00');
+            const inicioAval = new Date(dataAvalStr + 'T00:00:00');
+            const dataConsulta = new Date(dataConsultaStr + 'T00:00:00');
+
+            const fimAval = new Date(inicioAval);
+            fimAval.setDate(inicioAval.getDate() + diasAval - 1);
+
+            const UM_DIA = 1000 * 60 * 60 * 24;
+            const diferencaEmDias = (dataAntiga, dataNova) => Math.floor((dataNova - dataAntiga) / UM_DIA);
+
+            let diasAusenciaAntes = 0;
+            let diasAusenciaDepois = 0;
+            let totalDias = 0;
+            let mensagemDetalhada = "";
+
+            if (dataConsulta <= inicioAval) {
+                totalDias = diferencaEmDias(ultimoLogin, dataConsulta);
+                mensagemDetalhada = `O aval ainda não começou. Ausência normal de <strong>${totalDias} dia(s)</strong>.`;
+            } else {
+                diasAusenciaAntes = diferencaEmDias(ultimoLogin, inicioAval);
+                
+                if (dataConsulta > fimAval) {
+                    diasAusenciaDepois = diferencaEmDias(fimAval, dataConsulta);
+                    totalDias = diasAusenciaAntes + diasAusenciaDepois;
+                    mensagemDetalhada = `
+                        Ausência pré-aval: <strong>${diasAusenciaAntes} dia(s)</strong><br>
+                        Ausência pós-aval: <strong>${diasAusenciaDepois} dia(s)</strong><br>
+                        Total de ausência: <strong>${totalDias} dia(s)</strong>
+                    `;
+                } else {
+                    totalDias = diasAusenciaAntes;
+                    mensagemDetalhada = `
+                        O militar está atualmente no período de vigência do aval.<br>
+                        Dias de ausência acumulados antes do aval: <strong>${totalDias} dia(s)</strong>.
+                    `;
+                }
+            }
+
+            const boxResultado = document.getElementById('resultado-aval');
+            const textoResultado = document.getElementById('texto-resultado');
+            
+            textoResultado.innerHTML = mensagemDetalhada;
+            boxResultado.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
