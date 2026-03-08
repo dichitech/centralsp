@@ -1,524 +1,557 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Central de Sistemas - Supervisores</title>
+  <meta charset="UTF-8">
+  <title>Central de Sistemas - Supervisores</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      /* Cores base adaptadas para Supervisores (Dourado/Amarelo) */
+      --bg-deep: #070602;
+      --bg-panel: #121008;
+      --sup-neon: #fbbf24;
+      --sup-glow: rgba(251, 191, 36, 0.4);
+      --sup-dark: #4a3800;
+      
+      --admin-neon: #f59e0b;
+      --admin-glow: rgba(245, 158, 11, 0.4);
+      --admin-panel: rgba(20, 15, 0, 0.4);
+      
+      --dynamic-neon: var(--sup-neon);
+      --dynamic-glow: var(--sup-glow);
+      --dynamic-panel: var(--bg-panel);
+      --dynamic-select-text: #fff;
+      
+      --text-main: #f4f4f4;
+      --text-sub: #c9b98b;
+      --font-ui: 'Rajdhani', sans-serif;
+      --border-tech: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body { font-family: var(--font-ui); background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; transition: background-image 0.4s; }
+    body::before { content: ''; position: fixed; top: 50%; left: 50%; width: 150vw; height: 150vh; transform: translate(-50%, -50%); background: radial-gradient(circle at center, rgba(251, 191, 36, 0.05) 0%, transparent 60%); pointer-events: none; z-index: -1; }
+
+    /* Tela de Login */
+    #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-deep); z-index: 99999; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.3s; }
+    .login-card { background: var(--bg-panel); border: 1px solid var(--sup-neon); padding: 50px 40px; border-radius: 12px; text-align: center; box-shadow: 0 0 40px var(--sup-glow); max-width: 400px; width: 90%; }
+    .login-card img { width: 90px; filter: drop-shadow(0 0 10px var(--sup-neon)); margin-bottom: 25px; }
+    .login-card h2 { color: #fff; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-size: 24px; }
+    .login-card p { color: var(--text-sub); margin-bottom: 35px; font-size: 15px; font-weight: 500; }
+
+    /* Controles Superiores (Logout) */
+    .top-controls { position: absolute; right: 30px; top: 30px; display: flex; gap: 15px; z-index: 100; }
+    .btn-top { background: transparent; border: none; font-size: 24px; cursor: pointer; transition: all 0.3s; filter: drop-shadow(0 0 5px var(--sup-neon)); }
+    #btnLogout { color: var(--text-sub); }
+    #btnLogout:hover { transform: scale(1.1); color: #ff2a2a; filter: drop-shadow(0 0 10px #ff2a2a); }
+
+    /* Cabeçalho */
+    header { padding: 30px 20px; display: flex; justify-content: center; position: relative; z-index: 10; }
+    .header-frame { background: rgba(10, 8, 2, 0.85); backdrop-filter: blur(10px); border: var(--border-tech); border-radius: 8px; padding: 15px 40px; display: flex; align-items: center; gap: 25px; box-shadow: 0 0 20px rgba(251, 191, 36, 0.15), inset 0 0 10px rgba(251, 191, 36, 0.05); position: relative; transition: all 0.4s; }
+    .header-frame::before { content: ''; position: absolute; top: -1px; left: 10%; width: 80%; height: 2px; background: linear-gradient(90deg, transparent, var(--dynamic-neon), transparent); }
+    .logo-dic { width: 65px; filter: drop-shadow(0 0 8px var(--dynamic-neon)); transition: all 0.4s;}
+    .title-area { display: flex; flex-direction: column; justify-content: center; }
+    .title-area h1 { font-size: 28px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #fff; text-shadow: 0 0 10px var(--dynamic-glow); margin-bottom: -5px; }
+    .title-area h2 { font-size: 14px; font-weight: 500; color: var(--dynamic-neon); text-transform: uppercase; letter-spacing: 3px; }
+
+    /* Container Principal */
+    #appWrapper { display: none; flex-direction: column; flex: 1; }
+    .container { flex: 1; max-width: 1300px; margin: 20px auto 50px auto; padding: 0 20px; width: 100%; }
     
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    /* Layout Admin Flex (Sidebar + Content) */
+    #mainLayout { display: flex; gap: 30px; align-items: flex-start; } 
+
+    /* Menu Lateral */
+    .admin-sidebar {
+      background: var(--admin-panel);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(251, 191, 36, 0.15);
+      border-radius: 16px;
+      padding: 25px 20px;
+      width: 260px;
+      flex-shrink: 0;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .admin-sidebar-header { color: var(--text-sub); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; padding-left: 10px; }
+    .btn-sidebar { background: transparent; border: none; color: var(--text-main); padding: 14px 15px; border-radius: 8px; font-family: var(--font-ui); font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.3s; text-align: left; }
+    .btn-sidebar i { font-size: 18px; width: 24px; text-align: center; }
+    .btn-sidebar:hover { background: rgba(251, 191, 36, 0.05); color: var(--dynamic-neon); }
+    .btn-sidebar.active { background: rgba(251, 191, 36, 0.15); color: var(--dynamic-neon); }
+
+    /* Área de Conteúdo */
+    .admin-main-content { flex: 1; width: 100%; }
     
-    <style>
-        /* =======================================================
-           VARIÁVEIS GLOBAIS (TEMA SUPERVISORES - INSPIRADO NA DIC)
-           ======================================================= */
-        :root {
-            /* Cores Login DIC adaptadas para Supervisores */
-            --bg-deep: #070707;
-            --bg-panel: #111111;
-            --sup-neon: #fbbf24; /* Dourado/Amarelo */
-            --sup-glow: rgba(251, 191, 36, 0.4);
-            --sup-dark: #4a3800;
-            --text-main: #f4f4f4;
-            --text-sub: #a3a3a3;
-            --font-ui: 'Rajdhani', sans-serif;
-            --font-dash: 'Roboto', sans-serif;
-            --border-tech: 1px solid rgba(251, 191, 36, 0.3);
+    .admin-section { 
+      background: var(--admin-panel); 
+      backdrop-filter: blur(15px); 
+      border: 1px solid rgba(251, 191, 36, 0.15); 
+      border-radius: 16px; 
+      padding: 35px; 
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4); 
+      transition: all 0.4s; 
+      display: none;
+    }
+    .admin-section.active { display: block; }
+    .admin-section:hover { border-color: rgba(251, 191, 36, 0.3); }
+    .admin-section h3 { color: var(--dynamic-neon); font-size: 20px; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 3px; display: flex; align-items: center; gap: 12px; font-weight: 700; }
+    .admin-section p.subtext { color: var(--text-sub); margin-top: -15px; margin-bottom: 25px; font-size: 15px; }
 
-            /* Cores Dashboard Original */
-            --sidebar-bg: #1e293b; 
-            --card-bg: #1e293b;
-            --border-color: #334155;
-            --danger-color: #ef4444;
-        }
+    /* Inputs e Tabelas */
+    .input-block { position: relative; width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(251, 191, 36, 0.1); border-radius: 6px; display: flex; align-items: center; padding: 0 15px; transition: all 0.3s; margin-bottom: 15px; }
+    .input-block:focus-within { border-color: var(--dynamic-neon); box-shadow: 0 0 12px var(--dynamic-glow); }
+    .input-block i { color: var(--dynamic-neon); font-size: 16px; }
+    .input-block input { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 16px; font-family: var(--font-ui); font-weight: 500; padding: 15px 10px; outline: none; letter-spacing: 1px; }
+    
+    label.tech-label { display: block; color: var(--text-sub); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    .row { display: flex; gap: 15px; }
+    .row .form-group { flex: 1; }
 
-        body {
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
-            font-family: var(--font-dash);
-        }
+    .admin-table-wrapper { width: 100%; overflow-x: auto; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+    .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .admin-table th { color: var(--text-sub); background: rgba(0,0,0,0.4); padding: 18px 15px; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid rgba(251, 191, 36, 0.2); white-space: nowrap; }
+    .admin-table td { padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; transition: background 0.3s; }
+    .admin-table tr:hover td { background: rgba(251, 191, 36, 0.03); }
+    .admin-table tr:last-child td { border-bottom: none; }
 
-        /* Efeito de Fundo Radial do Login */
-        body::before { 
-            content: ''; 
-            position: fixed; 
-            top: 50%; left: 50%; 
-            width: 150vw; height: 150vh; 
-            transform: translate(-50%, -50%); 
-            background: radial-gradient(circle at center, rgba(251, 191, 36, 0.08) 0%, transparent 60%); 
-            pointer-events: none; 
-            z-index: -1; 
-        }
+    .admin-input { width: 100%; background: transparent; border: 1px solid transparent; color: #fff; font-family: var(--font-ui); font-size: 15px; padding: 8px 12px; border-radius: 6px; outline: none; transition: all 0.3s; font-weight: 500; }
+    .admin-input[readonly] { opacity: 0.6; cursor: default; }
+    .admin-input:not([readonly]) { background: rgba(0,0,0,0.6); border: 1px solid var(--dynamic-neon); box-shadow: inset 0 0 8px rgba(0,0,0,0.5); opacity: 1; }
 
-        /* =======================================================
-           TELA DE LOGIN (DESIGN DIC)
-           ======================================================= */
-        #login-screen {
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: var(--bg-deep); 
-            z-index: 99999; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            flex-direction: column; 
-            transition: opacity 0.3s;
-            font-family: var(--font-ui);
-        }
+    .action-cell { display: flex; gap: 8px; justify-content: flex-start; align-items: center; }
+    .btn-admin-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid transparent; background: rgba(255,255,255,0.05); color: var(--text-sub); transition: all 0.3s; font-size: 14px; }
+    .btn-admin-edit:hover { background: rgba(251, 191, 36, 0.15); color: var(--dynamic-neon); border-color: rgba(251, 191, 36, 0.3); }
+    .btn-admin-del:hover { background: rgba(255,42,42,0.15); color: #ff2a2a; border-color: rgba(255,42,42,0.3); }
+    .btn-admin-check { background: rgba(76,175,80,0.15); color: #4caf50; border-color: rgba(76,175,80,0.3); }
+    .btn-admin-check:hover { background: #4caf50; color: #fff; }
 
-        .login-card {
-            background: var(--bg-panel); 
-            border: 1px solid var(--sup-neon); 
-            padding: 50px 40px; 
-            border-radius: 12px; 
-            text-align: center; 
-            box-shadow: 0 0 40px var(--sup-glow); 
-            max-width: 400px; 
-            width: 90%; 
-        }
+    /* Botões Padrão */
+    .btn-tech { background: rgba(251, 191, 36, 0.05); border: 1px solid var(--dynamic-neon); border-color: rgba(251, 191, 36, 0.5); color: var(--text-main); padding: 12px 24px; border-radius: 6px; font-family: var(--font-ui); font-size: 15px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
+    .btn-tech:hover { background: var(--dynamic-neon); border-color: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px var(--dynamic-glow); }
 
-        .login-card img { 
-            width: 80px; 
-            filter: drop-shadow(0 0 10px var(--sup-neon)); 
-            margin-bottom: 25px; 
-        }
+    .admin-controls-bottom { display: flex; gap: 15px; margin-top: 25px; align-items: center; justify-content: flex-end; }
+    .btn-add { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--dynamic-neon); }
+    .btn-add:hover { background: rgba(251, 191, 36, 0.2); border-color: var(--dynamic-neon); }
+    .btn-save { background: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
+    .btn-save:hover { background: #f59e0b; box-shadow: 0 0 25px rgba(251, 191, 36, 0.5); transform: translateY(-2px); }
 
-        .login-card h2 { 
-            color: #fff; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            margin-bottom: 10px; 
-            font-size: 26px; 
-            font-weight: 700;
-        }
+    /* Resultados Avais */
+    #resultado-aval { margin-top: 25px; padding: 20px; background: rgba(251, 191, 36, 0.05); border: 1px dashed var(--dynamic-neon); border-radius: 8px; display: none; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+    #resultado-aval h4 { color: var(--dynamic-neon); margin-bottom: 10px; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+    #texto-resultado { font-size: 16px; color: #fff; line-height: 1.5; }
+    #texto-resultado strong { color: var(--dynamic-neon); font-size: 18px; }
 
-        .login-card p { 
-            color: var(--text-sub); 
-            margin-bottom: 35px; 
-            font-size: 16px; 
-            font-weight: 500; 
-            letter-spacing: 1px;
-        }
+    /* Toasts, Loaders e Footer */
+    #globalLoader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; color: var(--dynamic-neon); font-size: 18px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
+    .spinner-ring { width: 50px; height: 50px; border: 3px solid rgba(251, 191, 36, 0.1); border-top-color: var(--dynamic-neon); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes slide-in-right { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes smoke-fade-out { to { opacity: 0; transform: translateY(-20px) scale(0.9); } }
 
-        .btn-tech { 
-            background: rgba(251, 191, 36, 0.05); 
-            border: 1px solid var(--sup-neon); 
-            border-color: rgba(251, 191, 36, 0.5); 
-            color: var(--text-main); 
-            padding: 14px; 
-            border-radius: 6px; 
-            font-family: var(--font-ui); 
-            font-size: 16px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 10px; 
-            transition: all 0.3s; 
-            width: 100%;
-            margin-top: 10px;
-        }
+    .toast-container { position: fixed; top: 30px; right: 30px; z-index: 10000; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
+    .toast-msg { background: rgba(10, 8, 2, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--sup-neon); border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); color: #fff; font-size: 16px; font-weight: 600; animation: slide-in-right 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards, smoke-fade-out 2s ease-in forwards 3s; }
 
-        .btn-tech:hover { 
-            background: var(--sup-neon); 
-            border-color: var(--sup-neon); 
-            color: #000; 
-            box-shadow: 0 0 20px var(--sup-glow); 
-        }
+    footer { text-align: center; padding: 25px; font-size: 14px; color: #888; font-weight: 500; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.02); letter-spacing: 1px; }
 
-        #login-error {
-            color: #ff2a2a;
-            font-size: 15px;
-            margin-top: 15px;
-            display: none;
-            font-weight: 600;
-            text-shadow: 0 0 10px rgba(255, 42, 42, 0.4);
-        }
-
-        /* =======================================================
-           PAINEL PRINCIPAL (SIDEBAR + CONTEÚDO ORIGINAL)
-           ======================================================= */
-        #dashboard {
-            display: none;
-            width: 100%;
-            height: 100%;
-            background-color: #0f172a; /* Mantido do original para o painel */
-        }
-
-        .sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0;
-        }
-
-        .sidebar-header {
-            padding: 0 20px 20px;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .sidebar-header h3 {
-            color: var(--sup-neon);
-            font-size: 18px;
-            font-family: var(--font-ui);
-            letter-spacing: 2px;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            flex-grow: 1;
-        }
-
-        .sidebar-menu li {
-            padding: 15px 20px;
-            cursor: pointer;
-            color: var(--text-sub);
-            border-left: 3px solid transparent;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .sidebar-menu li:hover, .sidebar-menu li.active {
-            background-color: rgba(255, 255, 255, 0.05);
-            color: var(--text-main);
-            border-left-color: var(--sup-neon);
-        }
-
-        .sidebar-footer {
-            padding: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .sidebar-footer button {
-            width: 100%;
-            padding: 10px;
-            background-color: transparent;
-            color: var(--danger-color);
-            border: 1px solid var(--danger-color);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-family: var(--font-dash);
-            font-weight: bold;
-        }
-
-        .sidebar-footer button:hover {
-            background-color: var(--danger-color);
-            color: #fff;
-        }
-
-        .content {
-            flex-grow: 1;
-            padding: 40px;
-            overflow-y: auto;
-        }
-
-        .content-header { margin-bottom: 30px; }
-        .content-header h1 { font-size: 24px; font-weight: 500; }
-        
-        .module-section { display: none; }
-        .module-section.active { display: block; }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 25px;
-            max-width: 600px;
-        }
-
-        .row { display: flex; gap: 15px; margin-bottom: 15px; }
-        .row .form-group { flex: 1; }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: var(--text-sub);
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            background-color: #0f172a;
-            color: var(--text-main);
-            outline: none;
-        }
-
-        .form-group input:focus { border-color: var(--sup-neon); }
-
-        .btn-primary {
-            background-color: var(--sup-neon);
-            color: #000;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-primary:hover { background-color: #f59e0b; }
-
-        #resultado-aval {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: rgba(251, 191, 36, 0.1);
-            border: 1px solid var(--sup-neon);
-            border-radius: 4px;
-            display: none;
-        }
-
-        #resultado-aval h4 {
-            color: var(--sup-neon);
-            margin-bottom: 5px;
-        }
-    </style>
+    @media (max-width: 850px) {
+      .header-frame { flex-direction: column; text-align: center; padding-top: 30px;}
+      .top-controls { top: 10px; right: 20px; }
+      #mainLayout { flex-direction: column; }
+      .admin-sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; padding: 15px; }
+      .btn-sidebar { flex: 1; justify-content: center; }
+      .row { flex-direction: column; gap: 0; }
+    }
+  </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-card">
-            <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" alt="Logo Supervisores">
-            <h2>Central de Sistemas</h2>
-            <p>Acesso restrito à Liderança dos Supervisores</p>
+  <div id="loginScreen">
+    <div id="loginLoader" style="display: none; text-align: center; color: var(--sup-neon); font-size: 16px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">
+      <div class="spinner-ring" style="margin: 0 auto 20px auto;"></div>
+      Autenticando Sessão...
+    </div>
+    <div class="login-card" id="loginCard">
+      <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" alt="Logo Supervisores">
+      <h2>Central de Sistemas</h2>
+      <p>Acesso restrito à Liderança dos Supervisores</p>
+      <button onclick="loginGoogle()" class="btn-tech" style="width:100%; font-size:16px;">
+        <i class="fab fa-google"></i> Entrar com o Google
+      </button>
+      <p id="login-error" style="color: #ff2a2a; font-size: 14px; margin-top: 15px; display: none; font-weight: 600;"><i class="fas fa-exclamation-triangle"></i> Erro ao logar com o Google.</p>
+    </div>
+  </div>
 
-            <button class="btn-tech" onclick="loginGoogle()" style="width:100%; font-size:16px;">
-                <i class="fab fa-google"></i> Entrar com o Google
-            </button>
-            <p id="login-error"><i class="fas fa-exclamation-triangle"></i> Erro ao logar com o Google.</p>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <div id="appWrapper">
+    
+    <div class="top-controls">
+      <button id="btnLogout" class="btn-top" onclick="fazerLogout()" title="Sair da Conta">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </div>
+
+    <header>
+      <div class="header-frame">
+        <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" alt="Logo" class="logo-dic">
+        <div class="title-area">
+          <h1>Central de Sistemas</h1>
+          <h2>Liderança dos Supervisores</h2>
         </div>
-    </div>
+      </div>
+    </header>
 
-    <div id="dashboard">
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h3>SUPERVISORES</h3>
-                <span style="font-size: 12px; color: var(--text-sub)">Painel Administrativo</span>
+    <div class="container" id="mainLayout">
+      
+      <div class="admin-sidebar">
+        <div class="admin-sidebar-header">Módulos do Sistema</div>
+        <button class="btn-sidebar active" onclick="switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i> Cálculo de Avais</button>
+        <button class="btn-sidebar" onclick="switchSection('modulo-futuro', this)"><i class="fas fa-cogs"></i> Sistema Futuro</button>
+        <button class="btn-sidebar" id="btnAdminAcessos" style="display: none;" onclick="switchSection('modulo-acessos', this)"><i class="fas fa-users-cog"></i> Acessos</button>
+      </div>
+
+      <div class="admin-main-content">
+        
+        <div id="modulo-avais" class="admin-section active">
+          <h3><i class="fas fa-calculator"></i> Cálculo Automático de Avais</h3>
+          <p class="subtext">Calcule os dias de ausência desconsiderando o período congelado pelo aval.</p>
+          
+          <div class="row">
+            <div class="form-group">
+              <label class="tech-label">Último Login</label>
+              <div class="input-block"><i class="far fa-calendar-alt"></i><input type="date" id="data-login"></div>
             </div>
-            <ul class="sidebar-menu">
-                <li class="active" onclick="mudarModulo('modulo-avais', this)"><i class="fas fa-calculator"></i> Cálculo de Avais</li>
-                <li onclick="mudarModulo('modulo-futuro', this)"><i class="fas fa-cogs"></i> Sistema Futuro</li>
-            </ul>
-            <div class="sidebar-footer">
-                <button onclick="fazerLogout()"><i class="fas fa-sign-out-alt"></i> Sair da Central</button>
+            <div class="form-group">
+              <label class="tech-label">Data da Consulta</label>
+              <div class="input-block"><i class="far fa-calendar-check"></i><input type="date" id="data-consulta"></div>
             </div>
-        </nav>
+          </div>
+          
+          <div class="row">
+            <div class="form-group">
+              <label class="tech-label">Início do Aval</label>
+              <div class="input-block"><i class="fas fa-hourglass-start"></i><input type="date" id="data-aval"></div>
+            </div>
+            <div class="form-group">
+              <label class="tech-label">Dias de Aval</label>
+              <div class="input-block"><i class="fas fa-sort-numeric-up"></i><input type="number" id="dias-aval" min="1" placeholder="Ex: 7"></div>
+            </div>
+          </div>
 
-        <main class="content">
-            <section id="modulo-avais" class="module-section active">
-                <div class="content-header">
-                    <h1>Cálculo Automático de Avais</h1>
-                    <p style="color: var(--text-sub); margin-top: 5px;">Calcule os dias de ausência desconsiderando o período congelado pelo aval.</p>
-                </div>
+          <button class="btn-tech" onclick="processarCalculo()"><i class="fas fa-sync-alt"></i> Calcular Ausência</button>
 
-                <div class="card">
-                    <div class="row">
-                        <div class="form-group">
-                            <label for="data-login">Último Login</label>
-                            <input type="date" id="data-login">
-                        </div>
-                        <div class="form-group">
-                            <label for="data-consulta">Data da Consulta</label>
-                            <input type="date" id="data-consulta">
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="form-group">
-                            <label for="data-aval">Início do Aval</label>
-                            <input type="date" id="data-aval">
-                        </div>
-                        <div class="form-group">
-                            <label for="dias-aval">Dias de Aval</label>
-                            <input type="number" id="dias-aval" min="1" placeholder="Ex: 7">
-                        </div>
-                    </div>
+          <div id="resultado-aval">
+            <h4><i class="fas fa-poll-h"></i> Resultado da Análise</h4>
+            <p id="texto-resultado"></p>
+          </div>
+        </div>
 
-                    <button class="btn-primary" style="width: auto; padding: 10px 20px;" onclick="processarCalculo()">Calcular Ausência</button>
+        <div id="modulo-futuro" class="admin-section">
+          <h3><i class="fas fa-cogs"></i> Sistema Futuro</h3>
+          <p class="subtext">Em desenvolvimento...</p>
+          <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.1); padding: 30px; text-align: center; border-radius: 8px;">
+            <p style="color: var(--text-sub);">Este espaço está reservado para os próximos módulos do painel.</p>
+          </div>
+        </div>
 
-                    <div id="resultado-aval">
-                        <h4>Resultado</h4>
-                        <p id="texto-resultado"></p>
-                    </div>
-                </div>
-            </section>
+        <div id="modulo-acessos" class="admin-section">
+          <h3><i class="fas fa-users-cog"></i> Gerenciar Acessos</h3>
+          <p class="subtext">Controle de quem pode acessar esta central de sistemas.</p>
+          
+          <div class="admin-table-wrapper">
+            <table class="admin-table" id="tbAcessos">
+              <thead>
+                <tr>
+                  <th style="width:40%">E-mail Google</th>
+                  <th style="width:30%">Nick no Habbo</th>
+                  <th style="width:15%">Nível</th>
+                  <th style="width:15%">Ações</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="admin-controls-bottom">
+            <button class="btn-tech btn-add" onclick="addLinhaAcesso()"><i class="fas fa-plus"></i> Novo Acesso</button>
+            <button class="btn-tech btn-save" onclick="salvarAcessos()"><i class="fas fa-save"></i> Salvar Alterações</button>
+          </div>
+        </div>
 
-            <section id="modulo-futuro" class="module-section">
-                <div class="content-header">
-                    <h1>Novo Sistema</h1>
-                    <p style="color: var(--text-sub); margin-top: 5px;">Em desenvolvimento...</p>
-                </div>
-                <div class="card">
-                    <p>Este espaço está reservado para os próximos sistemas que você desenvolverá para os Sps.</p>
-                </div>
-            </section>
-        </main>
+      </div>
     </div>
+  </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <footer>
+    Desenvolvido com <i class="fa-solid fa-heart" style="color: #808080;"></i> por MegaMetall
+  </footer>
 
-    <script>
-        // ==========================================
-        // CONFIGURAÇÃO DO FIREBASE
-        // ==========================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyCvyt0IyruvPqZPb6OqX5yiGuvIjUWpktA",
-            authDomain: "central-supervisores.firebaseapp.com",
-            projectId: "central-supervisores",
-            storageBucket: "central-supervisores.firebasestorage.app",
-            messagingSenderId: "882541677437",
-            appId: "1:882541677437:web:ed25d1e7aa273ca40cda14"
-        };
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-        // Inicializa o Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+  <script>
+    // ==========================================
+    // CONFIGURAÇÃO DO FIREBASE
+    // ==========================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyCvyt0IyruvPqZPb6OqX5yiGuvIjUWpktA",
+        authDomain: "central-supervisores.firebaseapp.com",
+        projectId: "central-supervisores",
+        storageBucket: "central-supervisores.firebasestorage.app",
+        messagingSenderId: "882541677437",
+        appId: "1:882541677437:web:ed25d1e7aa273ca40cda14"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    // Variáveis Globais
+    let usuarioLogadoEmail = '';
+    let acessosData = [];
+
+    // ==========================================
+    // AUTENTICAÇÃO E INICIALIZAÇÃO
+    // ==========================================
+    function liberarPainel() {
+        document.getElementById('loginCard').style.display = 'none';
+        document.getElementById('loginLoader').style.display = 'none';
+        document.getElementById('loginScreen').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appWrapper').style.display = 'flex';
+        }, 300);
+        document.getElementById('data-consulta').valueAsDate = new Date();
+    }
+
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            usuarioLogadoEmail = user.email.toLowerCase();
+            verificarAcessoBD(usuarioLogadoEmail);
+        } else {
+            document.getElementById('appWrapper').style.display = 'none';
+            document.getElementById('loginLoader').style.display = 'none';
+            document.getElementById('loginCard').style.display = 'block';
+            document.getElementById('loginScreen').style.display = 'flex';
+            setTimeout(() => { document.getElementById('loginScreen').style.opacity = '1'; }, 10);
         }
+    });
 
-        // ==========================================
-        // AUTENTICAÇÃO E CONTROLE DE TELA
-        // ==========================================
-        const auth = firebase.auth();
-
-        // Monitora o estado da autenticação
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // Usuário logado
-                document.getElementById('login-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('dashboard').style.display = 'flex';
-                }, 300);
-                
-                document.getElementById('data-consulta').valueAsDate = new Date();
-            } else {
-                // Usuário não logado
-                document.getElementById('login-screen').style.display = 'flex';
-                setTimeout(() => {
-                    document.getElementById('login-screen').style.opacity = '1';
-                }, 10);
-                document.getElementById('dashboard').style.display = 'none';
-            }
-        });
-
-        function loginGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            const errorElement = document.getElementById('login-error');
-            const btn = document.querySelector('.btn-tech');
-            const originalText = btn.innerHTML;
-            
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Autenticando...";
-            btn.style.pointerEvents = 'none';
-
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    errorElement.style.display = "none";
-                    btn.innerHTML = originalText;
-                    btn.style.pointerEvents = 'auto';
-                })
-                .catch((error) => {
-                    errorElement.style.display = "block";
-                    btn.innerHTML = originalText;
-                    btn.style.pointerEvents = 'auto';
-                    console.error("Erro no login com Google: ", error);
+    function verificarAcessoBD(email) {
+        db.collection("acessos").get().then((snap) => {
+            if (snap.empty) {
+                // AUTO-CADASTRO: Primeiro usuário vira ADMIN
+                db.collection("acessos").doc(email).set({
+                    email: email,
+                    nick: '',
+                    nivel: "ADMIN"
+                }).then(() => {
+                    alert("Sistema Inicializado! Seu e-mail foi cadastrado automaticamente como Administrador.");
+                    window.location.reload();
                 });
-        }
-
-        function fazerLogout() {
-            auth.signOut();
-        }
-
-        // ==========================================
-        // NAVEGAÇÃO DA BARRA LATERAL
-        // ==========================================
-        function mudarModulo(idModulo, elementoMenu) {
-            document.querySelectorAll('.module-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(idModulo).classList.add('active');
-            elementoMenu.classList.add('active');
-        }
-
-        // ==========================================
-        // LÓGICA DO SISTEMA DE AVAIS
-        // ==========================================
-        function processarCalculo() {
-            const dataLoginStr = document.getElementById('data-login').value;
-            const dataAvalStr = document.getElementById('data-aval').value;
-            const diasAval = parseInt(document.getElementById('dias-aval').value);
-            const dataConsultaStr = document.getElementById('data-consulta').value;
-
-            if (!dataLoginStr || !dataAvalStr || isNaN(diasAval) || !dataConsultaStr) {
-                alert("Por favor, preencha todos os campos do formulário de Aval.");
                 return;
             }
 
-            const ultimoLogin = new Date(dataLoginStr + 'T00:00:00');
-            const inicioAval = new Date(dataAvalStr + 'T00:00:00');
-            const dataConsulta = new Date(dataConsultaStr + 'T00:00:00');
+            let autorizado = false;
+            let nivelUsuario = 'COMUM';
+            acessosData = [];
 
-            const fimAval = new Date(inicioAval);
-            fimAval.setDate(inicioAval.getDate() + diasAval - 1);
-
-            const UM_DIA = 1000 * 60 * 60 * 24;
-            const diferencaEmDias = (dataAntiga, dataNova) => Math.floor((dataNova - dataAntiga) / UM_DIA);
-
-            let diasAusenciaAntes = 0;
-            let diasAusenciaDepois = 0;
-            let totalDias = 0;
-            let mensagemDetalhada = "";
-
-            if (dataConsulta <= inicioAval) {
-                totalDias = diferencaEmDias(ultimoLogin, dataConsulta);
-                mensagemDetalhada = `O aval ainda não começou. Ausência normal de <strong>${totalDias} dia(s)</strong>.`;
-            } else {
-                diasAusenciaAntes = diferencaEmDias(ultimoLogin, inicioAval);
-                
-                if (dataConsulta > fimAval) {
-                    diasAusenciaDepois = diferencaEmDias(fimAval, dataConsulta);
-                    totalDias = diasAusenciaAntes + diasAusenciaDepois;
-                    mensagemDetalhada = `
-                        Ausência pré-aval: <strong>${diasAusenciaAntes} dia(s)</strong><br>
-                        Ausência pós-aval: <strong>${diasAusenciaDepois} dia(s)</strong><br>
-                        Total de ausência: <strong>${totalDias} dia(s)</strong>
-                    `;
-                } else {
-                    totalDias = diasAusenciaAntes;
-                    mensagemDetalhada = `
-                        O militar está atualmente no período de vigência do aval.<br>
-                        Dias de ausência acumulados antes do aval: <strong>${totalDias} dia(s)</strong>.
-                    `;
+            snap.forEach((doc) => {
+                let d = doc.data();
+                acessosData.push({ id: doc.id, email: d.email, nick: d.nick || '', nivel: d.nivel || 'COMUM' });
+                if (d.email === email) {
+                    autorizado = true;
+                    nivelUsuario = d.nivel;
                 }
-            }
+            });
 
-            const boxResultado = document.getElementById('resultado-aval');
-            const textoResultado = document.getElementById('texto-resultado');
-            
-            textoResultado.innerHTML = mensagemDetalhada;
-            boxResultado.style.display = 'block';
+            if (autorizado) {
+                if (nivelUsuario === 'ADMIN') {
+                    document.getElementById('btnAdminAcessos').style.display = 'flex';
+                    renderTabelaAcessos();
+                }
+                liberarPainel();
+            } else {
+                alert("ACESSO NEGADO: O e-mail " + email + " não possui permissão nesta central.");
+                auth.signOut();
+            }
+        }).catch((error) => {
+            console.error(error);
+            alert("Erro ao conectar com o banco de dados. Verifique as regras de segurança.");
+            auth.signOut();
+        });
+    }
+
+    function loginGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        document.getElementById('loginCard').style.display = 'none';
+        document.getElementById('loginLoader').style.display = 'block';
+
+        auth.signInWithPopup(provider).catch((error) => {
+            document.getElementById('loginLoader').style.display = 'none';
+            document.getElementById('loginCard').style.display = 'block';
+            document.getElementById('login-error').style.display = 'block';
+            console.error("Erro no login: ", error);
+        });
+    }
+
+    function fazerLogout() { auth.signOut(); }
+
+    // ==========================================
+    // NAVEGAÇÃO
+    // ==========================================
+    function switchSection(idModulo, btnElement) {
+        document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.btn-sidebar').forEach(el => el.classList.remove('active'));
+        document.getElementById(idModulo).classList.add('active');
+        btnElement.classList.add('active');
+    }
+
+    function mostrarToastAdmin(msg) {
+        var container = document.getElementById('toastContainer');
+        var toast = document.createElement('div');
+        toast.className = 'toast-msg';
+        toast.innerHTML = '<i class="fas fa-check-circle" style="color: #4caf50; font-size: 20px;"></i><span style="color:#fff;">' + msg + '</span>';
+        container.appendChild(toast);
+        setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3500);
+    }
+
+    // ==========================================
+    // MÓDULO DE AVAIS
+    // ==========================================
+    function processarCalculo() {
+        const dataLoginStr = document.getElementById('data-login').value;
+        const dataAvalStr = document.getElementById('data-aval').value;
+        const diasAval = parseInt(document.getElementById('dias-aval').value);
+        const dataConsultaStr = document.getElementById('data-consulta').value;
+
+        if (!dataLoginStr || !dataAvalStr || isNaN(diasAval) || !dataConsultaStr) {
+            alert("Preencha todos os campos corretamente.");
+            return;
         }
-    </script>
+
+        const ultimoLogin = new Date(dataLoginStr + 'T00:00:00');
+        const inicioAval = new Date(dataAvalStr + 'T00:00:00');
+        const dataConsulta = new Date(dataConsultaStr + 'T00:00:00');
+
+        const fimAval = new Date(inicioAval);
+        fimAval.setDate(inicioAval.getDate() + diasAval - 1);
+
+        const UM_DIA = 1000 * 60 * 60 * 24;
+        const diferencaEmDias = (dataAntiga, dataNova) => Math.floor((dataNova - dataAntiga) / UM_DIA);
+
+        let diasAusenciaAntes = 0;
+        let diasAusenciaDepois = 0;
+        let totalDias = 0;
+        let msg = "";
+
+        if (dataConsulta <= inicioAval) {
+            totalDias = diferencaEmDias(ultimoLogin, dataConsulta);
+            msg = `O aval ainda não começou. Ausência normal de <strong>${totalDias} dia(s)</strong>.`;
+        } else {
+            diasAusenciaAntes = diferencaEmDias(ultimoLogin, inicioAval);
+            
+            if (dataConsulta > fimAval) {
+                diasAusenciaDepois = diferencaEmDias(fimAval, dataConsulta);
+                totalDias = diasAusenciaAntes + diasAusenciaDepois;
+                msg = `Ausência pré-aval: <strong>${diasAusenciaAntes} dia(s)</strong><br>` +
+                      `Ausência pós-aval: <strong>${diasAusenciaDepois} dia(s)</strong><br>` +
+                      `<span style="display:block; margin-top:10px;">Total de ausência: <strong>${totalDias} dia(s)</strong></span>`;
+            } else {
+                totalDias = diasAusenciaAntes;
+                msg = `Militar está atualmente no período de vigência do aval.<br>` +
+                      `Dias acumulados antes do aval: <strong>${totalDias} dia(s)</strong>.`;
+            }
+        }
+
+        document.getElementById('texto-resultado').innerHTML = msg;
+        document.getElementById('resultado-aval').style.display = 'block';
+    }
+
+    // ==========================================
+    // MÓDULO DE GERENCIAMENTO (ADMIN)
+    // ==========================================
+    function renderTabelaAcessos() {
+        var tbody = document.querySelector('#tbAcessos tbody');
+        tbody.innerHTML = '';
+        acessosData.forEach(item => tbody.appendChild(criarRowAcesso(item)));
+    }
+
+    function criarRowAcesso(item) {
+        var tr = document.createElement('tr');
+        var btnAcoes = '<button class="btn-admin-icon btn-admin-edit" onclick="toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button>' +
+                       '<button class="btn-admin-icon btn-admin-del" onclick="this.closest(\'tr\').remove()" title="Excluir"><i class="fas fa-trash"></i></button>';
+
+        // Bloqueia edição do próprio email para o admin não se excluir por engano
+        if (item.email === usuarioLogadoEmail) {
+            btnAcoes = '<span style="color: var(--text-sub); font-size: 13px; font-weight: 600;"><i class="fas fa-lock"></i> Segurança</span>';
+        }
+
+        tr.innerHTML = 
+            `<td><input type="text" class="admin-input inp-email" value="${item.email || ''}" readonly placeholder="exemplo@gmail.com"></td>` +
+            `<td><input type="text" class="admin-input inp-nick" value="${item.nick || ''}" placeholder="Nick no Habbo..." readonly></td>` +
+            `<td><input type="text" class="admin-input inp-nivel" value="${item.nivel || 'COMUM'}" placeholder="ADMIN ou COMUM" readonly></td>` +
+            `<td class="action-cell">${btnAcoes}</td>`;
+        return tr;
+    }
+
+    function addLinhaAcesso() {
+        var tbody = document.querySelector('#tbAcessos tbody');
+        var tr = criarRowAcesso({ email: '', nick: '', nivel: 'COMUM' });
+        tbody.appendChild(tr);
+        toggleEditRow(tr.querySelector('.btn-admin-edit'));
+    }
+
+    function toggleEditRow(btn) {
+        var tr = btn.closest('tr');
+        tr.querySelectorAll('input').forEach(inp => inp.removeAttribute('readonly'));
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        btn.className = 'btn-admin-icon btn-admin-check';
+        btn.onclick = function() { confirmEditRow(btn); };
+    }
+
+    function confirmEditRow(btn) {
+        var tr = btn.closest('tr');
+        tr.querySelectorAll('input').forEach(inp => inp.setAttribute('readonly', true));
+        btn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+        btn.className = 'btn-admin-icon btn-admin-edit';
+        btn.onclick = function() { toggleEditRow(btn); };
+    }
+
+    function salvarAcessos() {
+        var rows = document.querySelectorAll('#tbAcessos tbody tr');
+        const batch = db.batch();
+        
+        // Exclui todos do cache antigo
+        acessosData.forEach(ac => { batch.delete(db.collection("acessos").doc(ac.email)); });
+
+        // Salva as linhas que estão na tabela agora
+        rows.forEach(r => {
+            var email = r.querySelector('.inp-email').value.trim().toLowerCase();
+            if(email) {
+                var ref = db.collection("acessos").doc(email); 
+                batch.set(ref, { 
+                    email: email, 
+                    nick: r.querySelector('.inp-nick').value.trim(),
+                    nivel: r.querySelector('.inp-nivel').value.trim().toUpperCase()
+                });
+            }
+        });
+
+        batch.commit().then(() => {
+            mostrarToastAdmin("Acessos salvos no banco de dados!");
+        }).catch((e) => { 
+            alert("Erro ao salvar: " + e.message); 
+        });
+    }
+  </script>
 </body>
 </html>
