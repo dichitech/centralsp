@@ -211,6 +211,7 @@
       <div class="admin-sidebar">
         <div class="admin-sidebar-header">Módulos do Sistema</div>
         <button class="btn-sidebar active" onclick="switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i> Cálculo de Avais</button>
+        <button class="btn-sidebar" onclick="switchSection('modulo-feedbacks', this)"><i class="fas fa-comments"></i> Painel de Feedbacks</button>
         <button class="btn-sidebar" onclick="switchSection('modulo-futuro', this)"><i class="fas fa-cogs"></i> Sistema Futuro</button>
         <button class="btn-sidebar" id="btnAdminAcessos" style="display: none;" onclick="switchSection('modulo-acessos', this)"><i class="fas fa-users-cog"></i> Acessos</button>
       </div>
@@ -248,6 +249,14 @@
           <div id="resultado-aval">
             <h4><i class="fas fa-poll-h"></i> Resultado da Análise</h4>
             <p id="texto-resultado"></p>
+          </div>
+        </div>
+
+        <div id="modulo-feedbacks" class="admin-section">
+          <h3><i class="fas fa-comments"></i> Painel Global de Feedbacks</h3>
+          <p class="subtext">Espelho do sistema original da DIC. Nenhuma funcionalidade original foi alterada.</p>
+          <div style="width: 100%; height: 75vh; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;">
+            <iframe src="https://dichitech.github.io/feedback/" style="width: 100%; height: 100%; border: none;"></iframe>
           </div>
         </div>
 
