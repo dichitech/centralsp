@@ -110,42 +110,6 @@
             letter-spacing: 1px;
         }
 
-        .input-block-login {
-            position: relative; 
-            background: rgba(0,0,0,0.6); 
-            border: 1px solid rgba(251, 191, 36, 0.15); 
-            border-radius: 6px; 
-            display: flex; 
-            align-items: center; 
-            padding: 0 15px; 
-            margin-bottom: 15px;
-            transition: all 0.3s; 
-        }
-
-        .input-block-login:focus-within { 
-            border-color: var(--sup-neon); 
-            box-shadow: 0 0 12px var(--sup-glow); 
-        }
-
-        .input-block-login i { 
-            color: var(--sup-neon); 
-            font-size: 16px; 
-            width: 25px;
-        }
-
-        .input-block-login input { 
-            width: 100%; 
-            background: transparent; 
-            border: none; 
-            color: var(--text-main); 
-            font-size: 16px; 
-            font-family: var(--font-ui); 
-            font-weight: 500; 
-            padding: 15px 10px; 
-            outline: none; 
-            letter-spacing: 1px; 
-        }
-
         .btn-tech { 
             background: rgba(251, 191, 36, 0.05); 
             border: 1px solid var(--sup-neon); 
@@ -339,20 +303,10 @@
             <h2>Central de Sistemas</h2>
             <p>Acesso restrito à Liderança dos Supervisores</p>
 
-            <div class="input-block-login">
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="email" placeholder="E-mail de acesso" autocomplete="off">
-            </div>
-            
-            <div class="input-block-login">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="Senha do sistema">
-            </div>
-
-            <button class="btn-tech" onclick="fazerLogin()">
-                <i class="fas fa-sign-in-alt"></i> Autenticar
+            <button class="btn-tech" onclick="loginGoogle()" style="width:100%; font-size:16px;">
+                <i class="fab fa-google"></i> Entrar com o Google
             </button>
-            <p id="login-error"><i class="fas fa-exclamation-triangle"></i> Credenciais inválidas.</p>
+            <p id="login-error"><i class="fas fa-exclamation-triangle"></i> Erro ao logar com o Google.</p>
         </div>
     </div>
 
@@ -469,48 +423,32 @@
             }
         });
 
-        function fazerLogin() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        function loginGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
             const errorElement = document.getElementById('login-error');
-
-            if(!email || !password) {
-                errorElement.innerHTML = "<i class='fas fa-exclamation-triangle'></i> Preencha todos os campos.";
-                errorElement.style.display = "block";
-                return;
-            }
-
-            // Efeito visual no botão durante o login
             const btn = document.querySelector('.btn-tech');
             const originalText = btn.innerHTML;
+            
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Autenticando...";
             btn.style.pointerEvents = 'none';
 
-            auth.signInWithEmailAndPassword(email, password)
-                .then(() => {
+            auth.signInWithPopup(provider)
+                .then((result) => {
                     errorElement.style.display = "none";
                     btn.innerHTML = originalText;
                     btn.style.pointerEvents = 'auto';
                 })
                 .catch((error) => {
-                    errorElement.innerHTML = "<i class='fas fa-exclamation-triangle'></i> E-mail ou senha incorretos.";
                     errorElement.style.display = "block";
                     btn.innerHTML = originalText;
                     btn.style.pointerEvents = 'auto';
-                    console.error(error);
+                    console.error("Erro no login com Google: ", error);
                 });
         }
 
         function fazerLogout() {
             auth.signOut();
         }
-
-        // Permitir login apertando "Enter"
-        document.getElementById('password').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                fazerLogin();
-            }
-        });
 
         // ==========================================
         // NAVEGAÇÃO DA BARRA LATERAL
