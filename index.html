@@ -7,7 +7,6 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     :root {
-      /* Cores base adaptadas para Supervisores (Dourado/Amarelo) */
       --bg-deep: #070602;
       --bg-panel: #121008;
       --sup-neon: #fbbf24;
@@ -41,13 +40,12 @@
     .login-card h2 { color: #fff; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-size: 24px; }
     .login-card p { color: var(--text-sub); margin-bottom: 35px; font-size: 15px; font-weight: 500; }
 
-    /* Controles Superiores (Logout) */
+    /* Controles Superiores */
     .top-controls { position: absolute; right: 30px; top: 30px; display: flex; gap: 15px; z-index: 100; }
     .btn-top { background: transparent; border: none; font-size: 24px; cursor: pointer; transition: all 0.3s; filter: drop-shadow(0 0 5px var(--sup-neon)); }
     #btnLogout { color: var(--text-sub); }
     #btnLogout:hover { transform: scale(1.1); color: #ff2a2a; filter: drop-shadow(0 0 10px #ff2a2a); }
 
-    /* Cabeçalho */
     header { padding: 30px 20px; display: flex; justify-content: center; position: relative; z-index: 10; }
     .header-frame { background: rgba(10, 8, 2, 0.85); backdrop-filter: blur(10px); border: var(--border-tech); border-radius: 8px; padding: 15px 40px; display: flex; align-items: center; gap: 25px; box-shadow: 0 0 20px rgba(251, 191, 36, 0.15), inset 0 0 10px rgba(251, 191, 36, 0.05); position: relative; transition: all 0.4s; }
     .header-frame::before { content: ''; position: absolute; top: -1px; left: 10%; width: 80%; height: 2px; background: linear-gradient(90deg, transparent, var(--dynamic-neon), transparent); }
@@ -56,116 +54,104 @@
     .title-area h1 { font-size: 28px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #fff; text-shadow: 0 0 10px var(--dynamic-glow); margin-bottom: -5px; }
     .title-area h2 { font-size: 14px; font-weight: 500; color: var(--dynamic-neon); text-transform: uppercase; letter-spacing: 3px; }
 
-    /* Container Principal */
     #appWrapper { display: none; flex-direction: column; flex: 1; }
-    .container { flex: 1; max-width: 1300px; margin: 20px auto 50px auto; padding: 0 20px; width: 100%; }
-    
-    /* Layout Admin Flex (Sidebar + Content) */
+    .container { flex: 1; max-width: 1400px; margin: 20px auto 50px auto; padding: 0 20px; width: 100%; }
     #mainLayout { display: flex; gap: 30px; align-items: flex-start; } 
 
     /* Menu Lateral */
-    .admin-sidebar {
-      background: var(--admin-panel);
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(251, 191, 36, 0.15);
-      border-radius: 16px;
-      padding: 25px 20px;
-      width: 260px;
-      flex-shrink: 0;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .admin-sidebar { background: var(--admin-panel); backdrop-filter: blur(15px); border: 1px solid rgba(251, 191, 36, 0.15); border-radius: 16px; padding: 25px 20px; width: 260px; flex-shrink: 0; box-shadow: 0 15px 35px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 10px; position: sticky; top: 20px; }
     .admin-sidebar-header { color: var(--text-sub); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; padding-left: 10px; }
     .btn-sidebar { background: transparent; border: none; color: var(--text-main); padding: 14px 15px; border-radius: 8px; font-family: var(--font-ui); font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.3s; text-align: left; }
     .btn-sidebar i { font-size: 18px; width: 24px; text-align: center; }
     .btn-sidebar:hover { background: rgba(251, 191, 36, 0.05); color: var(--dynamic-neon); }
     .btn-sidebar.active { background: rgba(251, 191, 36, 0.15); color: var(--dynamic-neon); }
 
-    /* Área de Conteúdo */
-    .admin-main-content { flex: 1; width: 100%; }
-    
-    .admin-section { 
-      background: var(--admin-panel); 
-      backdrop-filter: blur(15px); 
-      border: 1px solid rgba(251, 191, 36, 0.15); 
-      border-radius: 16px; 
-      padding: 35px; 
-      box-shadow: 0 15px 35px rgba(0,0,0,0.4); 
-      transition: all 0.4s; 
-      display: none;
-    }
+    .admin-main-content { flex: 1; width: 100%; min-width: 0; }
+    .admin-section { background: var(--admin-panel); backdrop-filter: blur(15px); border: 1px solid rgba(251, 191, 36, 0.15); border-radius: 16px; padding: 35px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); transition: all 0.4s; display: none; }
     .admin-section.active { display: block; }
-    .admin-section:hover { border-color: rgba(251, 191, 36, 0.3); }
     .admin-section h3 { color: var(--dynamic-neon); font-size: 20px; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 3px; display: flex; align-items: center; gap: 12px; font-weight: 700; }
     .admin-section p.subtext { color: var(--text-sub); margin-top: -15px; margin-bottom: 25px; font-size: 15px; }
 
-    /* Inputs e Tabelas */
+    /* Inputs Genéricos */
     .input-block { position: relative; width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(251, 191, 36, 0.1); border-radius: 6px; display: flex; align-items: center; padding: 0 15px; transition: all 0.3s; margin-bottom: 15px; }
     .input-block:focus-within { border-color: var(--dynamic-neon); box-shadow: 0 0 12px var(--dynamic-glow); }
     .input-block i { color: var(--dynamic-neon); font-size: 16px; }
-    .input-block input { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 16px; font-family: var(--font-ui); font-weight: 500; padding: 15px 10px; outline: none; letter-spacing: 1px; }
-    
+    .input-block input, .input-block select { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 16px; font-family: var(--font-ui); font-weight: 500; padding: 15px 10px; outline: none; letter-spacing: 1px; }
+    .input-block select option { background: var(--bg-panel); color: #fff; }
     label.tech-label { display: block; color: var(--text-sub); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
 
-    .row { display: flex; gap: 15px; }
-    .row .form-group { flex: 1; }
-
+    /* Tabelas Administrativas */
     .admin-table-wrapper { width: 100%; overflow-x: auto; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
     .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
     .admin-table th { color: var(--text-sub); background: rgba(0,0,0,0.4); padding: 18px 15px; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid rgba(251, 191, 36, 0.2); white-space: nowrap; }
     .admin-table td { padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; transition: background 0.3s; }
     .admin-table tr:hover td { background: rgba(251, 191, 36, 0.03); }
-    .admin-table tr:last-child td { border-bottom: none; }
-
     .admin-input { width: 100%; background: transparent; border: 1px solid transparent; color: #fff; font-family: var(--font-ui); font-size: 15px; padding: 8px 12px; border-radius: 6px; outline: none; transition: all 0.3s; font-weight: 500; }
     .admin-input[readonly] { opacity: 0.6; cursor: default; }
     .admin-input:not([readonly]) { background: rgba(0,0,0,0.6); border: 1px solid var(--dynamic-neon); box-shadow: inset 0 0 8px rgba(0,0,0,0.5); opacity: 1; }
-
     .action-cell { display: flex; gap: 8px; justify-content: flex-start; align-items: center; }
     .btn-admin-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid transparent; background: rgba(255,255,255,0.05); color: var(--text-sub); transition: all 0.3s; font-size: 14px; }
     .btn-admin-edit:hover { background: rgba(251, 191, 36, 0.15); color: var(--dynamic-neon); border-color: rgba(251, 191, 36, 0.3); }
-    .btn-admin-del:hover { background: rgba(255,42,42,0.15); color: #ff2a2a; border-color: rgba(255,42,42,0.3); }
+    .btn-admin-del:hover { background: rgba(255,42,42,0.15); color: #ef4444; border-color: rgba(239,68,68,0.3); }
     .btn-admin-check { background: rgba(76,175,80,0.15); color: #4caf50; border-color: rgba(76,175,80,0.3); }
-    .btn-admin-check:hover { background: #4caf50; color: #fff; }
 
     /* Botões Padrão */
     .btn-tech { background: rgba(251, 191, 36, 0.05); border: 1px solid var(--dynamic-neon); border-color: rgba(251, 191, 36, 0.5); color: var(--text-main); padding: 12px 24px; border-radius: 6px; font-family: var(--font-ui); font-size: 15px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
     .btn-tech:hover { background: var(--dynamic-neon); border-color: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px var(--dynamic-glow); }
-
     .admin-controls-bottom { display: flex; gap: 15px; margin-top: 25px; align-items: center; justify-content: flex-end; }
     .btn-add { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--dynamic-neon); }
     .btn-add:hover { background: rgba(251, 191, 36, 0.2); border-color: var(--dynamic-neon); }
     .btn-save { background: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
     .btn-save:hover { background: #f59e0b; box-shadow: 0 0 25px rgba(251, 191, 36, 0.5); transform: translateY(-2px); }
 
-    /* Resultados Avais */
-    #resultado-aval { margin-top: 25px; padding: 20px; background: rgba(251, 191, 36, 0.05); border: 1px dashed var(--dynamic-neon); border-radius: 8px; display: none; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
-    #resultado-aval h4 { color: var(--dynamic-neon); margin-bottom: 10px; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
-    #texto-resultado { font-size: 16px; color: #fff; line-height: 1.5; }
-    #texto-resultado strong { color: var(--dynamic-neon); font-size: 18px; }
+    /* =======================================
+       ESTILIZAÇÃO CUSTOMIZADA: MÓDULO DE METAS
+       ======================================= */
+    .metas-top-layout { display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; }
+    
+    /* Pódio Area */
+    .podium-box { flex: 1; min-width: 350px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-tech); border-radius: 12px; position: relative; height: 320px; display: flex; justify-content: center; align-items: flex-end; overflow: hidden; padding-bottom: 20px; box-shadow: inset 0 0 40px rgba(0,0,0,0.8); }
+    .podium-glow { position: absolute; bottom: 50px; width: 250px; height: 150px; background: var(--sup-neon); filter: blur(70px); opacity: 0.35; z-index: 1; border-radius: 50%; pointer-events: none; }
+    
+    /* Imagens e Drag and Drop */
+    .draggable-item { position: absolute; z-index: 5; image-rendering: pixelated; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); transition: filter 0.2s; }
+    .draggable-item.edit-mode { cursor: move; border: 1px dashed rgba(255,255,255,0.5); filter: drop-shadow(0 0 10px rgba(251,191,36,0.8)); z-index: 100 !important; }
+    .draggable-item.edit-mode:hover { background: rgba(251,191,36,0.1); }
+    
+    @keyframes floatMedal { 0% { transform: translateY(0); filter: drop-shadow(0 0 5px rgba(255,255,255,0.6)); } 50% { transform: translateY(-8px); filter: drop-shadow(0 0 15px rgba(255,255,255,1)); } 100% { transform: translateY(0); filter: drop-shadow(0 0 5px rgba(255,255,255,0.6)); } }
+    .medal-float { animation: floatMedal 2.5s infinite ease-in-out; }
+    .empate-text { position: absolute; color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px var(--sup-neon), 0 0 5px #000; letter-spacing: 2px; z-index: 6; text-align: center; }
 
-    /* Toasts, Loaders e Footer */
-    #globalLoader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; color: var(--dynamic-neon); font-size: 18px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
+    /* Eventos e Patrocinadores Area */
+    .events-box { flex: 1; min-width: 350px; background: linear-gradient(135deg, rgba(20,15,0,0.8) 0%, rgba(0,0,0,0.9) 100%); border: 1px solid var(--border-tech); border-radius: 12px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); display: flex; flex-direction: column; }
+    .events-title { color: var(--sup-neon); font-size: 18px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid rgba(251,191,36,0.2); padding-bottom: 5px; font-weight: 700; display: flex; justify-content: space-between; }
+    .sponsor-list { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+    .sponsor-avatar { width: 50px; height: 50px; background: rgba(0,0,0,0.6); border: 1px solid rgba(251,191,36,0.3); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .sponsor-avatar img { transform: translateY(-10px); }
+    .sponsor-text { font-size: 13px; color: var(--text-sub); line-height: 1.5; font-style: italic; background: rgba(251,191,36,0.05); padding: 10px; border-radius: 6px; border-left: 3px solid var(--sup-neon); }
+    
+    /* Detalhes do Membro Selecionado */
+    .member-details-layout { display: flex; gap: 20px; flex-wrap: wrap; }
+    .member-stage-box { width: 300px; height: 350px; background: rgba(0,0,0,0.5); border: 2px solid var(--sup-neon); border-radius: 12px; position: relative; box-shadow: 0 0 20px var(--sup-glow), inset 0 0 30px rgba(0,0,0,0.8); overflow: hidden; }
+    .stage-glow { position: absolute; inset: 0; box-shadow: inset 0 0 50px rgba(251,191,36,0.2); pointer-events: none; z-index: 10; border-radius: 10px; }
+    
+    .stats-grid-box { flex: 1; min-width: 300px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-content: start; }
+    .stat-card { background: rgba(20,15,0,0.6); border: 1px solid rgba(251,191,36,0.15); border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s; }
+    .stat-card:hover { border-color: var(--sup-neon); background: rgba(251,191,36,0.05); transform: translateY(-2px); }
+    .stat-card h4 { color: var(--text-sub); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .stat-card .val { color: #fff; font-size: 28px; font-weight: 700; text-shadow: 0 0 10px rgba(255,255,255,0.2); font-family: sans-serif; }
+    .stat-total { background: linear-gradient(135deg, rgba(251,191,36,0.1) 0%, rgba(0,0,0,0.6) 100%); border-color: var(--sup-neon); grid-column: 1 / -1; display: flex; justify-content: space-around; align-items: center; }
+    .stat-total .val { color: var(--sup-neon); font-size: 36px; text-shadow: 0 0 15px var(--sup-glow); }
+
+    /* Loaders e Toasts */
     .spinner-ring { width: 50px; height: 50px; border: 3px solid rgba(251, 191, 36, 0.1); border-top-color: var(--dynamic-neon); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes slide-in-right { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     @keyframes smoke-fade-out { to { opacity: 0; transform: translateY(-20px) scale(0.9); } }
-
     .toast-container { position: fixed; top: 30px; right: 30px; z-index: 10000; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
     .toast-msg { background: rgba(10, 8, 2, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--sup-neon); border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); color: #fff; font-size: 16px; font-weight: 600; animation: slide-in-right 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards, smoke-fade-out 2s ease-in forwards 3s; }
-
     footer { text-align: center; padding: 25px; font-size: 14px; color: #888; font-weight: 500; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.02); letter-spacing: 1px; }
 
-    @media (max-width: 850px) {
-      .header-frame { flex-direction: column; text-align: center; padding-top: 30px;}
-      .top-controls { top: 10px; right: 20px; }
-      #mainLayout { flex-direction: column; }
-      .admin-sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; padding: 15px; }
-      .btn-sidebar { flex: 1; justify-content: center; }
-      .row { flex-direction: column; gap: 0; }
-    }
   </style>
 </head>
 <body>
@@ -189,11 +175,8 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <div id="appWrapper">
-    
     <div class="top-controls">
-      <button id="btnLogout" class="btn-top" onclick="fazerLogout()" title="Sair da Conta">
-        <i class="fas fa-sign-out-alt"></i>
-      </button>
+      <button id="btnLogout" class="btn-top" onclick="fazerLogout()" title="Sair da Conta"><i class="fas fa-sign-out-alt"></i></button>
     </div>
 
     <header>
@@ -207,101 +190,123 @@
     </header>
 
     <div class="container" id="mainLayout">
-      
       <div class="admin-sidebar">
         <div class="admin-sidebar-header">Módulos do Sistema</div>
-        <button class="btn-sidebar active" id="menu-avais" onclick="switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i> Cálculo de Avais</button>
-        <button class="btn-sidebar" id="menu-metas" onclick="switchSection('modulo-metas', this)"><i class="fas fa-bullseye"></i> Consulta de Metas</button>
+        <button class="btn-sidebar active" id="menu-metas" onclick="switchSection('modulo-metas', this)"><i class="fas fa-bullseye"></i> Consulta de Metas</button>
+        <button class="btn-sidebar" id="menu-avais" onclick="switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i> Cálculo de Avais</button>
         <button class="btn-sidebar" id="menu-feedbacks" onclick="switchSection('modulo-feedbacks', this)"><i class="fas fa-comments"></i> Painel de Feedbacks</button>
-        <button class="btn-sidebar" id="menu-futuro" onclick="switchSection('modulo-futuro', this)"><i class="fas fa-cogs"></i> Sistema Futuro</button>
         <button class="btn-sidebar" id="btnAdminAcessos" style="display: none;" onclick="switchSection('modulo-acessos', this)"><i class="fas fa-users-cog"></i> Acessos</button>
       </div>
 
       <div class="admin-main-content">
         
-        <div id="modulo-avais" class="admin-section active">
-          <h3><i class="fas fa-calculator"></i> Cálculo Automático de Avais</h3>
-          <p class="subtext">Calcule os dias de ausência desconsiderando o período congelado pelo aval.</p>
-          
-          <div class="row">
-            <div class="form-group">
-              <label class="tech-label">Último Login</label>
-              <div class="input-block"><i class="far fa-calendar-alt"></i><input type="date" id="data-login"></div>
-            </div>
-            <div class="form-group">
-              <label class="tech-label">Data da Consulta</label>
-              <div class="input-block"><i class="far fa-calendar-check"></i><input type="date" id="data-consulta"></div>
+        <div id="modulo-metas" class="admin-section active">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h3 style="margin:0;"><i class="fas fa-bullseye"></i> Consulta de Metas - <span id="meta-week-title" style="color:#fff;">Carregando...</span></h3>
+            <div id="admin-drag-controls" style="display: none; gap: 10px;">
+                <button class="btn-tech" onclick="toggleEditMode()" id="btn-edit-pos" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-arrows-alt"></i> Editar Posições</button>
+                <button class="btn-tech btn-save" onclick="savePositions()" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-save"></i> Salvar Layout</button>
             </div>
           </div>
           
-          <div class="row">
-            <div class="form-group">
-              <label class="tech-label">Início do Aval</label>
-              <div class="input-block"><i class="fas fa-hourglass-start"></i><input type="date" id="data-aval"></div>
-            </div>
-            <div class="form-group">
-              <label class="tech-label">Dias de Aval</label>
-              <div class="input-block"><i class="fas fa-sort-numeric-up"></i><input type="number" id="dias-aval" min="1" placeholder="Ex: 7"></div>
-            </div>
+          <div class="metas-top-layout">
+             <div class="podium-box">
+                <div class="podium-glow"></div>
+                <img id="img-podio-base" src="https://i.imgur.com/sWg6BNh.png" class="draggable-item" style="z-index: 2;">
+                
+                <img id="avatar-1" src="" class="draggable-item" style="z-index: 3; display:none;">
+                <img id="medal-1" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgk1prBqI84-KMlRtMxa_d7zVr-rqtK98qCwWnW_mFOZt_kDyhbSOKp6WgbwGyhuPR2Cej0BDvaFHTgOzWRb13qQ5glBYnTO-WLVmD2Mc7GBy5_eeycsqI1xeYIyZuqGK0IKmU-QUi0y8M/s1600/ITC21.gif" class="draggable-item medal-float" style="z-index: 4; display:none;">
+                
+                <img id="avatar-2" src="" class="draggable-item" style="z-index: 3; display:none;">
+                <img id="medal-2" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuP4oSwMUvEeMDglW96CfvqrDASdaiQIHPsO6hx3CDFgBKZINyAX3dqlQrOJgGLsBDafGL_vVqS-9su5ijkKP87T-yQHM4YCe3zaHcYXPhBas5RjG12vh_6RPuoQemKimWHAhV-bQEVBc/s1600/ITC20.gif" class="draggable-item medal-float" style="z-index: 4; display:none;">
+                
+                <img id="avatar-empate" src="https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b" class="draggable-item" style="z-index: 3; display:none;">
+                <div id="txt-empate" class="draggable-item empate-text" style="display:none;">EMPATE</div>
+             </div>
+
+             <div class="events-box">
+                <div class="events-title">
+                   <span><i class="fas fa-calendar-alt"></i> Eventos do Mês</span>
+                   <span id="mes-atual" style="color:#fff; font-size:14px;"></span>
+                </div>
+                <div style="flex:1; margin-bottom: 20px; color: #fff; font-size: 14px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                   <strong style="color:var(--sup-neon);">Em breve:</strong> Premiações e novidades exclusivas para a equipe dos Supervisores. Fique atento aos anúncios no grupo!
+                </div>
+
+                <div class="events-title" style="font-size: 15px;"><i class="fas fa-star"></i> Patrocinadores Oficiais</div>
+                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
+                   <img src="https://www.habbo.com.br/habbo-imaging/badge/b09134s12017s55012t12014s4301414a5c32c3d12825df4b3496e1fb8ba98.gif" alt="Badge Patrocinador" style="filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));">
+                   <div id="sponsors-container" class="sponsor-list" style="margin:0;"></div>
+                </div>
+                <div class="sponsor-text">
+                   "Deseja patrocinar algum dos eventos e ajudar ainda mais a divisão? Procure agora mesmo o Líder ou Vice-Líder da divisão!"<br><br>
+                   <span style="color: var(--sup-neon); font-weight:bold;">Supervisor por amor, gestor por essência. #SAGE</span>
+                </div>
+             </div>
           </div>
 
-          <button class="btn-tech" onclick="processarCalculo()"><i class="fas fa-sync-alt"></i> Calcular Ausência</button>
+          <div class="input-block" style="max-width: 300px;">
+             <i class="fas fa-search"></i>
+             <select id="select-membro" onchange="renderMemberDetails()">
+                <option value="" disabled selected>Selecione um membro...</option>
+             </select>
+          </div>
 
-          <div id="resultado-aval">
-            <h4><i class="fas fa-poll-h"></i> Resultado da Análise</h4>
-            <p id="texto-resultado"></p>
+          <div class="member-details-layout" id="area-detalhes-membro" style="display:none; opacity:0; transition: opacity 0.4s;">
+             <div class="member-stage-box">
+                <div class="stage-glow"></div>
+                <img id="img-palco-base" src="https://i.imgur.com/7XXAuf4.png" class="draggable-item" style="z-index: 2;">
+                <img id="img-brasao" src="https://i.imgur.com/aOXCYBj.png" class="draggable-item" style="z-index: 3;">
+                <img id="img-emblema-sup" src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" class="draggable-item" style="z-index: 4;">
+                <img id="avatar-selecionado" src="" class="draggable-item" style="z-index: 5;">
+             </div>
+
+             <div class="stats-grid-box">
+                <div class="stat-total">
+                   <div>
+                      <h4 style="color:var(--text-sub); margin-bottom:0;">Total de Pontos</h4>
+                      <div class="val" id="det-total">-</div>
+                   </div>
+                   <div style="text-align: right;">
+                      <h4 style="color:var(--text-sub); margin-bottom:0;">Status da Meta</h4>
+                      <div id="det-status" style="font-size: 20px; font-weight: 700; text-transform: uppercase; margin-top:5px;">-</div>
+                   </div>
+                </div>
+                <div class="stat-card"><h4>Convites</h4><div class="val" id="det-convite">-</div></div>
+                <div class="stat-card"><h4>PPP</h4><div class="val" id="det-ppp">-</div></div>
+                <div class="stat-card"><h4>Rel. Soldados</h4><div class="val" id="det-rels">-</div></div>
+                <div class="stat-card"><h4>Rel. C.Grupos</h4><div class="val" id="det-relcg">-</div></div>
+                <div class="stat-card"><h4>Avisos</h4><div class="val" id="det-avisos">-</div></div>
+             </div>
           </div>
         </div>
 
-        <div id="modulo-metas" class="admin-section">
-          <h3><i class="fas fa-bullseye"></i> Consulta de Metas</h3>
-          <p class="subtext">Acompanhamento da pontuação sincronizado automaticamente com a Liderança.</p>
-
-          <div class="input-block" style="max-width: 400px; margin-bottom: 20px;">
-            <i class="fas fa-search"></i>
-            <input type="text" id="busca-meta" placeholder="Buscar pelo nick do membro..." onkeyup="filtrarMetas()">
+        <div id="modulo-avais" class="admin-section">
+          <h3><i class="fas fa-calculator"></i> Cálculo Automático de Avais</h3>
+          <div class="row">
+            <div class="form-group"><label class="tech-label">Último Login</label><div class="input-block"><i class="far fa-calendar-alt"></i><input type="date" id="data-login"></div></div>
+            <div class="form-group"><label class="tech-label">Data da Consulta</label><div class="input-block"><i class="far fa-calendar-check"></i><input type="date" id="data-consulta"></div></div>
           </div>
-
-          <div class="admin-table-wrapper">
-            <table class="admin-table" id="tbMetas">
-              <thead></thead>
-              <tbody>
-                <tr><td style="text-align: center; color: var(--sup-neon);"><i class="fas fa-spinner fa-spin"></i> Sincronizando dados com o banco de forma segura...</td></tr>
-              </tbody>
-            </table>
+          <div class="row">
+            <div class="form-group"><label class="tech-label">Início do Aval</label><div class="input-block"><i class="fas fa-hourglass-start"></i><input type="date" id="data-aval"></div></div>
+            <div class="form-group"><label class="tech-label">Dias de Aval</label><div class="input-block"><i class="fas fa-sort-numeric-up"></i><input type="number" id="dias-aval" min="1" placeholder="Ex: 7"></div></div>
           </div>
+          <button class="btn-tech" onclick="processarCalculo()"><i class="fas fa-sync-alt"></i> Calcular Ausência</button>
+          <div id="resultado-aval"><h4><i class="fas fa-poll-h"></i> Resultado da Análise</h4><p id="texto-resultado"></p></div>
         </div>
 
         <div id="modulo-feedbacks" class="admin-section">
           <h3><i class="fas fa-comments"></i> Painel Global de Feedbacks</h3>
-          <p class="subtext">Espelho do sistema original da DIC. Nenhuma funcionalidade original foi alterada.</p>
           <div style="width: 100%; height: 75vh; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.15); overflow: hidden;">
             <iframe src="COLE_O_LINK_DO_SEU_PAINEL_DE_FEEDBACKS_AQUI" style="width: 100%; height: 100%; border: none;"></iframe>
           </div>
         </div>
 
-        <div id="modulo-futuro" class="admin-section">
-          <h3><i class="fas fa-cogs"></i> Sistema Futuro</h3>
-          <p class="subtext">Em desenvolvimento...</p>
-          <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.1); padding: 30px; text-align: center; border-radius: 8px;">
-            <p style="color: var(--text-sub);">Este espaço está reservado para os próximos módulos do painel.</p>
-          </div>
-        </div>
-
         <div id="modulo-acessos" class="admin-section">
           <h3><i class="fas fa-users-cog"></i> Gerenciar Acessos</h3>
-          <p class="subtext">Controle de quem pode acessar esta central de sistemas.</p>
-          
           <div class="admin-table-wrapper">
             <table class="admin-table" id="tbAcessos">
-              <thead>
-                <tr>
-                  <th style="width:40%">E-mail Google</th>
-                  <th style="width:30%">Nick no Habbo</th>
-                  <th style="width:15%">Nível</th>
-                  <th style="width:15%">Ações</th>
-                </tr>
-              </thead>
+              <thead><tr><th style="width:40%">E-mail Google</th><th style="width:30%">Nick no Habbo</th><th style="width:15%">Nível</th><th style="width:15%">Ações</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
@@ -315,18 +320,13 @@
     </div>
   </div>
 
-  <footer>
-    Desenvolvido com <i class="fa-solid fa-heart" style="color: #808080;"></i> por MegaMetall
-  </footer>
+  <footer>Desenvolvido com <i class="fa-solid fa-heart" style="color: #808080;"></i> por MegaMetall</footer>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <script>
-    // ==========================================
-    // CONFIGURAÇÃO DO FIREBASE
-    // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyCvyt0IyruvPqZPb6OqX5yiGuvIjUWpktA",
         authDomain: "central-supervisores.firebaseapp.com",
@@ -335,22 +335,34 @@
         messagingSenderId: "882541677437",
         appId: "1:882541677437:web:ed25d1e7aa273ca40cda14"
     };
-
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     
-    // Variáveis Globais
     let usuarioLogadoEmail = '';
     let nivelUsuarioGlobal = 'COMUM';
     let acessosData = [];
+    
+    // Dados globais da planilha
+    let membrosDataArray = [];
+    
+    // Posições default caso não haja nada salvo
+    let layoutConfig = {
+        'img-podio-base': { left: '100px', top: '150px' },
+        'avatar-1': { left: '175px', top: '50px' },
+        'medal-1': { left: '175px', top: '0px' },
+        'avatar-2': { left: '80px', top: '100px' },
+        'medal-2': { left: '80px', top: '50px' },
+        'avatar-empate': { left: '130px', top: '60px' },
+        'txt-empate': { left: '130px', top: '30px' },
+        'img-palco-base': { left: '50px', top: '220px' },
+        'img-brasao': { left: '10px', top: '10px' },
+        'img-emblema-sup': { left: '45px', top: '40px' },
+        'avatar-selecionado': { left: '130px', top: '100px' }
+    };
+    let isEditMode = false;
 
-    // ==========================================
-    // AUTENTICAÇÃO E INICIALIZAÇÃO
-    // ==========================================
+    // Inicialização da Tela
     function liberarPainel() {
         document.getElementById('loginCard').style.display = 'none';
         document.getElementById('loginLoader').style.display = 'none';
@@ -361,8 +373,13 @@
         }, 300);
         document.getElementById('data-consulta').valueAsDate = new Date();
         
-        // Puxa as metas do Firebase (Em tempo real)
+        // Coloca Mês atual no título de Eventos
+        const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        document.getElementById('mes-atual').innerText = meses[new Date().getMonth()] + " de " + new Date().getFullYear();
+
+        carregarLayoutConfig();
         escutarMetasDoFirebase();
+        backupAssetsSeguro(); // Tenta garantir cache das imagens
     }
 
     auth.onAuthStateChanged((user) => {
@@ -381,271 +398,312 @@
     function verificarAcessoBD(email) {
         db.collection("acessos").get().then((snap) => {
             if (snap.empty) {
-                // AUTO-CADASTRO: Primeiro usuário vira ADMIN
-                db.collection("acessos").doc(email).set({
-                    email: email,
-                    nick: '',
-                    nivel: "ADMIN"
-                }).then(() => {
-                    alert("Sistema Inicializado! Seu e-mail foi cadastrado automaticamente como Administrador.");
-                    window.location.reload();
-                });
-                return;
+                db.collection("acessos").doc(email).set({ email: email, nick: '', nivel: "ADMIN" }).then(() => { window.location.reload(); }); return;
             }
-
             let autorizado = false;
             nivelUsuarioGlobal = 'COMUM';
             acessosData = [];
-
             snap.forEach((doc) => {
-                let d = doc.data();
-                acessosData.push({ id: doc.id, email: d.email, nick: d.nick || '', nivel: d.nivel || 'COMUM' });
-                if (d.email === email) {
-                    autorizado = true;
-                    nivelUsuarioGlobal = d.nivel;
-                }
+                let d = doc.data(); acessosData.push({ id: doc.id, email: d.email, nick: d.nick || '', nivel: d.nivel || 'COMUM' });
+                if (d.email === email) { autorizado = true; nivelUsuarioGlobal = d.nivel; }
             });
-
             if (autorizado) {
                 if (nivelUsuarioGlobal === 'ADMIN') {
                     document.getElementById('btnAdminAcessos').style.display = 'flex';
+                    document.getElementById('admin-drag-controls').style.display = 'flex';
                     renderTabelaAcessos();
                 }
-                
-                // Controle de visualização para o nível MEMBRO
                 if (nivelUsuarioGlobal === 'MEMBRO') {
                     document.getElementById('menu-avais').style.display = 'none';
                     document.getElementById('menu-feedbacks').style.display = 'none';
-                    document.getElementById('menu-futuro').style.display = 'none';
                     switchSection('modulo-metas', document.getElementById('menu-metas'));
                 } else {
-                    document.getElementById('menu-avais').style.display = 'flex';
-                    document.getElementById('menu-feedbacks').style.display = 'flex';
-                    document.getElementById('menu-futuro').style.display = 'flex';
+                    switchSection('modulo-metas', document.getElementById('menu-metas'));
                 }
                 liberarPainel();
-            } else {
-                alert("ACESSO NEGADO: O e-mail " + email + " não possui permissão nesta central.");
-                auth.signOut();
-            }
-        }).catch((error) => {
-            console.error(error);
-            alert("Erro ao conectar com o banco de dados. Verifique as regras de segurança.");
-            auth.signOut();
+            } else { alert("ACESSO NEGADO."); auth.signOut(); }
         });
     }
 
     function loginGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
-        document.getElementById('loginCard').style.display = 'none';
-        document.getElementById('loginLoader').style.display = 'block';
-
-        auth.signInWithPopup(provider).catch((error) => {
-            document.getElementById('loginLoader').style.display = 'none';
-            document.getElementById('loginCard').style.display = 'block';
-            document.getElementById('login-error').style.display = 'block';
-            console.error("Erro no login: ", error);
-        });
+        document.getElementById('loginCard').style.display = 'none'; document.getElementById('loginLoader').style.display = 'block';
+        auth.signInWithPopup(provider).catch(() => { document.getElementById('loginLoader').style.display = 'none'; document.getElementById('loginCard').style.display = 'block'; document.getElementById('login-error').style.display = 'block'; });
     }
-
     function fazerLogout() { auth.signOut(); }
-
-    // ==========================================
-    // NAVEGAÇÃO
-    // ==========================================
     function switchSection(idModulo, btnElement) {
         document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.btn-sidebar').forEach(el => el.classList.remove('active'));
-        document.getElementById(idModulo).classList.add('active');
-        btnElement.classList.add('active');
+        document.getElementById(idModulo).classList.add('active'); btnElement.classList.add('active');
     }
-
     function mostrarToastAdmin(msg) {
-        var container = document.getElementById('toastContainer');
-        var toast = document.createElement('div');
-        toast.className = 'toast-msg';
-        toast.innerHTML = '<i class="fas fa-check-circle" style="color: #4caf50; font-size: 20px;"></i><span style="color:#fff;">' + msg + '</span>';
-        container.appendChild(toast);
-        setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3500);
+        var container = document.getElementById('toastContainer'); var toast = document.createElement('div');
+        toast.className = 'toast-msg'; toast.innerHTML = '<i class="fas fa-check-circle" style="color: #4caf50; font-size: 20px;"></i><span style="color:#fff;">' + msg + '</span>';
+        container.appendChild(toast); setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3500);
     }
 
     // ==========================================
-    // MÓDULO DE AVAIS
+    // SISTEMA DE ARRASTAR E SOLTAR (DRAG & DROP)
     // ==========================================
-    function processarCalculo() {
-        const dataLoginStr = document.getElementById('data-login').value;
-        const dataAvalStr = document.getElementById('data-aval').value;
-        const diasAval = parseInt(document.getElementById('dias-aval').value);
-        const dataConsultaStr = document.getElementById('data-consulta').value;
-
-        if (!dataLoginStr || !dataAvalStr || isNaN(diasAval) || !dataConsultaStr) {
-            alert("Preencha todos os campos corretamente.");
-            return;
+    function aplicarPosicoes() {
+        for(let id in layoutConfig) {
+            let el = document.getElementById(id);
+            if(el) { el.style.left = layoutConfig[id].left; el.style.top = layoutConfig[id].top; makeDraggable(el, id); }
         }
+    }
 
-        const ultimoLogin = new Date(dataLoginStr + 'T00:00:00');
-        const inicioAval = new Date(dataAvalStr + 'T00:00:00');
-        const dataConsulta = new Date(dataConsultaStr + 'T00:00:00');
-
-        const fimAval = new Date(inicioAval);
-        fimAval.setDate(inicioAval.getDate() + diasAval - 1);
-
-        const UM_DIA = 1000 * 60 * 60 * 24;
-        const diferencaEmDias = (dataAntiga, dataNova) => Math.floor((dataNova - dataAntiga) / UM_DIA);
-
-        let diasAusenciaAntes = 0;
-        let diasAusenciaDepois = 0;
-        let totalDias = 0;
-        let msg = "";
-
-        if (dataConsulta <= inicioAval) {
-            totalDias = diferencaEmDias(ultimoLogin, dataConsulta);
-            msg = `O aval ainda não começou. Ausência normal de <strong>${totalDias} dia(s)</strong>.`;
-        } else {
-            diasAusenciaAntes = diferencaEmDias(ultimoLogin, inicioAval);
-            
-            if (dataConsulta > fimAval) {
-                diasAusenciaDepois = diferencaEmDias(fimAval, dataConsulta);
-                totalDias = diasAusenciaAntes + diasAusenciaDepois;
-                msg = `Ausência pré-aval: <strong>${diasAusenciaAntes} dia(s)</strong><br>` +
-                      `Ausência pós-aval: <strong>${diasAusenciaDepois} dia(s)</strong><br>` +
-                      `<span style="display:block; margin-top:10px;">Total de ausência: <strong>${totalDias} dia(s)</strong></span>`;
-            } else {
-                totalDias = diasAusenciaAntes;
-                msg = `Militar está atualmente no período de vigência do aval.<br>` +
-                      `Dias acumulados antes do aval: <strong>${totalDias} dia(s)</strong>.`;
+    function carregarLayoutConfig() {
+        db.collection("sistema").doc("config_layout").get().then((doc) => {
+            if(doc.exists && doc.data().posicoes) {
+                // Mescla com default para não quebrar caso falte algum
+                layoutConfig = { ...layoutConfig, ...doc.data().posicoes };
             }
-        }
+            aplicarPosicoes();
+        });
+    }
 
-        document.getElementById('texto-resultado').innerHTML = msg;
-        document.getElementById('resultado-aval').style.display = 'block';
+    function toggleEditMode() {
+        isEditMode = !isEditMode;
+        let btn = document.getElementById('btn-edit-pos');
+        let els = document.querySelectorAll('.draggable-item');
+        if(isEditMode) {
+            btn.innerHTML = '<i class="fas fa-times"></i> Concluir Edição';
+            btn.style.borderColor = '#ef4444'; btn.style.color = '#ef4444';
+            els.forEach(e => { e.classList.add('edit-mode'); e.style.display = 'block'; }); // Força mostrar no modo edição
+        } else {
+            btn.innerHTML = '<i class="fas fa-arrows-alt"></i> Editar Posições';
+            btn.style.borderColor = ''; btn.style.color = '';
+            els.forEach(e => e.classList.remove('edit-mode'));
+            processarPodio(); // Recalcula visibilidade correta
+        }
+    }
+
+    function savePositions() {
+        if(nivelUsuarioGlobal !== 'ADMIN') return;
+        db.collection("sistema").doc("config_layout").set({ posicoes: layoutConfig }, {merge: true}).then(() => {
+            mostrarToastAdmin("Posições do layout salvas com sucesso!");
+            if(isEditMode) toggleEditMode();
+        });
+    }
+
+    function makeDraggable(elmnt, idKey) {
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        elmnt.onmousedown = dragMouseDown;
+        function dragMouseDown(e) {
+            if(!isEditMode) return;
+            e = e || window.event; e.preventDefault();
+            pos3 = e.clientX; pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+        }
+        function elementDrag(e) {
+            e = e || window.event; e.preventDefault();
+            pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
+            pos3 = e.clientX; pos4 = e.clientY;
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+        function closeDragElement() {
+            document.onmouseup = null; document.onmousemove = null;
+            layoutConfig[idKey] = { left: elmnt.style.left, top: elmnt.style.top };
+        }
     }
 
     // ==========================================
-    // MÓDULO DE METAS (LENDO DO FIREBASE)
+    // MÓDULO DE METAS (LÓGICA HABBiana)
     // ==========================================
     function escutarMetasDoFirebase() {
         db.collection("sistema").doc("metas").onSnapshot((doc) => {
-            const documentTbody = document.querySelector('#tbMetas tbody');
-            const documentThead = document.querySelector('#tbMetas thead');
-            
             if (doc.exists && doc.data().dados) {
                 let rows = [];
-                try {
-                    rows = JSON.parse(doc.data().dados);
-                } catch(e) { console.error("Erro ao ler JSON: ", e); }
-
-                documentThead.innerHTML = '';
-                documentTbody.innerHTML = '';
+                try { rows = JSON.parse(doc.data().dados); } catch(e) { return; }
                 
-                if(rows.length > 0) {
-                    const trHead = document.createElement('tr');
-                    rows[0].forEach(header => {
-                        const th = document.createElement('th'); th.innerText = header; trHead.appendChild(th);
-                    });
-                    documentThead.appendChild(trHead);
-
-                    for(let i = 1; i < rows.length; i++) {
-                        if(rows[i].every(cell => cell === "" || cell === null)) continue; 
-                        const tr = document.createElement('tr');
-                        rows[i].forEach(cell => {
-                            const td = document.createElement('td'); td.innerText = cell;
-                            if(typeof cell === 'string') {
-                                let txtLower = cell.toLowerCase().trim();
-                                if(txtLower === 'não cumprida' || txtLower === 'nao cumprida') { td.style.color = '#ef4444'; td.style.fontWeight = 'bold'; }
-                                else if(txtLower === 'cumprida') { td.style.color = '#4caf50'; td.style.fontWeight = 'bold'; }
-                            }
-                            tr.appendChild(td);
-                        });
-                        documentTbody.appendChild(tr);
-                    }
+                if(rows.length > 17 && rows[17][1]) {
+                    document.getElementById('meta-week-title').innerText = rows[17][1];
                 }
-            } else {
-                documentTbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color: var(--text-sub);">Aguardando a primeira sincronização da planilha...</td></tr>';
+
+                membrosDataArray = [];
+                let sponsorsList = [];
+
+                // Puxar Patrocinadores (Linha 4 em diante, Colunas P(15), Q(16), R(17))
+                for(let i = 3; i < rows.length; i++) {
+                    if(rows[i][15]) sponsorsList.push(rows[i][15]);
+                    if(rows[i][16]) sponsorsList.push(rows[i][16]);
+                    if(rows[i][17]) sponsorsList.push(rows[i][17]);
+                }
+                renderSponsors(sponsorsList);
+
+                // Puxar Membros (Linha 21 em diante, Coluna D(3) é o Nick)
+                for(let i = 20; i < rows.length; i++) {
+                    if(!rows[i][3]) continue;
+                    membrosDataArray.push({
+                        cargo: rows[i][2] || '',
+                        nick: rows[i][3].trim(),
+                        convite: rows[i][5] || 0,
+                        ppp: rows[i][6] || 0,
+                        rels: rows[i][7] || 0,
+                        relcg: rows[i][9] || 0,
+                        avisos: rows[i][10] || 0,
+                        total: parseInt(rows[i][11]) || 0,
+                        status: (rows[i][12] || '').toString().trim()
+                    });
+                }
+                
+                popularSelectMembros();
+                processarPodio();
             }
-        }, (error) => {
-            console.error("Erro ao ler metas: ", error);
         });
     }
 
-    function filtrarMetas() {
-        var input = document.getElementById("busca-meta").value.toUpperCase();
-        var tr = document.getElementById("tbMetas").getElementsByTagName("tbody")[0].getElementsByTagName("tr");
-        for (var i = 0; i < tr.length; i++) {
-            var td = tr[i].getElementsByTagName("td")[0];
-            if (td) {
-                tr[i].style.display = (td.textContent || td.innerText).toUpperCase().indexOf(input) > -1 ? "" : "none";
+    function renderSponsors(lista) {
+        let unique = [...new Set(lista.filter(n => n.trim() !== ''))];
+        let container = document.getElementById('sponsors-container');
+        container.innerHTML = '';
+        unique.forEach(nick => {
+            let limpo = nick.trim();
+            container.innerHTML += `<div class="sponsor-avatar" title="${limpo}"><img src="https://www.habbo.com.br/habbo-imaging/avatarimage?user=${limpo}&action=std&direction=2&head_direction=2&gesture=sml&size=m" onerror="this.style.display='none'"></div>`;
+        });
+    }
+
+    function popularSelectMembros() {
+        let sel = document.getElementById('select-membro');
+        sel.innerHTML = '<option value="" disabled selected>Selecione um membro...</option>';
+        // Ordem Alfabética pro Select
+        let sorted = [...membrosDataArray].sort((a,b) => a.nick.localeCompare(b.nick));
+        sorted.forEach(m => {
+            sel.innerHTML += `<option value="${m.nick}">${m.cargo} ${m.nick}</option>`;
+        });
+    }
+
+    function processarPodio() {
+        if(isEditMode) return; // Se tiver editando, deixa tudo visível
+        
+        let av1 = document.getElementById('avatar-1'); let m1 = document.getElementById('medal-1');
+        let av2 = document.getElementById('avatar-2'); let m2 = document.getElementById('medal-2');
+        let ave = document.getElementById('avatar-empate'); let txte = document.getElementById('txt-empate');
+        
+        // Esconde todos inicialmente
+        av1.style.display = 'none'; m1.style.display = 'none';
+        av2.style.display = 'none'; m2.style.display = 'none';
+        ave.style.display = 'none'; txte.style.display = 'none';
+
+        if(membrosDataArray.length === 0) return;
+
+        // Ordena por Total
+        let top = [...membrosDataArray].sort((a,b) => b.total - a.total);
+
+        if(top.length >= 2 && top[0].total > 0 && top[0].total === top[1].total) {
+            // EMPATE!
+            ave.style.display = 'block'; txte.style.display = 'block';
+        } else if(top.length > 0 && top[0].total > 0) {
+            // 1º LUGAR
+            av1.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[0].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`;
+            av1.style.display = 'block'; m1.style.display = 'block';
+            
+            // 2º LUGAR (Se existir)
+            if(top.length > 1 && top[1].total > 0) {
+                av2.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[1].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`;
+                av2.style.display = 'block'; m2.style.display = 'block';
             }
         }
     }
 
+    function renderMemberDetails() {
+        let nickSelecionado = document.getElementById('select-membro').value;
+        let membro = membrosDataArray.find(m => m.nick === nickSelecionado);
+        if(!membro) return;
+
+        // Animação de entrada
+        let area = document.getElementById('area-detalhes-membro');
+        area.style.display = 'flex';
+        setTimeout(() => { area.style.opacity = '1'; }, 50);
+
+        // Preenche Valores
+        document.getElementById('avatar-selecionado').src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${membro.nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`;
+        document.getElementById('det-total').innerText = membro.total;
+        document.getElementById('det-convite').innerText = membro.convite;
+        document.getElementById('det-ppp').innerText = membro.ppp;
+        document.getElementById('det-rels').innerText = membro.rels;
+        document.getElementById('det-relcg').innerText = membro.relcg;
+        document.getElementById('det-avisos').innerText = membro.avisos;
+
+        // Cor do Status
+        let stEl = document.getElementById('det-status');
+        stEl.innerText = membro.status;
+        let sTxt = membro.status.toLowerCase();
+        if(sTxt.includes('não') || sTxt.includes('nao')) { stEl.style.color = '#ef4444'; }
+        else if(sTxt.includes('cumprida')) { stEl.style.color = '#4caf50'; }
+        else { stEl.style.color = '#fff'; }
+    }
+
     // ==========================================
-    // MÓDULO DE ACESSOS (ADMIN)
+    // BACKUP DE ASSETS (Opcional p/ CORS)
+    // ==========================================
+    function backupAssetsSeguro() {
+        // Esta função tenta salvar as URLs em base64 no banco caso algum link quebre no futuro.
+        // Como o navegador bloqueia canvas cross-origin do Habbo, salvaremos ao menos as URLs fixas no DB de assets, 
+        // ou você pode colocar strings base64 direto no Firebase manualmente.
+        db.collection("sistema").doc("assets_url").set({
+            'podio': 'https://i.imgur.com/sWg6BNh.png',
+            'palco': 'https://i.imgur.com/7XXAuf4.png',
+            'brasao': 'https://i.imgur.com/aOXCYBj.png',
+            'medalha_1': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgk1prBqI84-KMlRtMxa_d7zVr-rqtK98qCwWnW_mFOZt_kDyhbSOKp6WgbwGyhuPR2Cej0BDvaFHTgOzWRb13qQ5glBYnTO-WLVmD2Mc7GBy5_eeycsqI1xeYIyZuqGK0IKmU-QUi0y8M/s1600/ITC21.gif',
+            'medalha_2': 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuP4oSwMUvEeMDglW96CfvqrDASdaiQIHPsO6hx3CDFgBKZINyAX3dqlQrOJgGLsBDafGL_vVqS-9su5ijkKP87T-yQHM4YCe3zaHcYXPhBas5RjG12vh_6RPuoQemKimWHAhV-bQEVBc/s1600/ITC20.gif'
+        }, {merge: true});
+    }
+
+    // ==========================================
+    // MÓDULO DE AVAIS ORIGINAL
+    // ==========================================
+    function processarCalculo() {
+        const d1 = document.getElementById('data-login').value; const d2 = document.getElementById('data-aval').value;
+        const dAval = parseInt(document.getElementById('dias-aval').value); const d3 = document.getElementById('data-consulta').value;
+        if (!d1 || !d2 || isNaN(dAval) || !d3) return alert("Preencha todos os campos.");
+        const u = new Date(d1+'T00:00:00'); const i = new Date(d2+'T00:00:00'); const c = new Date(d3+'T00:00:00');
+        const f = new Date(i); f.setDate(i.getDate() + dAval - 1);
+        const UM_DIA = 1000*60*60*24; const dif = (ant, nov) => Math.floor((nov - ant)/UM_DIA);
+        let m = "";
+        if(c <= i) { m = `O aval ainda não começou. Ausência normal de <strong>${dif(u,c)} dia(s)</strong>.`; } 
+        else {
+            let a1 = dif(u,i);
+            if(c > f) { let a2 = dif(f,c); m = `Ausência pré-aval: <strong>${a1} dia(s)</strong><br>Ausência pós-aval: <strong>${a2} dia(s)</strong><br><span style="display:block; margin-top:10px;">Total: <strong>${a1+a2} dia(s)</strong></span>`; }
+            else { m = `Militar em período de aval.<br>Ausência antes do aval: <strong>${a1} dia(s)</strong>.`; }
+        }
+        document.getElementById('texto-resultado').innerHTML = m; document.getElementById('resultado-aval').style.display = 'block';
+    }
+
+    // ==========================================
+    // MÓDULO DE ACESSOS (ADMIN) ORIGINAL
     // ==========================================
     function renderTabelaAcessos() {
-        var tbody = document.querySelector('#tbAcessos tbody');
-        tbody.innerHTML = '';
+        var tbody = document.querySelector('#tbAcessos tbody'); tbody.innerHTML = '';
         acessosData.forEach(item => tbody.appendChild(criarRowAcesso(item)));
     }
-
     function criarRowAcesso(item) {
         var tr = document.createElement('tr');
-        var btnAcoes = '<button class="btn-admin-icon btn-admin-edit" onclick="toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button>' +
-                       '<button class="btn-admin-icon btn-admin-del" onclick="this.closest(\'tr\').remove()" title="Excluir"><i class="fas fa-trash"></i></button>';
-
-        tr.innerHTML = 
-            `<td><input type="text" class="admin-input inp-email" value="${item.email || ''}" readonly placeholder="exemplo@gmail.com"></td>` +
-            `<td><input type="text" class="admin-input inp-nick" value="${item.nick || ''}" placeholder="Nick no Habbo..." readonly></td>` +
-            `<td><input type="text" class="admin-input inp-nivel" value="${item.nivel || 'COMUM'}" placeholder="ADMIN, COMUM ou MEMBRO" readonly></td>` +
-            `<td class="action-cell">${btnAcoes}</td>`;
+        tr.innerHTML = `<td><input type="text" class="admin-input inp-email" value="${item.email || ''}" readonly></td><td><input type="text" class="admin-input inp-nick" value="${item.nick || ''}" readonly></td><td><input type="text" class="admin-input inp-nivel" value="${item.nivel || 'COMUM'}" readonly></td><td class="action-cell"><button class="btn-admin-icon btn-admin-edit" onclick="toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button><button class="btn-admin-icon btn-admin-del" onclick="this.closest('tr').remove()" title="Excluir"><i class="fas fa-trash"></i></button></td>`;
         return tr;
     }
-
     function addLinhaAcesso() {
-        var tbody = document.querySelector('#tbAcessos tbody');
-        var tr = criarRowAcesso({ email: '', nick: '', nivel: 'MEMBRO' });
-        tbody.appendChild(tr);
-        toggleEditRow(tr.querySelector('.btn-admin-edit'));
+        var tbody = document.querySelector('#tbAcessos tbody'); var tr = criarRowAcesso({ email: '', nick: '', nivel: 'MEMBRO' });
+        tbody.appendChild(tr); toggleEditRow(tr.querySelector('.btn-admin-edit'));
     }
-
     function toggleEditRow(btn) {
-        var tr = btn.closest('tr');
-        tr.querySelectorAll('input').forEach(inp => inp.removeAttribute('readonly'));
-        btn.innerHTML = '<i class="fas fa-check"></i>';
-        btn.className = 'btn-admin-icon btn-admin-check';
-        btn.onclick = function() { confirmEditRow(btn); };
+        var tr = btn.closest('tr'); tr.querySelectorAll('input').forEach(inp => inp.removeAttribute('readonly'));
+        btn.innerHTML = '<i class="fas fa-check"></i>'; btn.className = 'btn-admin-icon btn-admin-check'; btn.onclick = function() { confirmEditRow(btn); };
     }
-
     function confirmEditRow(btn) {
-        var tr = btn.closest('tr');
-        tr.querySelectorAll('input').forEach(inp => inp.setAttribute('readonly', true));
-        btn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-        btn.className = 'btn-admin-icon btn-admin-edit';
-        btn.onclick = function() { toggleEditRow(btn); };
+        var tr = btn.closest('tr'); tr.querySelectorAll('input').forEach(inp => inp.setAttribute('readonly', true));
+        btn.innerHTML = '<i class="fas fa-pencil-alt"></i>'; btn.className = 'btn-admin-icon btn-admin-edit'; btn.onclick = function() { toggleEditRow(btn); };
     }
-
     function salvarAcessos() {
-        var rows = document.querySelectorAll('#tbAcessos tbody tr');
-        const batch = db.batch();
-        
+        var rows = document.querySelectorAll('#tbAcessos tbody tr'); const batch = db.batch();
         acessosData.forEach(ac => { batch.delete(db.collection("acessos").doc(ac.email)); });
-
         rows.forEach(r => {
             var email = r.querySelector('.inp-email').value.trim().toLowerCase();
-            if(email) {
-                batch.set(db.collection("acessos").doc(email), { 
-                    email: email, 
-                    nick: r.querySelector('.inp-nick').value.trim(),
-                    nivel: r.querySelector('.inp-nivel').value.trim().toUpperCase()
-                });
-            }
+            if(email) { batch.set(db.collection("acessos").doc(email), { email: email, nick: r.querySelector('.inp-nick').value.trim(), nivel: r.querySelector('.inp-nivel').value.trim().toUpperCase() }); }
         });
-
-        batch.commit().then(() => {
-            mostrarToastAdmin("Acessos salvos no banco de dados!");
-        }).catch((e) => { 
-            alert("Erro ao salvar: " + e.message); 
-        });
+        batch.commit().then(() => { mostrarToastAdmin("Acessos salvos!"); }).catch((e) => { alert("Erro: " + e.message); });
     }
   </script>
 </body>
