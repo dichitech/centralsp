@@ -124,7 +124,7 @@
     
     .sponsor-list { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
     .sponsor-avatar { width: 50px; height: 50px; background: rgba(0,0,0,0.6); border: 1px solid rgba(251,191,36,0.3); border-radius: 8px; overflow: hidden; position: relative; }
-    .sponsor-avatar img { position: absolute; pointer-events: none; } /* Controlado por js no drag */
+    .sponsor-avatar img { position: absolute; /* Controle interno do avatar */ }
     .sponsor-text { font-size: 13px; color: var(--text-sub); line-height: 1.5; font-style: italic; background: rgba(251,191,36,0.05); padding: 10px; border-radius: 6px; border-left: 3px solid var(--sup-neon); margin-top: auto;}
 
     /* Editáveis */
@@ -151,11 +151,6 @@
 
     .spinner-ring { width: 50px; height: 50px; border: 3px solid rgba(251, 191, 36, 0.1); border-top-color: var(--dynamic-neon); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes slide-in-right { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes smoke-fade-out { to { opacity: 0; transform: translateY(-20px) scale(0.9); } }
-    .toast-container { position: fixed; top: 30px; right: 30px; z-index: 10000; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
-    .toast-msg { background: rgba(10, 8, 2, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--sup-neon); border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); color: #fff; font-size: 16px; font-weight: 600; animation: slide-in-right 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards, smoke-fade-out 2s ease-in forwards 3s; }
-    footer { text-align: center; padding: 25px; font-size: 14px; color: #888; font-weight: 500; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.02); letter-spacing: 1px; }
   </style>
 </head>
 <body>
@@ -247,13 +242,13 @@
           
           <div id="evento-banner">
               <span><i class="fas fa-star" style="color: var(--sup-neon); font-size: 20px;"></i> <span id="evento-banner-txt">EVENTO ATIVO</span></span>
-              <span style="font-size: 13px; color: var(--sup-neon);"><i class="fas fa-info-circle"></i> Pontuações multiplicadas</span>
+              <span style="font-size: 13px; color: var(--sup-neon);"><i class="fas fa-info-circle"></i> Pontuações já multiplicadas</span>
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="margin:0;"><i class="fas fa-bullseye"></i> Consulta de Metas - <span id="meta-week-title" style="color:#fff;">Carregando...</span></h3>
             <div id="admin-drag-controls" style="display: none; gap: 10px; align-items: center;">
-                <span id="dica-resize" style="display:none; color:var(--text-sub); font-size:12px; margin-right:10px;"><i class="fas fa-mouse"></i> Arraste e use Scroll para redimensionar</span>
+                <span id="dica-resize" style="display:none; color:var(--text-sub); font-size:12px; margin-right:10px;"><i class="fas fa-mouse"></i> Arraste os itens e use o Scroll para redimensionar</span>
                 <button class="btn-tech" onclick="abrirDashboard()" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
                 <button class="btn-tech" onclick="toggleEditMode()" id="btn-edit-pos" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-arrows-alt"></i> Editar Posições</button>
                 <button class="btn-tech btn-save" onclick="savePositions()" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-save"></i> Salvar Layout</button>
@@ -290,7 +285,7 @@
 
                 <div class="events-title" style="font-size: 15px;"><i class="fas fa-star"></i> Patrocinadores Oficiais</div>
                 <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px; position:relative;">
-                   <img src="https://www.habbo.com.br/habbo-imaging/badge/b09134s12017s55012t12014s4301414a5c32c3d12825df4b3496e1fb8ba98.gif" alt="Badge" style="width: 50px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); pointer-events: none;">
+                   <img src="https://www.habbo.com.br/habbo-imaging/badge/b09134s12017s55012t12014s4301414a5c32c3d12825df4b3496e1fb8ba98.gif" alt="Badge" style="width: 50px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));">
                    <div id="sponsors-container" class="sponsor-list"></div>
                 </div>
                 
