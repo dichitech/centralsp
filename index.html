@@ -62,13 +62,12 @@
     .admin-section { background: var(--admin-panel); backdrop-filter: blur(15px); border: 1px solid rgba(251, 191, 36, 0.15); border-radius: 16px; padding: 35px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); display: none; }
     .admin-section.active { display: block; }
     .admin-section h3 { color: var(--dynamic-neon); font-size: 20px; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 3px; display: flex; align-items: center; gap: 12px; font-weight: 700; }
-    .admin-section p.subtext { color: var(--text-sub); margin-top: -15px; margin-bottom: 25px; font-size: 15px; }
-
-    /* Inputs e Genéricos */
+    
+    /* Inputs */
     .input-block { position: relative; width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(251, 191, 36, 0.1); border-radius: 6px; display: flex; align-items: center; padding: 0 15px; transition: all 0.3s; margin-bottom: 15px; }
     .input-block:focus-within { border-color: var(--dynamic-neon); box-shadow: 0 0 12px var(--dynamic-glow); }
     .input-block i { color: var(--dynamic-neon); font-size: 16px; }
-    .input-block input, .input-block select { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 16px; font-family: var(--font-ui); font-weight: 500; padding: 15px 10px; outline: none; letter-spacing: 1px; }
+    .input-block input, .input-block select { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 16px; font-family: var(--font-ui); font-weight: 500; padding: 15px 10px; outline: none; letter-spacing: 1px; color-scheme: dark;}
     .input-block select option { background: var(--bg-panel); color: #fff; }
     label.tech-label { display: block; color: var(--text-sub); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
     .row { display: flex; gap: 15px; } .row .form-group { flex: 1; }
@@ -76,7 +75,7 @@
     /* Tabelas e Botões */
     .admin-table-wrapper { width: 100%; overflow-x: auto; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
     .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
-    .admin-table th { color: var(--text-sub); background: rgba(0,0,0,0.4); padding: 18px 15px; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid rgba(251, 191, 36, 0.2); white-space: nowrap; }
+    .admin-table th { color: var(--text-sub); background: rgba(0,0,0,0.4); padding: 18px 15px; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid rgba(251, 191, 36, 0.2); }
     .admin-table td { padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; transition: background 0.3s; }
     .admin-input { width: 100%; background: transparent; border: 1px solid transparent; color: #fff; font-family: var(--font-ui); font-size: 15px; padding: 8px 12px; border-radius: 6px; outline: none; transition: all 0.3s; font-weight: 500; }
     .admin-input[readonly] { opacity: 0.6; cursor: default; }
@@ -99,7 +98,7 @@
        MODAL MINI DASHBOARD (ADMIN)
        ======================================= */
     .modal { display: none; position: fixed; z-index: 999999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px; }
-    .modal-content { background-color: var(--bg-panel); border: 1px solid var(--sup-neon); border-radius: 12px; width: 100%; max-width: 600px; position: relative; box-shadow: 0 0 40px var(--sup-glow); padding: 35px; overflow-y: auto; max-height: 90vh; }
+    .modal-content { background-color: var(--bg-panel); border: 1px solid var(--sup-neon); border-radius: 12px; width: 100%; max-width: 650px; position: relative; box-shadow: 0 0 40px var(--sup-glow); padding: 35px; overflow-y: auto; max-height: 90vh; }
     .close-btn { position: absolute; right: 20px; top: 20px; width: 35px; height: 35px; background: rgba(255,42,42,0.1); border-radius: 50%; color: #ef4444; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
     .close-btn:hover { background: #ef4444; color: #fff; transform: rotate(90deg); }
 
@@ -148,7 +147,7 @@
         pointer-events: auto !important; 
     }
 
-    /* Prêmios Redimensionáveis Fixo */
+    /* Prêmios Redimensionáveis (Não arrastam, só mudam de tamanho no scroll) */
     .resizable-prize { transition: filter 0.3s; filter: drop-shadow(0 0 10px rgba(251,191,36,0.5)); }
     .resizable-prize.edit-mode { 
         cursor: ns-resize !important; 
@@ -156,6 +155,7 @@
         filter: drop-shadow(0 0 15px rgba(255,42,42,1)) !important; 
         z-index: 9999 !important; 
         pointer-events: auto !important; 
+        display: block !important;
     }
 
     .medal-float.edit-mode { animation: none !important; transform: none !important; }
@@ -201,17 +201,47 @@
   <div id="modal-dashboard" class="modal">
      <div class="modal-content">
         <div class="close-btn" onclick="fecharDashboard()"><i class="fas fa-times"></i></div>
-        <h3 style="color: var(--sup-neon); margin-bottom: 25px;"><i class="fas fa-tachometer-alt"></i> Dashboard de Eventos</h3>
+        <h3 style="color: var(--sup-neon); margin-bottom: 25px;"><i class="fas fa-tachometer-alt"></i> Dashboard do Mês</h3>
         
+        <h4 style="color:#fff; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px; font-size:14px;"><i class="far fa-calendar-alt"></i> Detalhes do Evento do Mês</h4>
+        
+        <label class="tech-label">Nome do Evento</label>
+        <input type="text" id="dash-nome-evento" class="admin-input" placeholder="Ex: Semana em Dobro" style="margin-bottom:15px;">
+        
+        <div style="display:flex; gap:15px; margin-bottom:15px;">
+            <div style="flex:1;">
+                <label class="tech-label">Data de Início</label>
+                <div class="input-block" style="margin:0;"><input type="date" id="dash-data-inicio"></div>
+            </div>
+            <div style="flex:1;">
+                <label class="tech-label">Data de Término</label>
+                <div class="input-block" style="margin:0;"><input type="date" id="dash-data-fim"></div>
+            </div>
+        </div>
+
+        <label class="tech-label">Informações e Regras (Pode usar links HTML. Ex: &lt;a href="..."&gt;Clique Aqui&lt;/a&gt;)</label>
+        <textarea id="dash-txt-eventos" class="admin-input" style="height: 80px; resize:vertical; margin-bottom:15px; font-family:var(--font-ui);" placeholder="Digite as novidades e regras do evento..."></textarea>
+        
+        <h4 style="color:#fff; margin-bottom:15px; font-size:14px; text-transform:uppercase;"><i class="fas fa-gift"></i> Premiações do Evento</h4>
+        <div style="display:flex; gap:20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
+           <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
+               <input type="checkbox" id="dash-chk-hc" style="width:18px; height:18px; cursor:pointer;"> Dar HC
+           </label>
+           <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
+               <input type="checkbox" id="dash-chk-moedas" style="width:18px; height:18px; cursor:pointer;"> Dar Moedas
+           </label>
+        </div>
+
         <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px dashed rgba(251,191,36,0.3); margin-bottom: 20px;">
-           <h4 style="color:#fff; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px; font-size:14px;"><i class="fas fa-bolt"></i> Controle de Multiplicador</h4>
+           <h4 style="color:#fff; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px; font-size:14px;"><i class="fas fa-bolt"></i> Valoração / Multiplicador</h4>
            <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
                <div style="display: flex; align-items: center;">
-                   <label class="switch" title="Ativar/Desativar"><input type="checkbox" id="dash-toggle-evento"><span class="slider"></span></label>
-                   <span style="color: var(--text-sub); font-size: 14px; font-weight:bold;">ATIVAR EVENTO</span>
+                   <label class="switch" title="Ativar/Desativar Multiplicador"><input type="checkbox" id="dash-toggle-evento"><span class="slider"></span></label>
+                   <span style="color: var(--text-sub); font-size: 14px; font-weight:bold;">ATIVAR BÔNUS</span>
                </div>
                <div class="input-block" style="margin:0; width: 150px;">
                    <select id="dash-mult-evento">
+                       <option value="1">1x (Normal)</option>
                        <option value="2">2x Pontos</option>
                        <option value="3">3x Pontos</option>
                        <option value="4">4x Pontos</option>
@@ -220,31 +250,10 @@
            </div>
         </div>
 
-        <h4 style="color:#fff; margin-bottom:10px; font-size:14px; text-transform:uppercase;"><i class="far fa-calendar-alt"></i> Informações do Evento</h4>
-        <div class="input-block" style="margin-bottom:15px;">
-           <input type="text" id="dash-nome-evento" placeholder="Nome do Evento (ex: Semana em Dobro)">
-        </div>
-        <div class="input-block" style="margin-bottom:15px;">
-           <input type="text" id="dash-data-evento" placeholder="Data do Evento (ex: 15/10 a 20/10)">
-        </div>
-        
-        <label class="tech-label">Descrição dos Eventos do Mês</label>
-        <textarea id="dash-txt-eventos" class="admin-input" style="height: 80px; resize:none; margin-bottom:15px; font-family:var(--font-ui);" placeholder="Digite as novidades e eventos do mês..."></textarea>
-        
-        <label class="tech-label">Frase de Patrocínio</label>
+        <label class="tech-label">Frase de Patrocínio (Padrão)</label>
         <input type="text" id="dash-txt-patrocinio" class="admin-input" style="margin-bottom:20px;" placeholder="Deseja patrocinar algum dos eventos...">
 
-        <h4 style="color:#fff; margin-bottom:15px; font-size:14px; text-transform:uppercase;"><i class="fas fa-gift"></i> Premiações Ativas</h4>
-        <div style="display:flex; gap:20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-           <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
-               <input type="checkbox" id="dash-chk-hc" style="width:18px; height:18px; cursor:pointer;"> Mostrar HC
-           </label>
-           <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:8px;">
-               <input type="checkbox" id="dash-chk-moedas" style="width:18px; height:18px; cursor:pointer;"> Mostrar Moedas
-           </label>
-        </div>
-
-        <button class="btn-tech btn-save" onclick="salvarDashboard()" style="width: 100%; margin-top: 25px; padding: 15px;"><i class="fas fa-save"></i> Salvar e Aplicar Alterações</button>
+        <button class="btn-tech btn-save" onclick="salvarDashboard()" style="width: 100%; margin-top: 10px; padding: 15px;"><i class="fas fa-save"></i> Salvar e Aplicar Alterações</button>
      </div>
   </div>
 
@@ -275,7 +284,7 @@
           
           <div id="evento-banner">
               <span><i class="fas fa-star" style="color: var(--sup-neon); font-size: 20px;"></i> <span id="evento-banner-txt">EVENTO ATIVO</span></span>
-              <span style="font-size: 13px; color: var(--sup-neon);"><i class="fas fa-info-circle"></i> Pontuações multiplicadas</span>
+              <span style="font-size: 13px; color: var(--sup-neon);"><i class="fas fa-info-circle"></i> Pontuações multiplicadas na tela</span>
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -311,13 +320,15 @@
                    <span id="mes-atual" style="color:#fff; font-size:14px;"></span>
                 </div>
                 
-                <div style="flex:1; margin-bottom: 5px; color: #fff; font-size: 14px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
-                   <strong style="color:var(--sup-neon);">Em destaque:</strong> <span id="ui-txt-eventos">Fique atento aos anúncios no grupo!</span>
-                </div>
-
-                <div id="premios-container" style="display:flex; justify-content: center; gap: 20px; align-items: center; margin-bottom: 20px;">
-                    <img id="img-premio-hc" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEirfXmN9g_cDNpjq8o7oXeKFIRwJLgI-w2FEisZ3iJdxqblDlMM858H3fDrWh-PpDE12pNyMmPBdxX8TRgBU95PXO8nd24V9Gny1nFTkhqsGKUKfMmtK-AEoIAvFTsJBjsNV2gk2oUkTTpf/s1600/HC31.gif" class="resizable-prize" draggable="false" style="display:none; z-index:10;">
-                    <img id="img-premio-moedas" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDZ6AWqYyPxpnw-heLbJ-k1qoyj_EZN8_wWWotWVW5MzTQZKPQEY-L3zuPCYIK-ExBKbQFBxyfS_c_F4xY6pPUAgRoHiJvC9HgpWYj6iVUCp4eXDF7M-ilisPyCQ6KBpGfdqgwjpmvWrsi/s1600/15c6908117fc3.gif" class="resizable-prize" draggable="false" style="display:none; z-index:10;">
+                <div id="display-evento-mes" style="flex:1; margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border-left: 3px solid var(--sup-neon);">
+                   <h4 id="ui-nome-evento" style="color:var(--sup-neon); margin-bottom: 5px; font-size: 18px; text-transform: uppercase; letter-spacing: 1px;">Aguardando Evento</h4>
+                   <div id="ui-data-evento" style="color: var(--text-sub); font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; font-weight: 600;"><i class="far fa-calendar-day"></i> <span>--/-- a --/--</span></div>
+                   <div id="ui-txt-eventos" style="color: #fff; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">Fique atento aos anúncios no grupo!</div>
+                   
+                   <div id="premios-container" style="display:flex; gap: 15px; align-items: center; min-height: 40px;">
+                        <img id="img-premio-hc" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEirfXmN9g_cDNpjq8o7oXeKFIRwJLgI-w2FEisZ3iJdxqblDlMM858H3fDrWh-PpDE12pNyMmPBdxX8TRgBU95PXO8nd24V9Gny1nFTkhqsGKUKfMmtK-AEoIAvFTsJBjsNV2gk2oUkTTpf/s1600/HC31.gif" class="resizable-prize" draggable="false" style="display:none; z-index:10; transition: none;">
+                        <img id="img-premio-moedas" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDZ6AWqYyPxpnw-heLbJ-k1qoyj_EZN8_wWWotWVW5MzTQZKPQEY-L3zuPCYIK-ExBKbQFBxyfS_c_F4xY6pPUAgRoHiJvC9HgpWYj6iVUCp4eXDF7M-ilisPyCQ6KBpGfdqgwjpmvWrsi/s1600/15c6908117fc3.gif" class="resizable-prize" draggable="false" style="display:none; z-index:10; transition: none;">
+                   </div>
                 </div>
 
                 <div class="events-title" style="font-size: 15px;"><i class="fas fa-star"></i> Patrocinadores Oficiais</div>
@@ -432,7 +443,6 @@
     let usuarioLogadoEmail = ''; let nivelUsuarioGlobal = 'COMUM'; let acessosData = [];
     let membrosDataArray = []; let eventoAtivo = false; let eventoMult = 1;
     
-    // Posições Padrão Iniciais (inclui empatados e prêmios)
     let layoutConfig = {
         'img-podio-base': { left: '100px', top: '150px', width: 'auto' },
         'avatar-1': { left: '175px', top: '50px', width: 'auto' },
@@ -520,12 +530,19 @@
     function abrirDashboard() { document.getElementById('modal-dashboard').style.display = 'flex'; }
     function fecharDashboard() { document.getElementById('modal-dashboard').style.display = 'none'; }
 
+    function formatarDataBR(dataStr) {
+        if(!dataStr) return "";
+        let d = new Date(dataStr + "T00:00:00");
+        return d.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
+    }
+
     function salvarDashboard() {
         let dados = {
             eventoAtivo: document.getElementById('dash-toggle-evento').checked,
-            eventoNome: document.getElementById('dash-nome-evento').value || 'Evento',
-            eventoData: document.getElementById('dash-data-evento').value || '',
-            eventoMult: parseInt(document.getElementById('dash-mult-evento').value) || 2,
+            eventoNome: document.getElementById('dash-nome-evento').value || '',
+            eventoDataInicio: document.getElementById('dash-data-inicio').value || '',
+            eventoDataFim: document.getElementById('dash-data-fim').value || '',
+            eventoMult: parseInt(document.getElementById('dash-mult-evento').value) || 1,
             textoEventos: document.getElementById('dash-txt-eventos').value,
             textoPatrocinio: document.getElementById('dash-txt-patrocinio').value,
             mostrarHC: document.getElementById('dash-chk-hc').checked,
@@ -533,7 +550,7 @@
         };
         db.collection("sistema").doc("config_metas").set(dados, {merge:true}).then(() => {
             mostrarToastAdmin("Dashboard atualizado!"); fecharDashboard();
-        });
+        }).catch(e => alert("Erro ao salvar Dashboard. Verifique se atualizou as regras do Firebase! " + e.message));
     }
 
     function escutarConfigDashboard() {
@@ -546,7 +563,8 @@
                 if(nivelUsuarioGlobal === 'ADMIN') {
                     document.getElementById('dash-toggle-evento').checked = eventoAtivo;
                     document.getElementById('dash-nome-evento').value = d.eventoNome || '';
-                    document.getElementById('dash-data-evento').value = d.eventoData || '';
+                    document.getElementById('dash-data-inicio').value = d.eventoDataInicio || '';
+                    document.getElementById('dash-data-fim').value = d.eventoDataFim || '';
                     document.getElementById('dash-mult-evento').value = eventoMult;
                     document.getElementById('dash-txt-eventos').value = d.textoEventos || '';
                     document.getElementById('dash-txt-patrocinio').value = d.textoPatrocinio || '';
@@ -554,17 +572,32 @@
                     document.getElementById('dash-chk-moedas').checked = d.mostrarMoedas || false;
                 }
 
+                // Renderização da Interface
                 let banner = document.getElementById('evento-banner');
-                if(eventoAtivo) {
-                    let nomeT = d.eventoNome || 'EVENTO';
-                    let dataT = d.eventoData ? ` (${d.eventoData})` : '';
-                    document.getElementById('evento-banner-txt').innerText = `EVENTO ATIVO: ${nomeT.toUpperCase()}${dataT} - ${eventoMult}X PONTOS`;
+                let uiNome = document.getElementById('ui-nome-evento');
+                let uiData = document.getElementById('ui-data-evento');
+                let uiTxtEventos = document.getElementById('ui-txt-eventos');
+                let uiTxtPatrocinio = document.getElementById('ui-txt-patrocinio');
+
+                if(eventoAtivo && eventoMult > 1) {
+                    document.getElementById('evento-banner-txt').innerText = `EVENTO ATIVO: ${d.eventoNome || 'BÔNUS'} (${eventoMult}X PONTOS)`;
                     banner.style.display = 'flex';
                 } else { banner.style.display = 'none'; eventoMult = 1; }
 
-                if(d.textoEventos) document.getElementById('ui-txt-eventos').innerText = d.textoEventos;
-                if(d.textoPatrocinio) document.getElementById('ui-txt-patrocinio').innerText = d.textoPatrocinio;
+                uiNome.innerText = d.eventoNome || 'Aguardando Evento';
+                uiTxtEventos.innerHTML = d.textoEventos ? d.textoEventos.replace(/\n/g, '<br>') : 'Fique atento aos anúncios no grupo!';
+                uiTxtPatrocinio.innerText = d.textoPatrocinio || 'Deseja patrocinar algum dos eventos e ajudar ainda mais a divisão? Procure a Liderança!';
 
+                // Montagem da Data
+                if(d.eventoDataInicio && d.eventoDataFim) {
+                    uiData.innerHTML = `<i class="far fa-calendar-day"></i> <span>${formatarDataBR(d.eventoDataInicio)} a ${formatarDataBR(d.eventoDataFim)}</span>`;
+                    uiData.style.display = 'flex';
+                } else if(d.eventoDataInicio) {
+                    uiData.innerHTML = `<i class="far fa-calendar-day"></i> <span>A partir de ${formatarDataBR(d.eventoDataInicio)}</span>`;
+                    uiData.style.display = 'flex';
+                } else { uiData.style.display = 'none'; }
+
+                // Prêmios
                 if(!isEditMode) {
                    document.getElementById('img-premio-hc').style.display = d.mostrarHC ? 'block' : 'none';
                    document.getElementById('img-premio-moedas').style.display = d.mostrarMoedas ? 'block' : 'none';
@@ -607,9 +640,7 @@
         db.collection("sistema").doc("config_layout").get().then((doc) => {
             if(doc.exists && doc.data().posicoes) {
                 let loaded = doc.data().posicoes;
-                for(let k in loaded) { 
-                    layoutConfig[k] = { ...layoutConfig[k], ...loaded[k] }; 
-                }
+                for(let k in loaded) { layoutConfig[k] = { ...layoutConfig[k], ...loaded[k] }; }
             }
             aplicarPosicoes();
         });
@@ -617,11 +648,10 @@
 
     function savePositions() {
         if(nivelUsuarioGlobal !== 'ADMIN') return;
-        // Substitui o config inteiro no firebase
-        db.collection("sistema").doc("config_layout").set({ posicoes: layoutConfig }).then(() => {
+        db.collection("sistema").doc("config_layout").set({ posicoes: layoutConfig }, {merge: true}).then(() => {
             mostrarToastAdmin("Posições e Tamanhos salvos!");
             if(isEditMode) toggleEditMode();
-        });
+        }).catch(e => alert("Erro ao salvar posições. Verifique se atualizou as regras do Firebase! " + e.message));
     }
 
     function toggleEditMode() {
@@ -638,7 +668,6 @@
             btn.style.borderColor = '#ef4444'; btn.style.color = '#ef4444';
             dica.style.display = 'inline';
             
-            // Força a exibição das áreas e itens
             areaDet.style.display = 'flex'; areaDet.style.opacity = '1';
 
             let fallbacks = [
@@ -653,20 +682,13 @@
                 if(!img.src || img.src.endsWith('=')) img.src = f.src;
             });
 
-            // Ativa edição visual
             elsDrag.forEach(e => { 
                 e.classList.add('edit-mode'); 
                 if(e.tagName === 'IMG' || e.tagName === 'DIV') e.style.display = 'block'; 
             }); 
             
-            elsSponImg.forEach(img => { 
-                img.classList.add('sponsor-edit', 'edit-mode'); 
-            });
-            
-            elsPrize.forEach(img => { 
-                img.classList.add('edit-mode'); 
-                img.style.display = 'block'; // Mostra pra editar
-            });
+            elsSponImg.forEach(img => { img.classList.add('sponsor-edit', 'edit-mode'); });
+            elsPrize.forEach(img => { img.classList.add('edit-mode'); img.style.display = 'block'; });
             
         } else {
             btn.innerHTML = '<i class="fas fa-arrows-alt"></i> Editar Posições';
@@ -677,7 +699,6 @@
             elsSponImg.forEach(img => { img.classList.remove('sponsor-edit', 'edit-mode'); });
             elsPrize.forEach(img => { img.classList.remove('edit-mode'); });
             
-            // Retorna ao estado normal
             if(!document.getElementById('select-membro').value) {
                 areaDet.style.display = 'none'; areaDet.style.opacity = '0';
             } else { renderMemberDetails(); }
@@ -693,14 +714,15 @@
         }
     }
 
-    // Configura Prêmios Redimensionáveis
+    // Apenas Redimensionamento via Scroll para Prêmios
     function setupPrizesResizable() {
         document.querySelectorAll('.resizable-prize').forEach(img => {
             img.ondragstart = () => false;
             img.addEventListener('wheel', (e) => {
                 if(!isEditMode) return;
                 e.preventDefault(); e.stopPropagation();
-                let w = img.offsetWidth;
+                let styleW = window.getComputedStyle(img).width;
+                let w = parseFloat(styleW) || img.offsetWidth;
                 w += e.deltaY < 0 ? 5 : -5;
                 if(w < 20) w = 20;
                 img.style.width = w + 'px';
@@ -710,7 +732,6 @@
         });
     }
 
-    // Motor de Arrasto Baseado na Posição Renderizada Real (offsetLeft/Top)
     function setupAllDraggables() {
         document.querySelectorAll('.draggable-item').forEach(el => {
             if(el.dataset.dragReady) return;
@@ -723,7 +744,6 @@
 
                 let startX = e.clientX;
                 let startY = e.clientY;
-                // Força ler o pixel da tela do momento do clique (Imune a bugs de display:none)
                 let startLeft = el.offsetLeft;
                 let startTop = el.offsetTop;
 
@@ -750,7 +770,6 @@
                 document.addEventListener('mouseup', onMouseUp);
             });
 
-            // Resizer do Scroll
             el.addEventListener('wheel', (e) => {
                 if(!isEditMode) return;
                 e.preventDefault(); e.stopPropagation();
@@ -768,7 +787,6 @@
         });
     }
 
-    // Motor Isolado só para a foto interna dos patrocinadores
     function setupSponsorInnerDraggable() {
         document.querySelectorAll('.sponsor-avatar img').forEach(img => {
             if (img.dataset.dragReady) return;
@@ -779,29 +797,19 @@
                 if(!isEditMode) return;
                 e.preventDefault(); e.stopPropagation();
 
-                let startX = e.clientX;
-                let startY = e.clientY;
-                let startLeft = img.offsetLeft;
-                let startTop = img.offsetTop;
+                let startX = e.clientX; let startY = e.clientY;
+                let startLeft = img.offsetLeft; let startTop = img.offsetTop;
 
                 const onMouseMove = (moveEvent) => {
                     moveEvent.preventDefault();
-                    let dx = moveEvent.clientX - startX;
-                    let dy = moveEvent.clientY - startY;
-                    
+                    let dx = moveEvent.clientX - startX; let dy = moveEvent.clientY - startY;
                     layoutConfig['sponsorInner'] = layoutConfig['sponsorInner'] || {};
                     layoutConfig['sponsorInner'].left = (startLeft + dx) + 'px';
                     layoutConfig['sponsorInner'].top = (startTop + dy) + 'px';
                     aplicarSponsorInner();
                 };
-
-                const onMouseUp = () => {
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                };
-
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
+                const onMouseUp = () => { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); };
+                document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp);
             });
 
             img.addEventListener('wheel', (e) => {
@@ -898,7 +906,6 @@
         let p1 = top[0].total_base * eventoMult; let p2 = (top.length > 1) ? (top[1].total_base * eventoMult) : 0;
 
         if(top.length >= 2 && p1 > 0 && p1 === p2) {
-            // Empate: Os dois são DIC-Sp
             ave1.src = "https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b";
             ave2.src = "https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b";
             ave1.style.display = 'block'; txte1.style.display = 'block';
