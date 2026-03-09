@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Central de Sistemas - Supervisores</title>
+  <link rel="icon" type="image/gif" href="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
@@ -89,6 +90,8 @@
     .btn-tech { background: rgba(251, 191, 36, 0.05); border: 1px solid var(--dynamic-neon); border-color: rgba(251, 191, 36, 0.5); color: var(--text-main); padding: 12px 24px; border-radius: 6px; font-family: var(--font-ui); font-size: 15px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
     .btn-tech:hover { background: var(--dynamic-neon); border-color: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px var(--dynamic-glow); }
     .admin-controls-bottom { display: flex; gap: 15px; margin-top: 25px; align-items: center; justify-content: flex-end; }
+    .btn-add { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--dynamic-neon); }
+    .btn-add:hover { background: rgba(251, 191, 36, 0.2); border-color: var(--dynamic-neon); }
     .btn-save { background: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
     .btn-save:hover { background: #f59e0b; transform: translateY(-2px); }
 
@@ -125,10 +128,8 @@
     .sponsor-avatar img { position: absolute; pointer-events: none; } 
     .sponsor-text { font-size: 13px; color: var(--text-sub); line-height: 1.5; font-style: italic; background: rgba(251,191,36,0.05); padding: 10px; border-radius: 6px; border-left: 3px solid var(--sup-neon); margin-top: auto;}
 
-    /* Classes Infalíveis para Edição de Drag & Drop */
-    .draggable-item { position: absolute; z-index: 5; image-rendering: pixelated; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); user-select: none; }
-    
-    /* Força Absoluta no Display durante a Edição */
+    /* Editáveis com Força Máxima (!important) para garantir o clique e o visual */
+    .draggable-item { position: absolute; z-index: 5; image-rendering: pixelated; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); }
     .draggable-item.edit-mode { 
         cursor: move !important; 
         outline: 2px dashed #ff2a2a !important; 
@@ -141,6 +142,16 @@
     
     .sponsor-edit.edit-mode { 
         cursor: move !important; 
+        outline: 2px dashed #ff2a2a !important; 
+        filter: drop-shadow(0 0 15px rgba(255,42,42,1)) !important; 
+        z-index: 9999 !important; 
+        pointer-events: auto !important; 
+    }
+
+    /* Prêmios Redimensionáveis Fixo */
+    .resizable-prize { transition: filter 0.3s; filter: drop-shadow(0 0 10px rgba(251,191,36,0.5)); }
+    .resizable-prize.edit-mode { 
+        cursor: ns-resize !important; 
         outline: 2px dashed #ff2a2a !important; 
         filter: drop-shadow(0 0 15px rgba(255,42,42,1)) !important; 
         z-index: 9999 !important; 
@@ -197,9 +208,8 @@
            <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
                <div style="display: flex; align-items: center;">
                    <label class="switch" title="Ativar/Desativar"><input type="checkbox" id="dash-toggle-evento"><span class="slider"></span></label>
-                   <span style="color: var(--text-sub); font-size: 14px; font-weight:bold;">ATIVAR</span>
+                   <span style="color: var(--text-sub); font-size: 14px; font-weight:bold;">ATIVAR EVENTO</span>
                </div>
-               <div class="input-block" style="margin:0; flex:1; min-width: 150px;"><input type="text" id="dash-nome-evento" placeholder="Nome do Evento"></div>
                <div class="input-block" style="margin:0; width: 150px;">
                    <select id="dash-mult-evento">
                        <option value="2">2x Pontos</option>
@@ -210,7 +220,14 @@
            </div>
         </div>
 
-        <h4 style="color:#fff; margin-bottom:10px; font-size:14px; text-transform:uppercase;"><i class="fas fa-bullhorn"></i> Textos do Painel</h4>
+        <h4 style="color:#fff; margin-bottom:10px; font-size:14px; text-transform:uppercase;"><i class="far fa-calendar-alt"></i> Informações do Evento</h4>
+        <div class="input-block" style="margin-bottom:15px;">
+           <input type="text" id="dash-nome-evento" placeholder="Nome do Evento (ex: Semana em Dobro)">
+        </div>
+        <div class="input-block" style="margin-bottom:15px;">
+           <input type="text" id="dash-data-evento" placeholder="Data do Evento (ex: 15/10 a 20/10)">
+        </div>
+        
         <label class="tech-label">Descrição dos Eventos do Mês</label>
         <textarea id="dash-txt-eventos" class="admin-input" style="height: 80px; resize:none; margin-bottom:15px; font-family:var(--font-ui);" placeholder="Digite as novidades e eventos do mês..."></textarea>
         
@@ -264,7 +281,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="margin:0;"><i class="fas fa-bullseye"></i> Consulta de Metas - <span id="meta-week-title" style="color:#fff;">Carregando...</span></h3>
             <div id="admin-drag-controls" style="display: none; gap: 10px; align-items: center;">
-                <span id="dica-resize" style="display:none; color:var(--text-sub); font-size:12px; margin-right:10px;"><i class="fas fa-mouse"></i> Arraste os itens e use o Scroll para redimensionar</span>
+                <span id="dica-resize" style="display:none; color:var(--text-sub); font-size:12px; margin-right:10px;"><i class="fas fa-mouse"></i> Arraste e use Scroll para redimensionar</span>
                 <button class="btn-tech" onclick="abrirDashboard()" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
                 <button class="btn-tech" onclick="toggleEditMode()" id="btn-edit-pos" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-arrows-alt"></i> Editar Posições</button>
                 <button class="btn-tech btn-save" onclick="savePositions()" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-save"></i> Salvar Layout</button>
@@ -282,8 +299,10 @@
                 <img id="avatar-2" src="" draggable="false" class="draggable-item" style="z-index: 3; display:none;">
                 <img id="medal-2" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuP4oSwMUvEeMDglW96CfvqrDASdaiQIHPsO6hx3CDFgBKZINyAX3dqlQrOJgGLsBDafGL_vVqS-9su5ijkKP87T-yQHM4YCe3zaHcYXPhBas5RjG12vh_6RPuoQemKimWHAhV-bQEVBc/s1600/ITC20.gif" draggable="false" class="draggable-item medal-float" style="z-index: 4; display:none;">
                 
-                <img id="avatar-empate" src="https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b" draggable="false" class="draggable-item" style="z-index: 3; display:none;">
-                <div id="txt-empate" class="draggable-item empate-text" style="display:none;">EMPATE</div>
+                <img id="avatar-empate-1" src="" draggable="false" class="draggable-item" style="z-index: 3; display:none;">
+                <div id="txt-empate-1" class="draggable-item empate-text" style="display:none;">EMPATE</div>
+                <img id="avatar-empate-2" src="" draggable="false" class="draggable-item" style="z-index: 3; display:none;">
+                <div id="txt-empate-2" class="draggable-item empate-text" style="display:none;">EMPATE</div>
              </div>
 
              <div class="events-box" id="events-container">
@@ -292,12 +311,14 @@
                    <span id="mes-atual" style="color:#fff; font-size:14px;"></span>
                 </div>
                 
-                <div style="flex:1; margin-bottom: 20px; color: #fff; font-size: 14px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
-                   <strong style="color:var(--sup-neon);">Em breve:</strong> <span id="ui-txt-eventos">Fique atento aos anúncios no grupo!</span>
+                <div style="flex:1; margin-bottom: 5px; color: #fff; font-size: 14px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                   <strong style="color:var(--sup-neon);">Em destaque:</strong> <span id="ui-txt-eventos">Fique atento aos anúncios no grupo!</span>
                 </div>
 
-                <img id="img-premio-hc" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEirfXmN9g_cDNpjq8o7oXeKFIRwJLgI-w2FEisZ3iJdxqblDlMM858H3fDrWh-PpDE12pNyMmPBdxX8TRgBU95PXO8nd24V9Gny1nFTkhqsGKUKfMmtK-AEoIAvFTsJBjsNV2gk2oUkTTpf/s1600/HC31.gif" draggable="false" class="draggable-item" style="display:none; z-index:10;">
-                <img id="img-premio-moedas" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDZ6AWqYyPxpnw-heLbJ-k1qoyj_EZN8_wWWotWVW5MzTQZKPQEY-L3zuPCYIK-ExBKbQFBxyfS_c_F4xY6pPUAgRoHiJvC9HgpWYj6iVUCp4eXDF7M-ilisPyCQ6KBpGfdqgwjpmvWrsi/s1600/15c6908117fc3.gif" draggable="false" class="draggable-item" style="display:none; z-index:10;">
+                <div id="premios-container" style="display:flex; justify-content: center; gap: 20px; align-items: center; margin-bottom: 20px;">
+                    <img id="img-premio-hc" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEirfXmN9g_cDNpjq8o7oXeKFIRwJLgI-w2FEisZ3iJdxqblDlMM858H3fDrWh-PpDE12pNyMmPBdxX8TRgBU95PXO8nd24V9Gny1nFTkhqsGKUKfMmtK-AEoIAvFTsJBjsNV2gk2oUkTTpf/s1600/HC31.gif" class="resizable-prize" draggable="false" style="display:none; z-index:10;">
+                    <img id="img-premio-moedas" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDZ6AWqYyPxpnw-heLbJ-k1qoyj_EZN8_wWWotWVW5MzTQZKPQEY-L3zuPCYIK-ExBKbQFBxyfS_c_F4xY6pPUAgRoHiJvC9HgpWYj6iVUCp4eXDF7M-ilisPyCQ6KBpGfdqgwjpmvWrsi/s1600/15c6908117fc3.gif" class="resizable-prize" draggable="false" style="display:none; z-index:10;">
+                </div>
 
                 <div class="events-title" style="font-size: 15px;"><i class="fas fa-star"></i> Patrocinadores Oficiais</div>
                 <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px; position:relative;">
@@ -411,21 +432,23 @@
     let usuarioLogadoEmail = ''; let nivelUsuarioGlobal = 'COMUM'; let acessosData = [];
     let membrosDataArray = []; let eventoAtivo = false; let eventoMult = 1;
     
-    // Posições Padrão Iniciais
+    // Posições Padrão Iniciais (inclui empatados e prêmios)
     let layoutConfig = {
         'img-podio-base': { left: '100px', top: '150px', width: 'auto' },
         'avatar-1': { left: '175px', top: '50px', width: 'auto' },
         'medal-1': { left: '175px', top: '0px', width: 'auto' },
         'avatar-2': { left: '80px', top: '100px', width: 'auto' },
         'medal-2': { left: '80px', top: '50px', width: 'auto' },
-        'avatar-empate': { left: '130px', top: '60px', width: 'auto' },
-        'txt-empate': { left: '130px', top: '30px', width: 'auto' },
+        'avatar-empate-1': { left: '175px', top: '50px', width: 'auto' },
+        'txt-empate-1': { left: '175px', top: '20px', width: 'auto' },
+        'avatar-empate-2': { left: '80px', top: '100px', width: 'auto' },
+        'txt-empate-2': { left: '80px', top: '70px', width: 'auto' },
         'img-palco-base': { left: '50px', top: '220px', width: 'auto' },
         'img-brasao': { left: '10px', top: '10px', width: 'auto' },
         'img-emblema-sup': { left: '45px', top: '40px', width: 'auto' },
         'avatar-selecionado': { left: '130px', top: '100px', width: 'auto' },
-        'img-premio-hc': { left: '10px', top: '50px', width: 'auto' },
-        'img-premio-moedas': { left: '60px', top: '50px', width: 'auto' },
+        'img-premio-hc': { width: '40px' },
+        'img-premio-moedas': { width: '40px' },
         'sponsorInner': { left: '0px', top: '-10px', width: '60px' } 
     };
     let isEditMode = false;
@@ -442,7 +465,8 @@
         carregarLayoutConfig();
         escutarConfigDashboard(); 
         escutarMetasDoFirebase();
-        setupAllDraggables(); // Inicializa o motor de arrasto infalível
+        setupAllDraggables(); 
+        setupPrizesResizable();
     }
 
     auth.onAuthStateChanged((user) => {
@@ -500,6 +524,7 @@
         let dados = {
             eventoAtivo: document.getElementById('dash-toggle-evento').checked,
             eventoNome: document.getElementById('dash-nome-evento').value || 'Evento',
+            eventoData: document.getElementById('dash-data-evento').value || '',
             eventoMult: parseInt(document.getElementById('dash-mult-evento').value) || 2,
             textoEventos: document.getElementById('dash-txt-eventos').value,
             textoPatrocinio: document.getElementById('dash-txt-patrocinio').value,
@@ -521,6 +546,7 @@
                 if(nivelUsuarioGlobal === 'ADMIN') {
                     document.getElementById('dash-toggle-evento').checked = eventoAtivo;
                     document.getElementById('dash-nome-evento').value = d.eventoNome || '';
+                    document.getElementById('dash-data-evento').value = d.eventoData || '';
                     document.getElementById('dash-mult-evento').value = eventoMult;
                     document.getElementById('dash-txt-eventos').value = d.textoEventos || '';
                     document.getElementById('dash-txt-patrocinio').value = d.textoPatrocinio || '';
@@ -530,21 +556,18 @@
 
                 let banner = document.getElementById('evento-banner');
                 if(eventoAtivo) {
-                    document.getElementById('evento-banner-txt').innerText = `EVENTO ATIVO: ${d.eventoNome} (${eventoMult}X)`;
+                    let nomeT = d.eventoNome || 'EVENTO';
+                    let dataT = d.eventoData ? ` (${d.eventoData})` : '';
+                    document.getElementById('evento-banner-txt').innerText = `EVENTO ATIVO: ${nomeT.toUpperCase()}${dataT} - ${eventoMult}X PONTOS`;
                     banner.style.display = 'flex';
                 } else { banner.style.display = 'none'; eventoMult = 1; }
 
                 if(d.textoEventos) document.getElementById('ui-txt-eventos').innerText = d.textoEventos;
                 if(d.textoPatrocinio) document.getElementById('ui-txt-patrocinio').innerText = d.textoPatrocinio;
 
-                let imgHC = document.getElementById('img-premio-hc');
-                let imgMoedas = document.getElementById('img-premio-moedas');
-                
                 if(!isEditMode) {
-                   imgHC.style.display = d.mostrarHC ? 'block' : 'none';
-                   imgMoedas.style.display = d.mostrarMoedas ? 'block' : 'none';
-                } else {
-                   imgHC.style.display = 'block'; imgMoedas.style.display = 'block';
+                   document.getElementById('img-premio-hc').style.display = d.mostrarHC ? 'block' : 'none';
+                   document.getElementById('img-premio-moedas').style.display = d.mostrarMoedas ? 'block' : 'none';
                 }
 
                 if(membrosDataArray.length > 0) {
@@ -559,7 +582,6 @@
     // SISTEMA NATIVO DE ARRASTAR E REDIMENSIONAR INFALÍVEL
     // ==========================================
     function aplicarPosicoes() {
-        // Aplica posições do Config para a tela visualmente
         for(let id in layoutConfig) {
             if(id === 'sponsorInner') continue; 
             let el = document.getElementById(id);
@@ -584,7 +606,10 @@
     function carregarLayoutConfig() {
         db.collection("sistema").doc("config_layout").get().then((doc) => {
             if(doc.exists && doc.data().posicoes) {
-                for(let k in doc.data().posicoes) { layoutConfig[k] = doc.data().posicoes[k]; }
+                let loaded = doc.data().posicoes;
+                for(let k in loaded) { 
+                    layoutConfig[k] = { ...layoutConfig[k], ...loaded[k] }; 
+                }
             }
             aplicarPosicoes();
         });
@@ -592,7 +617,8 @@
 
     function savePositions() {
         if(nivelUsuarioGlobal !== 'ADMIN') return;
-        db.collection("sistema").doc("config_layout").set({ posicoes: layoutConfig }, {merge: true}).then(() => {
+        // Substitui o config inteiro no firebase
+        db.collection("sistema").doc("config_layout").set({ posicoes: layoutConfig }).then(() => {
             mostrarToastAdmin("Posições e Tamanhos salvos!");
             if(isEditMode) toggleEditMode();
         });
@@ -604,6 +630,7 @@
         let dica = document.getElementById('dica-resize');
         let elsDrag = document.querySelectorAll('.draggable-item');
         let elsSponImg = document.querySelectorAll('.sponsor-avatar img');
+        let elsPrize = document.querySelectorAll('.resizable-prize');
         let areaDet = document.getElementById('area-detalhes-membro');
 
         if(isEditMode) {
@@ -611,27 +638,35 @@
             btn.style.borderColor = '#ef4444'; btn.style.color = '#ef4444';
             dica.style.display = 'inline';
             
-            // Força a exibição da área de membro para edição
+            // Força a exibição das áreas e itens
             areaDet.style.display = 'flex'; areaDet.style.opacity = '1';
 
-            // Avatares provisórios garantem que a imagem não fique invisível na edição
             let fallbacks = [
                 {id: 'avatar-1', src: 'https://www.habbo.com.br/habbo-imaging/avatarimage?user=Admin&action=std&direction=2&head_direction=2&gesture=sml&size=b'},
                 {id: 'avatar-2', src: 'https://www.habbo.com.br/habbo-imaging/avatarimage?user=Admin&action=std&direction=2&head_direction=2&gesture=sml&size=b'},
                 {id: 'avatar-selecionado', src: 'https://www.habbo.com.br/habbo-imaging/avatarimage?user=Admin&action=std&direction=2&head_direction=2&gesture=sml&size=b'},
-                {id: 'avatar-empate', src: 'https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b'}
+                {id: 'avatar-empate-1', src: 'https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b'},
+                {id: 'avatar-empate-2', src: 'https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b'}
             ];
             fallbacks.forEach(f => {
                 let img = document.getElementById(f.id);
                 if(!img.src || img.src.endsWith('=')) img.src = f.src;
             });
 
-            // Adiciona as classes que forçam visualização
+            // Ativa edição visual
             elsDrag.forEach(e => { 
                 e.classList.add('edit-mode'); 
                 if(e.tagName === 'IMG' || e.tagName === 'DIV') e.style.display = 'block'; 
             }); 
-            elsSponImg.forEach(img => { img.classList.add('sponsor-edit', 'edit-mode'); });
+            
+            elsSponImg.forEach(img => { 
+                img.classList.add('sponsor-edit', 'edit-mode'); 
+            });
+            
+            elsPrize.forEach(img => { 
+                img.classList.add('edit-mode'); 
+                img.style.display = 'block'; // Mostra pra editar
+            });
             
         } else {
             btn.innerHTML = '<i class="fas fa-arrows-alt"></i> Editar Posições';
@@ -640,29 +675,43 @@
             
             elsDrag.forEach(e => { e.classList.remove('edit-mode'); });
             elsSponImg.forEach(img => { img.classList.remove('sponsor-edit', 'edit-mode'); });
+            elsPrize.forEach(img => { img.classList.remove('edit-mode'); });
             
-            // Retorna ao estado normal, ocultando se necessário
+            // Retorna ao estado normal
             if(!document.getElementById('select-membro').value) {
                 areaDet.style.display = 'none'; areaDet.style.opacity = '0';
             } else { renderMemberDetails(); }
             
             processarPodio(); 
             
-            // Reseta prêmios se estiverem desativados
             db.collection("sistema").doc("config_metas").get().then((d) => {
-                if(d.exists) {
-                    let hcelem = document.getElementById('img-premio-hc');
-                    let mcelem = document.getElementById('img-premio-moedas');
-                    if(hcelem) hcelem.style.display = d.data().mostrarHC ? 'block' : 'none';
-                    if(mcelem) mcelem.style.display = d.data().mostrarMoedas ? 'block' : 'none';
-                }
+                let hc = false, moedas = false;
+                if(d.exists) { hc = d.data().mostrarHC; moedas = d.data().mostrarMoedas; }
+                document.getElementById('img-premio-hc').style.display = hc ? 'block' : 'none';
+                document.getElementById('img-premio-moedas').style.display = moedas ? 'block' : 'none';
             });
         }
     }
 
-    // Função Única de Arrasto e Resize - Anexa Eventos Globalmente
+    // Configura Prêmios Redimensionáveis
+    function setupPrizesResizable() {
+        document.querySelectorAll('.resizable-prize').forEach(img => {
+            img.ondragstart = () => false;
+            img.addEventListener('wheel', (e) => {
+                if(!isEditMode) return;
+                e.preventDefault(); e.stopPropagation();
+                let w = img.offsetWidth;
+                w += e.deltaY < 0 ? 5 : -5;
+                if(w < 20) w = 20;
+                img.style.width = w + 'px';
+                layoutConfig[img.id] = layoutConfig[img.id] || {};
+                layoutConfig[img.id].width = w + 'px';
+            }, { passive: false });
+        });
+    }
+
+    // Motor de Arrasto Baseado na Posição Renderizada Real (offsetLeft/Top)
     function setupAllDraggables() {
-        // Varre itens arrastáveis
         document.querySelectorAll('.draggable-item').forEach(el => {
             if(el.dataset.dragReady) return;
             el.dataset.dragReady = "true";
@@ -674,10 +723,9 @@
 
                 let startX = e.clientX;
                 let startY = e.clientY;
-                // getComputedStyle pega exatamente o pixel que a imagem está na tela agora
-                let style = window.getComputedStyle(el);
-                let startLeft = parseFloat(style.left) || 0;
-                let startTop = parseFloat(style.top) || 0;
+                // Força ler o pixel da tela do momento do clique (Imune a bugs de display:none)
+                let startLeft = el.offsetLeft;
+                let startTop = el.offsetTop;
 
                 const onMouseMove = (moveEvent) => {
                     moveEvent.preventDefault();
@@ -690,7 +738,6 @@
                 const onMouseUp = () => {
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
-                    // Salva a nova posição
                     let idKey = el.id;
                     if(idKey) {
                         layoutConfig[idKey] = layoutConfig[idKey] || {};
@@ -703,7 +750,7 @@
                 document.addEventListener('mouseup', onMouseUp);
             });
 
-            // Lógica de aumentar e diminuir usando o scroll
+            // Resizer do Scroll
             el.addEventListener('wheel', (e) => {
                 if(!isEditMode) return;
                 e.preventDefault(); e.stopPropagation();
@@ -721,6 +768,7 @@
         });
     }
 
+    // Motor Isolado só para a foto interna dos patrocinadores
     function setupSponsorInnerDraggable() {
         document.querySelectorAll('.sponsor-avatar img').forEach(img => {
             if (img.dataset.dragReady) return;
@@ -733,9 +781,8 @@
 
                 let startX = e.clientX;
                 let startY = e.clientY;
-                let style = window.getComputedStyle(img);
-                let startLeft = parseFloat(style.left) || 0;
-                let startTop = parseFloat(style.top) || 0;
+                let startLeft = img.offsetLeft;
+                let startTop = img.offsetTop;
 
                 const onMouseMove = (moveEvent) => {
                     moveEvent.preventDefault();
@@ -817,7 +864,7 @@
             container.innerHTML += `<div class="sponsor-avatar" title="${limpo}"><img src="https://www.habbo.com.br/habbo-imaging/avatarimage?user=${limpo}&action=std&direction=2&head_direction=2&gesture=sml&size=b" draggable="false"></div>`;
         });
         aplicarSponsorInner();
-        setupSponsorInnerDraggable(); // Garante que as fotos novas fiquem arrastáveis
+        setupSponsorInnerDraggable();
         if(isEditMode) {
             document.querySelectorAll('.sponsor-avatar img').forEach(img => { 
                 img.classList.add('sponsor-edit', 'edit-mode');
@@ -837,11 +884,13 @@
         if(isEditMode) return; 
         let av1 = document.getElementById('avatar-1'); let m1 = document.getElementById('medal-1');
         let av2 = document.getElementById('avatar-2'); let m2 = document.getElementById('medal-2');
-        let ave = document.getElementById('avatar-empate'); let txte = document.getElementById('txt-empate');
+        let ave1 = document.getElementById('avatar-empate-1'); let txte1 = document.getElementById('txt-empate-1');
+        let ave2 = document.getElementById('avatar-empate-2'); let txte2 = document.getElementById('txt-empate-2');
         
         av1.style.display = 'none'; m1.style.display = 'none';
         av2.style.display = 'none'; m2.style.display = 'none';
-        ave.style.display = 'none'; txte.style.display = 'none';
+        ave1.style.display = 'none'; txte1.style.display = 'none';
+        ave2.style.display = 'none'; txte2.style.display = 'none';
 
         if(membrosDataArray.length === 0) return;
 
@@ -849,7 +898,11 @@
         let p1 = top[0].total_base * eventoMult; let p2 = (top.length > 1) ? (top[1].total_base * eventoMult) : 0;
 
         if(top.length >= 2 && p1 > 0 && p1 === p2) {
-            ave.style.display = 'block'; txte.style.display = 'block';
+            // Empate: Os dois são DIC-Sp
+            ave1.src = "https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b";
+            ave2.src = "https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b";
+            ave1.style.display = 'block'; txte1.style.display = 'block';
+            ave2.style.display = 'block'; txte2.style.display = 'block';
         } else if(top.length > 0 && p1 > 0) {
             av1.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[0].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`;
             av1.style.display = 'block'; m1.style.display = 'block';
