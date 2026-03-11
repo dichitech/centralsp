@@ -12,7 +12,6 @@ let isEditMode = false;
 window.mostrarToast = function(msg, type = 'success') { var container = document.getElementById('toastContainer'); var toast = document.createElement('div'); let icon = type === 'success' ? '<i class="fas fa-check-circle" style="color: #4caf50; font-size: 20px;"></i>' : '<i class="fas fa-exclamation-triangle" style="color: #ff2a2a; font-size: 20px;"></i>'; let bc = type === 'success' ? 'var(--sup-neon)' : '#ff2a2a'; let sc = type === 'success' ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 42, 42, 0.3)'; toast.className = 'toast-msg'; toast.style.border = `1px solid ${bc}`; toast.style.boxShadow = `0 0 20px ${sc}`; toast.innerHTML = `${icon}<span style="color:#fff;">${msg}</span>`; container.appendChild(toast); setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3500); }
 window.customAlert = function(msg, title = "Aviso") { document.getElementById('custom-alert-title').innerHTML = `<i class="fas fa-exclamation-circle"></i> ${title}`; document.getElementById('custom-alert-msg').innerHTML = msg; document.getElementById('custom-alert-modal').style.display = 'flex'; }
 
-// Editor HTML Funções
 let savedSelection = null;
 window.saveSelection = function() { if (window.getSelection) { let sel = window.getSelection(); if (sel.getRangeAt && sel.rangeCount) { savedSelection = sel.getRangeAt(0); } } }
 window.restoreSelection = function() { if (savedSelection) { if (window.getSelection) { let sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(savedSelection); } } }
@@ -21,7 +20,6 @@ window.abrirModalLink = function() { event.preventDefault(); window.saveSelectio
 window.fecharCustomPrompt = function() { document.getElementById('custom-prompt-modal').style.display = 'none'; }
 window.confirmarCustomPrompt = function() { let url = document.getElementById('custom-prompt-input').value.trim(); window.fecharCustomPrompt(); window.restoreSelection(); if(url) { document.execCommand("createLink", false, url); } }
 
-// Inicialização Principal
 window.liberarPainel = function() {
     document.getElementById('loginCard').style.display = 'none'; document.getElementById('loginLoader').style.display = 'none'; document.getElementById('loginScreen').style.opacity = '0';
     setTimeout(() => { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('appWrapper').style.display = 'flex'; }, 300);
@@ -85,14 +83,12 @@ function renderTabelaEstrelas() {
 
 function registrarLogEstrela(bene, acao, idProm, detalhes) { db.collection("logs_estrelas").add({ timestamp: new Date().getTime(), data_hora: new Date().toLocaleString('pt-BR'), autor: usuarioLogadoNick, beneficiado: bene, acao: acao, id_promocao: idProm || '-', detalhes: detalhes }); }
 
-// NOVO MOTOR EM LOTE
+// LOTE
 window.buscarPromocoesLote = async function() {
     let dateVal = document.getElementById('lote-data').value;
     if(!dateVal) return window.mostrarToast("Selecione uma data para a validação.", "error");
 
-    let [y, m, d] = dateVal.split('-');
-    let dataBr = `${d}/${m}/${y}`;
-    
+    let [y, m, d] = dateVal.split('-'); let dataBr = `${d}/${m}/${y}`;
     let excluidosStr = document.getElementById('lote-excluidos').value;
     let excluidosArr = excluidosStr.split(',').map(s => s.trim()).filter(s => s !== "");
 
@@ -102,9 +98,7 @@ window.buscarPromocoesLote = async function() {
     let promocoes = [];
     try { promocoes = JSON.parse(docSnap.data().dados); } catch(e) { return window.mostrarToast("Erro ao processar dados.", "error"); }
 
-    // Filtra promoções do dia e que não estejam nos excluídos
     let filtradas = promocoes.filter(p => p.data === dataBr && !excluidosArr.includes(p.id));
-
     if(filtradas.length === 0) return window.customAlert(`Nenhuma promoção válida encontrada para a data ${dataBr}.`, "Busca Vazia");
 
     let contagem = {}; let idsColetados = [];
@@ -114,18 +108,14 @@ window.buscarPromocoesLote = async function() {
     for(let nick in contagem) { html += `<li><strong style="color:var(--sup-neon);">${nick}</strong>: validou ${contagem[nick]} promoção(ões)</li>`; }
     html += `</ul><button class="btn-tech btn-save" style="width:100%;" onclick='confirmarLote(${JSON.stringify(contagem)}, ${JSON.stringify(idsColetados)})'><i class="fas fa-check-double"></i> Atribuir Ciclos Oficiais</button>`;
 
-    document.getElementById('resultado-lote').innerHTML = html;
-    document.getElementById('resultado-lote').style.display = 'block';
+    document.getElementById('resultado-lote').innerHTML = html; document.getElementById('resultado-lote').style.display = 'block';
 }
 
 window.confirmarLote = async function(contagem, idsColetados) {
-    let idLoteStr = idsColetados.join(', ');
-    if(idLoteStr.length > 50) idLoteStr = idLoteStr.substring(0, 47) + "...";
+    let idLoteStr = idsColetados.join(', '); if(idLoteStr.length > 50) idLoteStr = idLoteStr.substring(0, 47) + "...";
 
     for(let nick in contagem) {
         let qtd = contagem[nick];
-        
-        // Verifica se existe na planilha
         let officialNick = Object.keys(cargosMap).find(k => k.toLowerCase() === nick.toLowerCase());
         let dbNick = officialNick || nick;
 
@@ -135,21 +125,23 @@ window.confirmarLote = async function(contagem, idsColetados) {
         let p = 0; let e = 0; let pr = 0; let status = 'Ativo';
         if(docM.exists) {
             let dados = docM.data();
-            if(dados.status === 'Suspenso') continue; // Pula suspensos
+            if(dados.status === 'Suspenso') continue; 
             p = dados.promocoes_realizadas || 0; e = dados.estrelas || 0; pr = dados.premios_acumulados || 0; status = dados.status;
         }
 
+        let estrelasAntes = e;
         p += qtd;
         let estrelasGanhas = Math.floor(p / 3);
-        p = p % 3; // Resto pro ciclo
+        p = p % 3; 
         e += estrelasGanhas;
 
         let detailLog = `Validou ${qtd} promoção(ões). `;
         if(estrelasGanhas > 0) detailLog += `Conquistou ${estrelasGanhas} estrela(s)! `;
 
-        if (e >= 10) { 
-            e = 0; pr += 1; detailLog += "Atingiu 10 estrelas. Premiado e zerado."; 
-            window.customAlert(`🏅 O policial ${dbNick} atingiu as 10 estrelas através desta validação!\nAvise-o da premiação.`, "Ciclo Completo!");
+        let atingiuPremio = Math.floor(estrelasAntes / 10) < Math.floor(e / 10);
+        if (atingiuPremio) {
+             window.customAlert(`🏅 O policial ${dbNick} acaba de atingir ${e} estrelas no sistema!<br><br>Avise o Comando para realizar o pagamento das 10 estrelas.`, "Aguardando Pagamento!");
+             detailLog += " Atingiu cota para prêmio.";
         }
 
         await ref.set({ nome: dbNick, status: status, promocoes_realizadas: p, estrelas: e, premios_acumulados: pr }, {merge:true});
@@ -166,6 +158,7 @@ function escutarLogsEstrelas() {
         let tbody = document.querySelector('#tb-logs tbody'); tbody.innerHTML = '';
         snap.forEach(doc => {
             let d = doc.data(); let cor = d.acao.includes("Validação") || d.acao.includes("Promoção") ? "color:#4caf50;" : "color:#ff2a2a;";
+            if(d.acao.includes("Pagamento")) cor = "color:#fbbf24;";
             tbody.innerHTML += `<tr><td style="font-size:12px;">${d.data_hora}</td><td><strong>${d.autor}</strong></td><td>${d.beneficiado}</td><td style="${cor} font-weight:bold;">${d.acao}</td><td style="font-size:13px; color:var(--text-sub);">ID/Lote: ${d.id_promocao} <br> ${d.detalhes}</td></tr>`;
         });
     });
@@ -236,7 +229,7 @@ function renderTabelaPontosExtras() { let tbody = document.querySelector('#tb-po
 function aplicarPosicoes() { for(let id in layoutConfig) { if(id === 'sponsorInner') continue; let el = document.getElementById(id); if(el) { if(layoutConfig[id].left) el.style.left = layoutConfig[id].left; if(layoutConfig[id].top) el.style.top = layoutConfig[id].top; if(layoutConfig[id].width) el.style.width = layoutConfig[id].width; } } aplicarSponsorInner(); }
 function aplicarSponsorInner() { let conf = layoutConfig['sponsorInner'] || {width: '60px', left: '0px', top: '-10px'}; document.querySelectorAll('.sponsor-avatar img').forEach(img => { if(conf.left) img.style.left = conf.left; if(conf.top) img.style.top = conf.top; if(conf.width) img.style.width = conf.width; }); }
 function carregarLayoutConfig() { db.collection("sistema").doc("config_layout").get().then((doc) => { if(doc.exists && doc.data().posicoes) { let loaded = doc.data().posicoes; for(let k in loaded) { layoutConfig[k] = { ...layoutConfig[k], ...loaded[k] }; } } aplicarPosicoes(); }); }
-window.savePositions = function() { db.collection("sistema").doc("config_layout").set({ posicoes: layoutConfig }, {merge: true}).then(() => { window.mostrarToast("Posições salvas!", "success"); if(isEditMode) window.toggleEditMode(); }); }
+window.savePositions = function() { db.collection("sistema").doc("config_layout").set({ posicoes: layoutConfig }, {merge: true}).then(() => { window.mostrarToast("Posições salvas!", "success"); if(isEditMode) window.toggleEditMode(); }).catch((e) => window.mostrarToast("Erro ao salvar posições: " + e.message, "error")); }
 
 window.toggleEditMode = function() {
     isEditMode = !isEditMode; let btn = document.getElementById('btn-edit-pos'); let dica = document.getElementById('dica-resize'); let elsDrag = document.querySelectorAll('.draggable-item'); let elsSponImg = document.querySelectorAll('.sponsor-avatar img'); let elsPrize = document.querySelectorAll('.resizable-prize'); let areaDet = document.getElementById('area-detalhes-membro');
@@ -253,23 +246,25 @@ window.toggleEditMode = function() {
         processarPodio(); 
     }
 }
+
 function setupPrizesResizable() { document.querySelectorAll('.resizable-prize').forEach(img => { if(img.dataset.dragReady) return; img.dataset.dragReady = "true"; img.ondragstart = () => false; img.addEventListener('wheel', (e) => { if(!isEditMode) return; e.preventDefault(); e.stopPropagation(); let w = parseFloat(img.style.width) || img.offsetWidth; w += e.deltaY < 0 ? 5 : -5; if(w < 15) w = 15; img.style.width = w + 'px'; layoutConfig[img.id] = layoutConfig[img.id] || {}; layoutConfig[img.id].width = w + 'px'; }, { passive: false }); }); }
 function setupAllDraggables() { document.querySelectorAll('.draggable-item').forEach(el => { if(el.dataset.dragReady) return; el.dataset.dragReady = "true"; el.ondragstart = () => false; el.addEventListener('mousedown', (e) => { if(!isEditMode) return; e.preventDefault(); e.stopPropagation(); let startX = e.clientX; let startY = e.clientY; let startLeft = el.offsetLeft; let startTop = el.offsetTop; const onMouseMove = (mEv) => { mEv.preventDefault(); el.style.left = (startLeft + (mEv.clientX - startX)) + 'px'; el.style.top = (startTop + (mEv.clientY - startY)) + 'px'; }; const onMouseUp = () => { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); layoutConfig[el.id] = layoutConfig[el.id] || {}; layoutConfig[el.id].left = el.style.left; layoutConfig[el.id].top = el.style.top; }; document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp); }); el.addEventListener('wheel', (e) => { if(!isEditMode) return; e.preventDefault(); e.stopPropagation(); let w = parseFloat(window.getComputedStyle(el).width) || el.offsetWidth; w += e.deltaY < 0 ? 5 : -5; if(w < 15) w = 15; el.style.width = w + 'px'; layoutConfig[el.id] = layoutConfig[el.id] || {}; layoutConfig[el.id].width = el.style.width; }, { passive: false }); }); }
 
 function escutarMetasDoFirebase() { db.collection("sistema").doc("metas").onSnapshot((doc) => { if (doc.exists && doc.data().dados) { let rows = []; try { rows = JSON.parse(doc.data().dados); } catch(e) { return; } if(rows.length > 17 && rows[17][1]) document.getElementById('meta-week-title').innerText = rows[17][1]; membrosDataArray = []; let sponsorsList = []; for(let i = 3; i < rows.length; i++) { if(rows[i][15]) sponsorsList.push(rows[i][15]); if(rows[i][16]) sponsorsList.push(rows[i][16]); if(rows[i][17]) sponsorsList.push(rows[i][17]); } renderSponsors(sponsorsList); for(let i = 20; i < rows.length; i++) { if(!rows[i][3]) continue; membrosDataArray.push({ cargo: rows[i][2] || '', nick: rows[i][3].trim(), convite: parseInt(rows[i][5]) || 0, ppp: parseInt(rows[i][6]) || 0, rels: parseInt(rows[i][7]) || 0, relcg: parseInt(rows[i][9]) || 0, avisos: parseInt(rows[i][10]) || 0, total_base: parseInt(rows[i][11]) || 0, status_base: (rows[i][12] || '').toString().trim() }); } popularSelectMembros(); processarPodio(); } }); }
+
 function renderSponsors(lista) { let unique = [...new Set(lista.filter(n => n.trim() !== ''))]; let container = document.getElementById('sponsors-container'); container.innerHTML = ''; unique.forEach(nick => { container.innerHTML += `<div class="sponsor-avatar" title="${nick.trim()}"><img src="https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nick.trim()}&action=std&direction=2&head_direction=2&gesture=sml&size=b" draggable="false"></div>`; }); aplicarSponsorInner(); document.querySelectorAll('.sponsor-avatar img').forEach(img => { if (img.dataset.dragReady) return; img.dataset.dragReady = "true"; img.ondragstart = () => false; img.addEventListener('mousedown', (e) => { if(!isEditMode) return; e.preventDefault(); e.stopPropagation(); let sX = e.clientX; let sY = e.clientY; let sL = img.offsetLeft; let sT = img.offsetTop; const onMv = (mEv) => { mEv.preventDefault(); layoutConfig['sponsorInner'] = layoutConfig['sponsorInner'] || {}; layoutConfig['sponsorInner'].left = (sL + (mEv.clientX - sX)) + 'px'; layoutConfig['sponsorInner'].top = (sT + (mEv.clientY - sY)) + 'px'; aplicarSponsorInner(); }; const onUp = () => { document.removeEventListener('mousemove', onMv); document.removeEventListener('mouseup', onUp); }; document.addEventListener('mousemove', onMv); document.addEventListener('mouseup', onUp); }); img.addEventListener('wheel', (e) => { if(!isEditMode) return; e.preventDefault(); e.stopPropagation(); let w = parseFloat(window.getComputedStyle(img).width) || img.offsetWidth; w += e.deltaY < 0 ? 3 : -3; if(w < 10) w = 10; layoutConfig['sponsorInner'] = layoutConfig['sponsorInner'] || {}; layoutConfig['sponsorInner'].width = w + 'px'; aplicarSponsorInner(); }, { passive: false }); if(isEditMode) img.classList.add('sponsor-edit', 'edit-mode'); }); }
 function popularSelectMembros() { let sel = document.getElementById('select-membro'); let valAtual = sel.value; sel.innerHTML = '<option value="" disabled selected>Selecione um membro...</option>'; let sorted = [...membrosDataArray].sort((a,b) => a.nick.localeCompare(b.nick)); sorted.forEach(m => { sel.innerHTML += `<option value="${m.nick}">${m.cargo} ${m.nick}</option>`; }); if(valAtual) sel.value = valAtual; }
 function getPontuacaoFinal(m) { return (m.total_base * eventoMult) + (pontosExtrasMap[m.nick] || 0); }
 function processarPodio() { if(isEditMode) return; let a1 = document.getElementById('avatar-1'); let m1 = document.getElementById('medal-1'); let n1 = document.getElementById('nick-1'); let a2 = document.getElementById('avatar-2'); let m2 = document.getElementById('medal-2'); let n2 = document.getElementById('nick-2'); let ae1 = document.getElementById('avatar-empate-1'); let te1 = document.getElementById('txt-empate-1'); let ae2 = document.getElementById('avatar-empate-2'); let te2 = document.getElementById('txt-empate-2'); [a1,m1,n1,a2,m2,n2,ae1,te1,ae2,te2].forEach(el => el.style.display = 'none'); if(membrosDataArray.length === 0) return; let top = [...membrosDataArray].sort((a,b) => getPontuacaoFinal(b) - getPontuacaoFinal(a)); let p1 = getPontuacaoFinal(top[0]); let p2 = (top.length > 1) ? getPontuacaoFinal(top[1]) : 0; if(top.length >= 2 && p1 > 0 && p1 === p2) { ae1.src = ae2.src = "https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b"; [ae1,te1,ae2,te2].forEach(el => el.style.display = 'block'); } else if(top.length > 0 && p1 > 0) { a1.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[0].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`; n1.innerText = top[0].nick; [a1,m1,n1].forEach(el => el.style.display = 'block'); if(top.length > 1 && p2 > 0) { a2.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[1].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`; n2.innerText = top[1].nick; [a2,m2,n2].forEach(el => el.style.display = 'block'); } } }
 window.renderMemberDetails = function() { let nick = document.getElementById('select-membro').value; let m = membrosDataArray.find(x => x.nick === nick); if(!m) return; document.getElementById('area-detalhes-membro').style.display = 'flex'; setTimeout(() => { document.getElementById('area-detalhes-membro').style.opacity = '1'; }, 50); let tCalc = getPontuacaoFinal(m); let ptsExtra = pontosExtrasMap[m.nick] || 0; document.getElementById('avatar-selecionado').src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${m.nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`; document.getElementById('det-total').innerHTML = `<span>${tCalc}</span>` + (ptsExtra > 0 ? `<span style="font-size:16px; color:#4caf50; font-weight:normal;">(+${ptsExtra} bônus)</span>` : ''); document.getElementById('det-convite').innerText = m.convite * eventoMult; document.getElementById('det-ppp').innerText = m.ppp * eventoMult; document.getElementById('det-rels').innerText = m.rels * eventoMult; document.getElementById('det-relcg').innerText = m.relcg * eventoMult; document.getElementById('det-avisos').innerText = m.avisos * eventoMult; let stEl = document.getElementById('det-status'); let sFinal = m.status_base; if(tCalc >= 5) sFinal = "CUMPRIDA"; stEl.innerText = sFinal; stEl.style.color = sFinal.toLowerCase().includes('não') ? '#ef4444' : '#4caf50'; }
 
-function carregarPrivacidade() { db.collection("sistema").doc("config_geral").get().then((doc) => { if (doc.exists && doc.data().textoPrivacidade) document.getElementById('editor-privacidade').innerHTML = doc.data().textoPrivacidade; else document.getElementById('editor-privacidade').innerHTML = "<p>Política de Privacidade.</p>"; }); }
+function carregarPrivacidade() { db.collection("sistema").doc("config_geral").get().then((doc) => { let htmlPadrao = `<p>Escreva aqui a Política de Privacidade.</p>`; if (doc.exists && doc.data().textoPrivacidade) document.getElementById('editor-privacidade').innerHTML = doc.data().textoPrivacidade; else document.getElementById('editor-privacidade').innerHTML = htmlPadrao; }); }
 window.salvarPrivacidade = function() { db.collection("sistema").doc("config_geral").set({ textoPrivacidade: document.getElementById('editor-privacidade').innerHTML }, { merge: true }).then(() => window.mostrarToast("Política de Privacidade salva!", "success")); }
-window.processarCalculo = function() { const d1 = document.getElementById('data-login').value; const d2 = document.getElementById('data-aval').value; const dAval = parseInt(document.getElementById('dias-aval').value); const d3 = document.getElementById('data-consulta').value; if (!d1 || !d2 || isNaN(dAval) || !d3) return window.customAlert("Preencha todos os campos.", "Aviso"); const u = new Date(d1+'T00:00:00'); const i = new Date(d2+'T00:00:00'); const c = new Date(d3+'T00:00:00'); const f = new Date(i); f.setDate(i.getDate() + dAval - 1); const UM_DIA = 1000*60*60*24; const dif = (ant, nov) => Math.floor((nov - ant)/UM_DIA); let m = ""; if(c <= i) { m = `O aval ainda não começou. Ausência normal de <strong>${dif(u,c)} dia(s)</strong>.`; } else { let a1 = dif(u,i); if(c > f) { let a2 = dif(f,c); m = `Ausência pré-aval: <strong>${a1} dia(s)</strong><br>Ausência pós-aval: <strong>${a2} dia(s)</strong><br><span style="display:block; margin-top:10px;">Total: <strong>${a1+a2} dia(s)</strong></span>`; } else { m = `Militar em período de aval.<br>Ausência antes do aval: <strong>${a1} dia(s)</strong>.`; } } document.getElementById('texto-resultado').innerHTML = m; document.getElementById('resultado-aval').style.display = 'block'; }
+window.processarCalculo = function() { const d1 = document.getElementById('data-login').value; const d2 = document.getElementById('data-aval').value; const dAval = parseInt(document.getElementById('dias-aval').value); const d3 = document.getElementById('data-consulta').value; if (!d1 || !d2 || isNaN(dAval) || !d3) return window.customAlert("Preencha todos os campos corretamente.", "Atenção"); const u = new Date(d1+'T00:00:00'); const i = new Date(d2+'T00:00:00'); const c = new Date(d3+'T00:00:00'); const f = new Date(i); f.setDate(i.getDate() + dAval - 1); const UM_DIA = 1000*60*60*24; const dif = (ant, nov) => Math.floor((nov - ant)/UM_DIA); let m = ""; if(c <= i) { m = `O aval ainda não começou. Ausência normal de <strong>${dif(u,c)} dia(s)</strong>.`; } else { let a1 = dif(u,i); if(c > f) { let a2 = dif(f,c); m = `Ausência pré-aval: <strong>${a1} dia(s)</strong><br>Ausência pós-aval: <strong>${a2} dia(s)</strong><br><span style="display:block; margin-top:10px;">Total: <strong>${a1+a2} dia(s)</strong></span>`; } else { m = `Militar em período de aval.<br>Ausência antes do aval: <strong>${a1} dia(s)</strong>.`; } } document.getElementById('texto-resultado').innerHTML = m; document.getElementById('resultado-aval').style.display = 'block'; }
 
 function renderTabelaAcessos() { var tbody = document.querySelector('#tbAcessos tbody'); tbody.innerHTML = ''; acessosData.forEach(item => tbody.appendChild(criarRowAcesso(item))); }
-function criarRowAcesso(item) { var tr = document.createElement('tr'); let sL = item.nivel === 'LIDER' ? 'selected' : ''; let sV = item.nivel === 'VICE-LIDER' ? 'selected' : ''; let sS = item.nivel === 'SUB-LIDER' ? 'selected' : ''; let sSup = item.nivel === 'SUPERVISOR' ? 'selected' : ''; let sC = item.nivel === 'COMANDO' ? 'selected' : ''; let hideAcoes = (nivelUsuarioGlobal === 'VICE-LIDER' && item.nivel === 'LIDER') ? 'display:none;' : ''; tr.innerHTML = `<td><input type="text" class="admin-input inp-email" value="${item.email || ''}" readonly></td><td><input type="text" class="admin-input inp-nick" value="${item.nick || ''}" readonly></td><td><select class="admin-input inp-nivel" disabled><option value="LIDER" ${sL}>Líder</option><option value="VICE-LIDER" ${sV}>Vice-Líder</option><option value="SUB-LIDER" ${sS}>Sub-Líder</option><option value="SUPERVISOR" ${sSup}>Supervisor</option><option value="COMANDO" ${sC}>Comando</option></select></td><td class="action-cell" style="${hideAcoes}"><button class="btn-admin-icon btn-admin-edit" onclick="window.toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button><button class="btn-admin-icon btn-admin-del" onclick="this.closest('tr').remove()" title="Excluir"><i class="fas fa-trash"></i></button></td>`; return tr; }
+function criarRowAcesso(item) { var tr = document.createElement('tr'); let sLider = item.nivel === 'LIDER' ? 'selected' : ''; let sVice = item.nivel === 'VICE-LIDER' ? 'selected' : ''; let sSub = item.nivel === 'SUB-LIDER' ? 'selected' : ''; let sSup = item.nivel === 'SUPERVISOR' ? 'selected' : ''; let hideAcoes = (nivelUsuarioGlobal === 'VICE-LIDER' && item.nivel === 'LIDER') ? 'display:none;' : ''; tr.innerHTML = `<td><input type="text" class="admin-input inp-email" value="${item.email || ''}" readonly></td><td><input type="text" class="admin-input inp-nick" value="${item.nick || ''}" readonly></td><td><select class="admin-input inp-nivel" disabled><option value="LIDER" ${sLider}>Líder</option><option value="VICE-LIDER" ${sVice}>Vice-Líder</option><option value="SUB-LIDER" ${sSub}>Sub-Líder</option><option value="SUPERVISOR" ${sSup}>Supervisor</option></select></td><td class="action-cell" style="${hideAcoes}"><button class="btn-admin-icon btn-admin-edit" onclick="window.toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button><button class="btn-admin-icon btn-admin-del" onclick="this.closest('tr').remove()" title="Excluir"><i class="fas fa-trash"></i></button></td>`; return tr; }
 window.addLinhaAcesso = function() { var tbody = document.querySelector('#tbAcessos tbody'); var tr = criarRowAcesso({ email: '', nick: '', nivel: 'SUPERVISOR' }); tbody.appendChild(tr); window.toggleEditRow(tr.querySelector('.btn-admin-edit')); }
 window.toggleEditRow = function(btn) { var tr = btn.closest('tr'); tr.querySelectorAll('input, select').forEach(inp => inp.removeAttribute('disabled')); tr.querySelectorAll('input').forEach(inp => inp.removeAttribute('readonly')); btn.innerHTML = '<i class="fas fa-check"></i>'; btn.className = 'btn-admin-icon btn-admin-check'; btn.onclick = function() { window.confirmEditRow(btn); }; }
 window.confirmEditRow = function(btn) { var tr = btn.closest('tr'); tr.querySelectorAll('input, select').forEach(inp => inp.setAttribute('disabled', true)); tr.querySelectorAll('input').forEach(inp => inp.setAttribute('readonly', true)); btn.innerHTML = '<i class="fas fa-pencil-alt"></i>'; btn.className = 'btn-admin-icon btn-admin-edit'; btn.onclick = function() { window.toggleEditRow(btn); }; }
-window.salvarAcessos = function() { var rows = document.querySelectorAll('#tbAcessos tbody tr'); const batch = db.batch(); acessosData.forEach(ac => { batch.delete(db.collection("acessos").doc(ac.email)); }); rows.forEach(r => { var email = r.querySelector('.inp-email').value.trim().toLowerCase(); if(email) { batch.set(db.collection("acessos").doc(email), { email: email, nick: r.querySelector('.inp-nick').value.trim(), nivel: r.querySelector('.inp-nivel').value.toUpperCase() }); } }); batch.commit().then(() => { window.mostrarToast("Acessos salvos!", "success"); }).catch((e) => { window.mostrarToast("Erro: " + e.message, "error"); }); }
+window.salvarAcessos = function() { var rows = document.querySelectorAll('#tbAcessos tbody tr'); const batch = db.batch(); acessosData.forEach(ac => { batch.delete(db.collection("acessos").doc(ac.email)); }); rows.forEach(r => { var email = r.querySelector('.inp-email').value.trim().toLowerCase(); if(email) { batch.set(db.collection("acessos").doc(email), { email: email, nick: r.querySelector('.inp-nick').value.trim(), nivel: r.querySelector('.inp-nivel').value.toUpperCase() }); } }); batch.commit().then(() => { window.mostrarToast("Acessos salvos com sucesso!", "success"); }).catch((e) => { window.mostrarToast("Erro: " + e.message, "error"); }); }
