@@ -7,25 +7,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    :root {
-      --bg-deep: #070602; --bg-panel: #121008; --sup-neon: #fbbf24; --sup-glow: rgba(251, 191, 36, 0.4);
-      --admin-neon: #f59e0b; --admin-glow: rgba(245, 158, 11, 0.4); --admin-panel: rgba(20, 15, 0, 0.4);
-      --dynamic-neon: var(--sup-neon); --dynamic-glow: var(--sup-glow);
-      --text-main: #f4f4f4; --text-sub: #c9b98b; --font-ui: 'Rajdhani', sans-serif;
-      --border-tech: 1px solid rgba(251, 191, 36, 0.3);
-    }
+    :root { --bg-deep: #070602; --bg-panel: #121008; --sup-neon: #fbbf24; --sup-glow: rgba(251, 191, 36, 0.4); --admin-neon: #f59e0b; --admin-glow: rgba(245, 158, 11, 0.4); --admin-panel: rgba(20, 15, 0, 0.4); --dynamic-neon: var(--sup-neon); --dynamic-glow: var(--sup-glow); --text-main: #f4f4f4; --text-sub: #c9b98b; --font-ui: 'Rajdhani', sans-serif; --border-tech: 1px solid rgba(251, 191, 36, 0.3); }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: var(--font-ui); background-color: var(--bg-deep); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
     body::before { content: ''; position: fixed; top: 50%; left: 50%; width: 150vw; height: 150vh; transform: translate(-50%, -50%); background: radial-gradient(circle at center, rgba(251, 191, 36, 0.05) 0%, transparent 60%); pointer-events: none; z-index: -1; }
+    
+    #loginScreen, .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 99999; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.3s; }
+    .modal { display: none; }
+    .login-card, .modal-content { background: var(--bg-panel); border: 1px solid var(--sup-neon); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 0 40px var(--sup-glow); max-width: 400px; width: 90%; position: relative; max-height: 90vh; overflow-y: auto;}
+    .modal-content { max-width: 700px; text-align: left; }
+    
+    .close-btn { position: absolute; right: 20px; top: 20px; width: 35px; height: 35px; background: rgba(255,42,42,0.1); border-radius: 50%; color: #ef4444; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; z-index: 10; }
+    .close-btn:hover { background: #ef4444; color: #fff; transform: rotate(90deg); }
 
-    /* Login */
-    #loginScreen { position: fixed; inset: 0; background: var(--bg-deep); z-index: 99999; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.3s; }
-    .login-card { background: var(--bg-panel); border: 1px solid var(--sup-neon); padding: 50px 40px; border-radius: 12px; text-align: center; box-shadow: 0 0 40px var(--sup-glow); max-width: 400px; width: 90%; }
-    .login-card img { width: 90px; filter: drop-shadow(0 0 10px var(--sup-neon)); margin-bottom: 25px; }
-    .login-card h2 { color: #fff; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-size: 24px; }
-    .login-card p { color: var(--text-sub); margin-bottom: 35px; font-size: 15px; font-weight: 500; }
-
-    /* Header e Controles */
     .top-controls { position: absolute; right: 30px; top: 30px; display: flex; gap: 15px; z-index: 100; }
     .btn-top { background: transparent; border: none; font-size: 24px; cursor: pointer; transition: all 0.3s; filter: drop-shadow(0 0 5px var(--sup-neon)); color: var(--text-sub); }
     .btn-top:hover { transform: scale(1.1); color: #fff; filter: drop-shadow(0 0 10px #fff); }
@@ -41,7 +35,6 @@
     .container { flex: 1; max-width: 1400px; margin: 20px auto 50px auto; padding: 0 20px; width: 100%; }
     #mainLayout { display: flex; gap: 30px; align-items: flex-start; } 
 
-    /* Menu Lateral */
     .admin-sidebar { background: var(--admin-panel); backdrop-filter: blur(15px); border: 1px solid rgba(251, 191, 36, 0.15); border-radius: 16px; padding: 25px 20px; width: 260px; flex-shrink: 0; box-shadow: 0 15px 35px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 10px; position: sticky; top: 20px; z-index: 20; }
     .admin-sidebar-header { color: var(--text-sub); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; padding-left: 10px; }
     .btn-sidebar { background: transparent; border: none; color: var(--text-main); padding: 14px 15px; border-radius: 8px; font-family: var(--font-ui); font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.3s; text-align: left; }
@@ -55,40 +48,27 @@
     .admin-section h3 { color: var(--dynamic-neon); font-size: 20px; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 3px; display: flex; align-items: center; gap: 12px; font-weight: 700; }
     .admin-section p.subtext { color: var(--text-sub); margin-top: -15px; margin-bottom: 25px; font-size: 15px; }
 
-    /* Inputs e Genéricos */
     .input-block { position: relative; width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(251, 191, 36, 0.1); border-radius: 6px; display: flex; align-items: center; padding: 0 15px; transition: all 0.3s; margin-bottom: 15px; }
     .input-block:focus-within { border-color: var(--dynamic-neon); box-shadow: 0 0 12px var(--dynamic-glow); }
     .input-block i { color: var(--dynamic-neon); font-size: 16px; }
     .input-block input, .input-block select { width: 100%; background: transparent; border: none; color: var(--text-main); font-size: 16px; font-family: var(--font-ui); font-weight: 500; padding: 15px 10px; outline: none; letter-spacing: 1px; color-scheme: dark;}
     .input-block select option { background: var(--bg-panel); color: #fff; }
     label.tech-label { display: block; color: var(--text-sub); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-    .row { display: flex; gap: 15px; } .row .form-group { flex: 1; }
 
-    /* Tabelas e Botões */
     .admin-table-wrapper { width: 100%; overflow-x: auto; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px; }
     .admin-table { width: 100%; border-collapse: collapse; text-align: left; }
     .admin-table th { color: var(--text-sub); background: rgba(0,0,0,0.4); padding: 18px 15px; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid rgba(251, 191, 36, 0.2); white-space: nowrap; }
     .admin-table td { padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; transition: background 0.3s; }
     .admin-input { width: 100%; background: transparent; border: 1px solid transparent; color: #fff; font-family: var(--font-ui); font-size: 15px; padding: 8px 12px; border-radius: 6px; outline: none; transition: all 0.3s; font-weight: 500; }
     .admin-input:not([readonly]):not([disabled]) { background: rgba(0,0,0,0.6); border: 1px solid var(--dynamic-neon); }
-    .action-cell { display: flex; gap: 8px; justify-content: flex-start; align-items: center; }
     .btn-admin-icon { width: 36px; height: 36px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid transparent; background: rgba(255,255,255,0.05); color: var(--text-sub); transition: all 0.3s; }
     .btn-admin-icon:hover { background: rgba(251, 191, 36, 0.15); color: var(--dynamic-neon); border-color: rgba(251, 191, 36, 0.3); }
     .btn-admin-del:hover { background: rgba(255,42,42,0.15) !important; color: #ef4444 !important; border-color: rgba(239,68,68,0.3) !important; }
 
     .btn-tech { background: rgba(251, 191, 36, 0.05); border: 1px solid var(--dynamic-neon); border-color: rgba(251, 191, 36, 0.5); color: var(--text-main); padding: 12px 24px; border-radius: 6px; font-family: var(--font-ui); font-size: 15px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
     .btn-tech:hover { background: var(--dynamic-neon); border-color: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px var(--dynamic-glow); }
-    .admin-controls-bottom { display: flex; gap: 15px; margin-top: 25px; align-items: center; justify-content: flex-end; }
-    .btn-add { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--dynamic-neon); }
-    .btn-add:hover { background: rgba(251, 191, 36, 0.2); border-color: var(--dynamic-neon); }
     .btn-save { background: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
     .btn-save:hover { background: #f59e0b; transform: translateY(-2px); }
-
-    /* Modais Customizados */
-    .modal { display: none; position: fixed; z-index: 999999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px; }
-    .modal-content { background-color: var(--bg-panel); border: 1px solid var(--sup-neon); border-radius: 12px; width: 100%; max-width: 700px; position: relative; box-shadow: 0 0 40px var(--sup-glow); padding: 35px; overflow-y: auto; max-height: 90vh; }
-    .close-btn { position: absolute; right: 20px; top: 20px; width: 35px; height: 35px; background: rgba(255,42,42,0.1); border-radius: 50%; color: #ef4444; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; z-index: 10; }
-    .close-btn:hover { background: #ef4444; color: #fff; transform: rotate(90deg); }
 
     .switch { position: relative; display: inline-block; width: 44px; height: 24px; margin-right: 10px; }
     .switch input { opacity: 0; width: 0; height: 0; }
@@ -97,7 +77,6 @@
     input:checked + .slider { background-color: var(--sup-neon); }
     input:checked + .slider:before { transform: translateX(20px); background-color: #000; }
 
-    /* Rich Text Editor */
     .editor-toolbar { display: flex; gap: 5px; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 6px 6px 0 0; border: 1px solid rgba(251,191,36,0.3); border-bottom: none; flex-wrap: wrap;}
     .editor-toolbar button { background: transparent; border: none; color: #fff; cursor: pointer; padding: 5px 10px; border-radius: 4px; font-size: 14px; transition: 0.2s;}
     .editor-toolbar button:hover { background: rgba(251,191,36,0.2); color: var(--sup-neon); }
@@ -106,10 +85,8 @@
     .rich-editor a { color: var(--sup-neon); text-decoration: underline; }
 
     .admin-evento-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 20px; margin-bottom: 20px; position: relative; }
-    
     #evento-banner { display:none; background: linear-gradient(90deg, rgba(251,191,36,0.15), transparent); border-left: 4px solid var(--sup-neon); padding: 12px 20px; margin-bottom: 25px; border-radius: 4px; color: #fff; font-size: 16px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; justify-content: space-between; }
     
-    /* Layout Pódio / Eventos */
     .metas-top-layout { display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; align-items: stretch; }
     .podium-box { flex: 1; min-width: 350px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-tech); border-radius: 12px; position: relative; height: 380px; overflow: hidden; box-shadow: inset 0 0 40px rgba(0,0,0,0.8); }
     .podium-glow { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 250px; height: 150px; background: var(--sup-neon); filter: blur(70px); opacity: 0.35; z-index: 1; border-radius: 50%; pointer-events: none; }
@@ -117,13 +94,11 @@
 
     .events-box { flex: 1; min-width: 350px; background: linear-gradient(135deg, rgba(20,15,0,0.8) 0%, rgba(0,0,0,0.9) 100%); border: 1px solid var(--border-tech); border-radius: 12px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative; }
     .events-title { color: var(--sup-neon); font-size: 18px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid rgba(251,191,36,0.2); padding-bottom: 5px; font-weight: 700; display: flex; justify-content: space-between; }
-    
     .sponsor-list { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
     .sponsor-avatar { width: 50px; height: 50px; background: rgba(0,0,0,0.6); border: 1px solid rgba(251,191,36,0.3); border-radius: 8px; overflow: hidden; position: relative; }
     .sponsor-avatar img { position: absolute; pointer-events: none; } 
     .sponsor-text { font-size: 13px; color: var(--text-sub); line-height: 1.5; font-style: italic; background: rgba(251,191,36,0.05); padding: 10px; border-radius: 6px; border-left: 3px solid var(--sup-neon); margin-top: auto;}
 
-    /* Editáveis com Força Máxima */
     .draggable-item { position: absolute; z-index: 5; image-rendering: pixelated; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); }
     .draggable-item.edit-mode { cursor: move !important; outline: 2px dashed #ff2a2a !important; filter: drop-shadow(0 0 15px rgba(255,42,42,1)) !important; z-index: 9999 !important; background: rgba(255,42,42,0.1) !important; pointer-events: auto !important; display: block !important; }
     .sponsor-edit.edit-mode { cursor: move !important; outline: 2px dashed #ff2a2a !important; filter: drop-shadow(0 0 15px rgba(255,42,42,1)) !important; z-index: 9999 !important; pointer-events: auto !important; }
@@ -138,7 +113,6 @@
     .member-details-layout { display: flex; gap: 20px; flex-wrap: wrap; position: relative; }
     .member-stage-box { width: 300px; height: 350px; background: rgba(0,0,0,0.5); border: 2px solid var(--sup-neon); border-radius: 12px; position: relative; box-shadow: 0 0 20px var(--sup-glow), inset 0 0 30px rgba(0,0,0,0.8); overflow: hidden; }
     .stage-glow { position: absolute; inset: 0; box-shadow: inset 0 0 50px rgba(251,191,36,0.2); pointer-events: none; z-index: 10; border-radius: 10px; }
-    
     .stats-grid-box { flex: 1; min-width: 300px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-content: start; }
     .stat-card { background: rgba(20,15,0,0.6); border: 1px solid rgba(251,191,36,0.15); border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s; }
     .stat-card:hover { border-color: var(--sup-neon); background: rgba(251,191,36,0.05); transform: translateY(-2px); }
@@ -150,10 +124,8 @@
     .spinner-ring { width: 50px; height: 50px; border: 3px solid rgba(251, 191, 36, 0.1); border-top-color: var(--dynamic-neon); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* Footer Centralizado */
     footer { width: 100%; display: block; box-sizing: border-box; text-align: center; padding: 30px 20px; font-size: 14px; color: #888; font-weight: 500; margin-top: auto; letter-spacing: 1px; border-top: 1px solid rgba(255,255,255,0.02); }
     
-    /* Toasts */
     .toast-container { position: fixed; top: 30px; right: 30px; z-index: 10000; display: flex; flex-direction: column; gap: 15px; pointer-events: none; }
     .toast-msg { background: rgba(10, 8, 2, 0.95); backdrop-filter: blur(10px); border-radius: 8px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; color: #fff; font-size: 16px; font-weight: 600; animation: slide-in-right 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards, smoke-fade-out 2s ease-in forwards 3s; }
     @keyframes slide-in-right { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -169,8 +141,9 @@
     <div class="login-card" id="loginCard">
       <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" alt="Logo">
       <h2>Central de Sistemas</h2>
-      <p>Acesso restrito à Liderança e Equipe</p>
-      <button onclick="loginGoogle()" class="btn-tech" style="width:100%; font-size:16px;"><i class="fab fa-google"></i> Entrar com o Google</button>
+      <p>Acesso restrito à Liderança e Supervisores</p>
+      <button onclick="window.loginGoogle()" class="btn-tech" style="width:100%; font-size:16px;"><i class="fab fa-google"></i> Entrar com o Google</button>
+      <p id="login-error" style="color: #ff2a2a; font-size: 14px; margin-top: 15px; display: none; font-weight: 600;"><i class="fas fa-exclamation-triangle"></i> Erro ao logar.</p>
     </div>
   </div>
 
@@ -187,68 +160,49 @@
   <div id="custom-prompt-modal" class="modal" style="z-index: 9999999;">
       <div class="modal-content" style="max-width: 400px; text-align: center;">
           <h3 style="color: var(--sup-neon); margin-bottom: 15px;"><i class="fas fa-link"></i> Inserir Link</h3>
-          <div class="input-block">
-              <input type="text" id="custom-prompt-input" placeholder="Ex: https://google.com">
-          </div>
+          <div class="input-block"><input type="text" id="custom-prompt-input" placeholder="Ex: https://google.com"></div>
           <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
-              <button class="btn-tech" onclick="fecharCustomPrompt()">Cancelar</button>
-              <button class="btn-tech btn-save" onclick="confirmarCustomPrompt()">Inserir</button>
+              <button class="btn-tech" onclick="window.fecharCustomPrompt()">Cancelar</button>
+              <button class="btn-tech btn-save" onclick="window.confirmarCustomPrompt()">Inserir</button>
           </div>
       </div>
   </div>
 
   <div id="modal-dashboard" class="modal">
      <div class="modal-content">
-        <div class="close-btn" onclick="fecharDashboard()"><i class="fas fa-times"></i></div>
+        <div class="close-btn" onclick="window.fecharDashboard()"><i class="fas fa-times"></i></div>
         <h3 style="color: var(--sup-neon); margin-bottom: 25px;"><i class="fas fa-tachometer-alt"></i> Dashboard de Metas e Eventos</h3>
         
         <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px dashed rgba(251,191,36,0.3); margin-bottom: 25px;">
            <h4 style="color:#fff; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px; font-size:14px;"><i class="fas fa-bolt"></i> Multiplicador Global de Pontos</h4>
            <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
-               <div style="display: flex; align-items: center;">
-                   <label class="switch" title="Ativar Bônus"><input type="checkbox" id="dash-toggle-evento"><span class="slider"></span></label>
-                   <span style="color: var(--text-sub); font-size: 14px; font-weight:bold;">ATIVAR BÔNUS</span>
-               </div>
+               <div style="display: flex; align-items: center;"><label class="switch" title="Ativar Bônus"><input type="checkbox" id="dash-toggle-evento"><span class="slider"></span></label><span style="color: var(--text-sub); font-size: 14px; font-weight:bold;">ATIVAR BÔNUS</span></div>
                <div class="input-block" style="margin:0; width: 150px;">
-                   <select id="dash-mult-evento">
-                       <option value="1">1x (Normal)</option>
-                       <option value="2">2x Pontos</option>
-                       <option value="3">3x Pontos</option>
-                       <option value="4">4x Pontos</option>
-                   </select>
+                   <select id="dash-mult-evento"><option value="1">1x (Normal)</option><option value="2">2x Pontos</option><option value="3">3x Pontos</option><option value="4">4x Pontos</option></select>
                </div>
            </div>
         </div>
 
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(251,191,36,0.2); padding-bottom:10px; margin-bottom:15px;">
             <h4 style="color:#fff; font-size:16px; text-transform:uppercase; margin:0;"><i class="far fa-calendar-alt"></i> Eventos do Mês</h4>
-            <button class="btn-tech" onclick="adicionarNovoEventoBox()" style="padding: 5px 10px; font-size: 12px;"><i class="fas fa-plus"></i> Adicionar Evento</button>
+            <button class="btn-tech" onclick="window.adicionarNovoEventoBox()" style="padding: 5px 10px; font-size: 12px;"><i class="fas fa-plus"></i> Adicionar Evento</button>
         </div>
-
         <div id="dash-eventos-container"></div>
-
         <label class="tech-label" style="margin-top: 15px;">Frase de Patrocínio Padrão</label>
         <input type="text" id="dash-txt-patrocinio" class="admin-input" style="margin-bottom:20px;" placeholder="Deseja patrocinar algum dos eventos...">
-
-        <button class="btn-tech btn-save" onclick="salvarDashboard()" style="width: 100%; margin-top: 10px; padding: 15px; font-size: 16px;"><i class="fas fa-save"></i> Salvar e Atualizar Painel</button>
+        <button class="btn-tech btn-save" onclick="window.salvarDashboard()" style="width: 100%; margin-top: 10px; padding: 15px; font-size: 16px;"><i class="fas fa-save"></i> Salvar e Atualizar Painel</button>
      </div>
   </div>
 
   <div id="modal-pontos-extras" class="modal">
       <div class="modal-content" style="max-width: 500px;">
-          <div class="close-btn" onclick="fecharModalPontosExtras()"><i class="fas fa-times"></i></div>
+          <div class="close-btn" onclick="window.fecharModalPontosExtras()"><i class="fas fa-times"></i></div>
           <h3 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-star"></i> Gerenciar Pontos Extras</h3>
           <p class="subtext">Atribua pontuações adicionais individualmente.</p>
           <div style="display:flex; gap:15px; align-items:center; margin-bottom: 25px;">
-              <div class="input-block" style="flex:2; margin:0;">
-                 <i class="fas fa-user"></i>
-                 <select id="pe-select-membro"><option value="" disabled selected>Selecione...</option></select>
-              </div>
-              <div class="input-block" style="flex:1; margin:0;">
-                 <i class="fas fa-plus"></i>
-                 <input type="number" id="pe-input-pontos" placeholder="Ex: 5" style="text-align:center;">
-              </div>
-              <button class="btn-tech btn-save" onclick="salvarPontoExtra()"><i class="fas fa-check"></i> Atribuir</button>
+              <div class="input-block" style="flex:2; margin:0;"><i class="fas fa-user"></i><select id="pe-select-membro"><option value="" disabled selected>Selecione...</option></select></div>
+              <div class="input-block" style="flex:1; margin:0;"><i class="fas fa-plus"></i><input type="number" id="pe-input-pontos" placeholder="Ex: 5" style="text-align:center;"></div>
+              <button class="btn-tech btn-save" onclick="window.salvarPontoExtra()"><i class="fas fa-check"></i> Atribuir</button>
           </div>
           <h4 style="color:#fff; margin-bottom:10px; font-size:14px; text-transform:uppercase; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom:5px;">Membros com Extras</h4>
           <div class="admin-table-wrapper" style="max-height: 250px; overflow-y:auto;">
@@ -262,7 +216,7 @@
 
   <div id="appWrapper">
     <div class="top-controls">
-      <button id="btnLogout" class="btn-top" onclick="fazerLogout()" title="Sair da Conta"><i class="fas fa-sign-out-alt"></i></button>
+      <button id="btnLogout" class="btn-top" onclick="window.fazerLogout()" title="Sair da Conta"><i class="fas fa-sign-out-alt"></i></button>
     </div>
 
     <header>
@@ -275,16 +229,16 @@
     <div class="container" id="mainLayout">
       <div class="admin-sidebar">
         <div class="admin-sidebar-header">Módulos do Sistema</div>
-        <button class="btn-sidebar active" id="menu-metas" onclick="switchSection('modulo-metas', this)"><i class="fas fa-bullseye"></i> Consulta de Metas</button>
-        <button class="btn-sidebar" id="menu-avais" onclick="switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i> Cálculo de Avais</button>
-        <button class="btn-sidebar" id="menu-feedbacks" onclick="switchSection('modulo-feedbacks', this)"><i class="fas fa-comments"></i> Painel de Feedbacks</button>
-        <button class="btn-sidebar" id="menu-estrelas" onclick="switchSection('modulo-estrelas', this)"><i class="fas fa-star"></i> Estrelas Promocionais</button>
+        <button class="btn-sidebar active" id="menu-metas" onclick="window.switchSection('modulo-metas', this)"><i class="fas fa-bullseye"></i> Consulta de Metas</button>
+        <button class="btn-sidebar" id="menu-avais" onclick="window.switchSection('modulo-avais', this)"><i class="fas fa-calculator"></i> Cálculo de Avais</button>
+        <button class="btn-sidebar" id="menu-feedbacks" onclick="window.switchSection('modulo-feedbacks', this)"><i class="fas fa-comments"></i> Painel de Feedbacks</button>
+        <button class="btn-sidebar" id="menu-estrelas" onclick="window.switchSection('modulo-estrelas', this)"><i class="fas fa-star"></i> Estrelas Promocionais</button>
         
         <div id="admin-only-menus" style="display: none; flex-direction: column; gap: 10px;">
             <div class="admin-sidebar-header" style="margin-top:15px; color:#f59e0b;">Gestão Liderança</div>
-            <button class="btn-sidebar" onclick="switchSection('modulo-logs', this)"><i class="fas fa-history"></i> Logs de Estrelas</button>
-            <button class="btn-sidebar" onclick="switchSection('modulo-acessos', this)"><i class="fas fa-users-cog"></i> Gerenciar Acessos</button>
-            <button class="btn-sidebar" onclick="switchSection('modulo-privacidade', this)"><i class="fas fa-shield-alt"></i> Privacidade</button>
+            <button class="btn-sidebar" onclick="window.switchSection('modulo-logs', this)"><i class="fas fa-history"></i> Logs de Estrelas</button>
+            <button class="btn-sidebar" onclick="window.switchSection('modulo-acessos', this)"><i class="fas fa-users-cog"></i> Gerenciar Acessos</button>
+            <button class="btn-sidebar" onclick="window.switchSection('modulo-privacidade', this)"><i class="fas fa-shield-alt"></i> Privacidade</button>
         </div>
       </div>
 
@@ -299,10 +253,10 @@
             <h3 style="margin:0;"><i class="fas fa-bullseye"></i> Consulta de Metas - <span id="meta-week-title" style="color:#fff;">Carregando...</span></h3>
             <div id="admin-drag-controls" style="display: none; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <span id="dica-resize" style="display:none; color:var(--text-sub); font-size:12px; margin-right:10px;"><i class="fas fa-mouse"></i> Arraste e use Scroll para tamanho</span>
-                <button class="btn-tech" onclick="abrirModalPontosExtras()" style="padding: 8px 15px; font-size: 13px; border-color: #4caf50; color: #4caf50;"><i class="fas fa-star"></i> Pontos Extras</button>
-                <button class="btn-tech" onclick="abrirDashboard()" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
-                <button class="btn-tech" onclick="toggleEditMode()" id="btn-edit-pos" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-arrows-alt"></i> Editar Posições</button>
-                <button class="btn-tech btn-save" onclick="savePositions()" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-save"></i> Salvar Layout</button>
+                <button class="btn-tech" onclick="window.abrirModalPontosExtras()" style="padding: 8px 15px; font-size: 13px; border-color: #4caf50; color: #4caf50;"><i class="fas fa-star"></i> Pontos Extras</button>
+                <button class="btn-tech" onclick="window.abrirDashboard()" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+                <button class="btn-tech" onclick="window.toggleEditMode()" id="btn-edit-pos" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-arrows-alt"></i> Editar Posições</button>
+                <button class="btn-tech btn-save" onclick="window.savePositions()" style="padding: 8px 15px; font-size: 13px;"><i class="fas fa-save"></i> Salvar Layout</button>
             </div>
           </div>
           
@@ -323,28 +277,19 @@
              </div>
 
              <div class="events-box" id="events-container">
-                <div class="events-title">
-                   <span><i class="fas fa-calendar-alt"></i> MURAL DE EVENTOS</span>
-                   <span id="mes-atual" style="color:#fff; font-size:14px;"></span>
-                </div>
+                <div class="events-title"><span><i class="fas fa-calendar-alt"></i> MURAL DE EVENTOS</span><span id="mes-atual" style="color:#fff; font-size:14px;"></span></div>
                 <div id="ui-lista-eventos" style="flex:1;"></div>
                 <div class="events-title" style="font-size: 15px; margin-top:10px;"><i class="fas fa-star"></i> Patrocinadores Oficiais</div>
                 <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px; position:relative;">
                    <img src="https://www.habbo.com.br/habbo-imaging/badge/b09134s12017s55012t12014s4301414a5c32c3d12825df4b3496e1fb8ba98.gif" alt="Badge" style="width: 50px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); pointer-events: none;">
                    <div id="sponsors-container" class="sponsor-list"></div>
                 </div>
-                <div class="sponsor-text">
-                   "<span id="ui-txt-patrocinio">Deseja patrocinar algum dos eventos e ajudar a divisão? Procure a Liderança!</span>"<br><br>
-                   <span style="color: var(--sup-neon); font-weight:bold;">Supervisor por amor, gestor por essência. #SAGE</span>
-                </div>
+                <div class="sponsor-text">"<span id="ui-txt-patrocinio"></span>"<br><br><span style="color: var(--sup-neon); font-weight:bold;">Supervisor por amor, gestor por essência. #SAGE</span></div>
              </div>
           </div>
 
           <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
-              <div class="input-block" style="max-width: 300px; margin:0;">
-                 <i class="fas fa-search"></i>
-                 <select id="select-membro" onchange="renderMemberDetails()"><option value="" disabled selected>Selecione um membro...</option></select>
-              </div>
+              <div class="input-block" style="max-width: 300px; margin:0;"><i class="fas fa-search"></i><select id="select-membro" onchange="window.renderMemberDetails()"><option value="" disabled selected>Selecione um membro...</option></select></div>
           </div>
 
           <div class="member-details-layout" id="area-detalhes-membro" style="display:none; opacity:0; transition: opacity 0.4s;">
@@ -371,7 +316,7 @@
 
         <div id="modulo-estrelas" class="admin-section">
             <h3><i class="fas fa-star"></i> Gerenciamento de Estrelas Promocionais</h3>
-            <p class="subtext">Controle de validação e sanções do sistema de estrelas.</p>
+            <p class="subtext">Validação de ciclos baseada na Planilha Oficial.</p>
             <div class="row" style="gap: 20px; align-items: flex-start;">
                 
                 <div style="flex: 2; min-width: 300px;">
@@ -386,39 +331,18 @@
 
                 <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px;">
                     <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px solid rgba(251,191,36,0.2);">
-                        <h4 style="color:var(--sup-neon); margin-bottom:10px; font-size:15px;"><i class="fas fa-medal"></i> Validar Promoção</h4>
-                        <p style="color:var(--text-sub); font-size:12px; margin-bottom:15px;">A cada 3 promoções validadas, 1 estrela é concedida.</p>
+                        <h4 style="color:var(--sup-neon); margin-bottom:10px; font-size:15px;"><i class="fas fa-layer-group"></i> Validação em Lote (Planilha)</h4>
+                        <p style="color:var(--text-sub); font-size:12px; margin-bottom:15px;">Puxa os registros automáticos do dia.</p>
                         
-                        <div class="input-block"><i class="fas fa-search"></i><input type="text" id="input-busca-nick-pro" placeholder="Nick do Policial..."></div>
-                        <button class="btn-tech" id="btn-verificar-pro" onclick="verificarNickPro()" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-search"></i> Verificar Nick</button>
-
-                        <div id="area-acao-pro" style="display:none; padding-top:15px; border-top:1px dashed rgba(251,191,36,0.2);">
-                            <div style="color:#fff; margin-bottom:10px; font-size:14px;">Policial: <strong id="lbl-nick-pro" style="color:var(--sup-neon);"></strong></div>
-                            <div class="input-block"><i class="fas fa-hashtag"></i><input type="text" id="input-id-promocao" placeholder="ID da Promoção (System DIC)"></div>
-                            <button class="btn-tech btn-save" onclick="registrarPromocao()" style="width: 100%;"><i class="fas fa-check"></i> Validar Promoção</button>
-                        </div>
-                    </div>
-
-                    <div id="area-comando-estrelas" style="background: rgba(255,42,42,0.1); padding: 20px; border-radius: 8px; border: 1px dashed rgba(255,42,42,0.3); display: none;">
-                        <h4 style="color:#ff2a2a; margin-bottom:10px; font-size:15px;"><i class="fas fa-gavel"></i> Área do Comando (Sanções)</h4>
+                        <label class="tech-label">Data das Promoções</label>
+                        <div class="input-block"><i class="far fa-calendar-alt"></i><input type="date" id="lote-data"></div>
                         
-                        <div class="input-block" style="border-color:rgba(255,42,42,0.3);"><i class="fas fa-search" style="color:#ff2a2a;"></i><input type="text" id="input-busca-nick-san" placeholder="Nick do Policial..."></div>
-                        <button class="btn-tech" id="btn-verificar-san" onclick="verificarNickSan()" style="width: 100%; margin-bottom: 15px; border-color:#ff2a2a; color:#ff2a2a;"><i class="fas fa-search"></i> Verificar Nick</button>
+                        <label class="tech-label">IDs Excluídos / Incorretos</label>
+                        <div class="input-block"><i class="fas fa-ban"></i><input type="text" id="lote-excluidos" placeholder="Ex: 502, 508, 510 (Opcional)"></div>
 
-                        <div id="area-acao-san" style="display:none; padding-top:15px; border-top:1px dashed rgba(255,42,42,0.3);">
-                            <div style="color:#fff; margin-bottom:10px; font-size:14px;">Policial: <strong id="lbl-nick-san" style="color:#ff2a2a;"></strong></div>
-                            <div class="input-block" style="border-color:rgba(255,42,42,0.3);"><i class="fas fa-exclamation-circle" style="color:#ff2a2a;"></i>
-                                <select id="sel-tipo-sancao" onchange="mudarTipoSancao()">
-                                    <option value="deduzir">Deduzir Estrelas</option>
-                                    <option value="cassar_todas">Cassar Todas as Estrelas (Zerar)</option>
-                                    <option value="suspender">Suspender Temporariamente</option>
-                                    <option value="reativar">Reativar Policial</option>
-                                </select>
-                            </div>
-                            <div class="input-block" id="box-qtd-san" style="border-color:rgba(255,42,42,0.3);"><i class="fas fa-minus" style="color:#ff2a2a;"></i><input type="number" id="input-qtd-san" placeholder="Qtd. de estrelas a deduzir"></div>
-                            
-                            <button class="btn-tech" onclick="aplicarSancao()" style="width: 100%; background: #ff2a2a; color: #fff; border:none;"><i class="fas fa-ban"></i> Aplicar Sanção</button>
-                        </div>
+                        <button class="btn-tech" onclick="window.buscarPromocoesLote()" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-search"></i> Buscar Promoções</button>
+                        
+                        <div id="resultado-lote" style="display:none; padding-top:15px; border-top:1px dashed rgba(251,191,36,0.2);"></div>
                     </div>
                 </div>
             </div>
@@ -445,7 +369,7 @@
             <div class="form-group"><label class="tech-label">Início do Aval</label><div class="input-block"><i class="fas fa-hourglass-start"></i><input type="date" id="data-aval"></div></div>
             <div class="form-group"><label class="tech-label">Dias de Aval</label><div class="input-block"><i class="fas fa-sort-numeric-up"></i><input type="number" id="dias-aval" min="1" placeholder="Ex: 7"></div></div>
           </div>
-          <button class="btn-tech" onclick="processarCalculo()"><i class="fas fa-sync-alt"></i> Calcular Ausência</button>
+          <button class="btn-tech" onclick="window.processarCalculo()"><i class="fas fa-sync-alt"></i> Calcular Ausência</button>
           <div id="resultado-aval"><h4><i class="fas fa-poll-h"></i> Resultado da Análise</h4><p id="texto-resultado"></p></div>
         </div>
 
@@ -460,7 +384,7 @@
           <h3><i class="fas fa-shield-alt"></i> Editar Política de Privacidade</h3>
           <p class="subtext">O texto abaixo é refletido instantaneamente na página pública de privacidade.</p>
           <div style="margin-bottom: 20px;" id="box-editor-privacidade"></div>
-          <button class="btn-tech btn-save" onclick="salvarPrivacidade()"><i class="fas fa-save"></i> Salvar Política</button>
+          <button class="btn-tech btn-save" onclick="window.salvarPrivacidade()"><i class="fas fa-save"></i> Salvar Política</button>
         </div>
 
         <div id="modulo-acessos" class="admin-section">
@@ -472,8 +396,8 @@
             </table>
           </div>
           <div class="admin-controls-bottom">
-            <button class="btn-tech btn-add" onclick="addLinhaAcesso()"><i class="fas fa-plus"></i> Novo Acesso</button>
-            <button class="btn-tech btn-save" onclick="salvarAcessos()"><i class="fas fa-save"></i> Salvar Alterações</button>
+            <button class="btn-tech btn-add" onclick="window.addLinhaAcesso()"><i class="fas fa-plus"></i> Novo Acesso</button>
+            <button class="btn-tech btn-save" onclick="window.salvarAcessos()"><i class="fas fa-save"></i> Salvar Alterações</button>
           </div>
         </div>
 
@@ -486,7 +410,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
+  
   <script src="app.js"></script>
 </body>
 </html>
