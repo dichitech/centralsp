@@ -16,6 +16,7 @@
     .modal { display: none; }
     .login-card, .modal-content { background: var(--bg-panel); border: 1px solid var(--sup-neon); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 0 40px var(--sup-glow); max-width: 400px; width: 90%; position: relative; max-height: 90vh; overflow-y: auto;}
     .modal-content { max-width: 700px; text-align: left; }
+    
     .close-btn { position: absolute; right: 20px; top: 20px; width: 35px; height: 35px; background: rgba(255,42,42,0.1); border-radius: 50%; color: #ef4444; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; z-index: 10; }
     .close-btn:hover { background: #ef4444; color: #fff; transform: rotate(90deg); }
 
@@ -67,6 +68,9 @@
 
     .btn-tech { background: rgba(251, 191, 36, 0.05); border: 1px solid var(--dynamic-neon); border-color: rgba(251, 191, 36, 0.5); color: var(--text-main); padding: 12px 24px; border-radius: 6px; font-family: var(--font-ui); font-size: 15px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
     .btn-tech:hover { background: var(--dynamic-neon); border-color: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px var(--dynamic-glow); }
+    .admin-controls-bottom { display: flex; gap: 15px; margin-top: 25px; align-items: center; justify-content: flex-end; }
+    .btn-add { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--dynamic-neon); }
+    .btn-add:hover { background: rgba(251, 191, 36, 0.2); border-color: var(--dynamic-neon); }
     .btn-save { background: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
     .btn-save:hover { background: #f59e0b; transform: translateY(-2px); }
 
@@ -95,7 +99,10 @@
     .events-box { flex: 1; min-width: 350px; background: linear-gradient(135deg, rgba(20,15,0,0.8) 0%, rgba(0,0,0,0.9) 100%); border: 1px solid var(--border-tech); border-radius: 12px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative; }
     .events-title { color: var(--sup-neon); font-size: 18px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid rgba(251,191,36,0.2); padding-bottom: 5px; font-weight: 700; display: flex; justify-content: space-between; }
     .sponsor-list { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-    
+    .sponsor-avatar { width: 50px; height: 50px; background: rgba(0,0,0,0.6); border: 1px solid rgba(251,191,36,0.3); border-radius: 8px; overflow: hidden; position: relative; }
+    .sponsor-avatar img { position: absolute; pointer-events: none; } 
+    .sponsor-text { font-size: 13px; color: var(--text-sub); line-height: 1.5; font-style: italic; background: rgba(251,191,36,0.05); padding: 10px; border-radius: 6px; border-left: 3px solid var(--sup-neon); margin-top: auto;}
+
     .draggable-item { position: absolute; z-index: 5; image-rendering: pixelated; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); }
     .draggable-item.edit-mode { cursor: move !important; outline: 2px dashed #ff2a2a !important; filter: drop-shadow(0 0 15px rgba(255,42,42,1)) !important; z-index: 9999 !important; background: rgba(255,42,42,0.1) !important; pointer-events: auto !important; display: block !important; }
     .sponsor-edit.edit-mode { cursor: move !important; outline: 2px dashed #ff2a2a !important; filter: drop-shadow(0 0 15px rgba(255,42,42,1)) !important; z-index: 9999 !important; pointer-events: auto !important; }
@@ -110,7 +117,6 @@
     .member-details-layout { display: flex; gap: 20px; flex-wrap: wrap; position: relative; }
     .member-stage-box { width: 300px; height: 350px; background: rgba(0,0,0,0.5); border: 2px solid var(--sup-neon); border-radius: 12px; position: relative; box-shadow: 0 0 20px var(--sup-glow), inset 0 0 30px rgba(0,0,0,0.8); overflow: hidden; }
     .stage-glow { position: absolute; inset: 0; box-shadow: inset 0 0 50px rgba(251,191,36,0.2); pointer-events: none; z-index: 10; border-radius: 10px; }
-    
     .stats-grid-box { flex: 1; min-width: 300px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-content: start; }
     .stat-card { background: rgba(20,15,0,0.6); border: 1px solid rgba(251,191,36,0.15); border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s; }
     .stat-card:hover { border-color: var(--sup-neon); background: rgba(251,191,36,0.05); transform: translateY(-2px); }
@@ -400,5 +406,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   
   <script src="app.js"></script>
-</body>
+  
+  </body>
 </html>
