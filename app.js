@@ -35,37 +35,60 @@ window.liberarPainel = function() {
 auth.onAuthStateChanged((user) => { if (user) { usuarioLogadoEmail = user.email.toLowerCase(); verificarAcessoBD(usuarioLogadoEmail); } else { document.getElementById('appWrapper').style.display = 'none'; document.getElementById('loginCard').style.display = 'block'; document.getElementById('loginScreen').style.display = 'flex'; setTimeout(() => { document.getElementById('loginScreen').style.opacity = '1'; }, 10); } });
 
 async function verificarAcessoBD(email) {
-    let authEmail = email.toLowerCase().trim();
-    
-    let planSnap = await db.collection("sistema").doc("acessos_planilha").get();
-    if(planSnap.exists && planSnap.data().dados) { try { planilhaAcessos = JSON.parse(planSnap.data().dados); } catch(e){} }
-    
-    let manualSnap = await db.collection("acessos").get();
-    acessosData = [];
-    manualSnap.forEach(doc => { acessosData.push({ id: doc.id, ...doc.data() }); });
-
-    let userManual = acessosData.find(u => u.email.toLowerCase() === authEmail);
-    let userPlan = planilhaAcessos[authEmail];
-    let autorizado = false;
-
-    if(userManual) { autorizado = true; nivelUsuarioGlobal = userManual.nivel; usuarioLogadoNick = userManual.nick; } 
-    else if(userPlan) { autorizado = true; nivelUsuarioGlobal = userPlan.nivel; usuarioLogadoNick = userPlan.nick; }
-
-    if (autorizado) {
-        nivelUsuarioGlobal = nivelUsuarioGlobal.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
-        if(nivelUsuarioGlobal === 'VICELIDER') nivelUsuarioGlobal = 'VICE-LIDER'; if(nivelUsuarioGlobal === 'SUBLIDER') nivelUsuarioGlobal = 'SUB-LIDER';
+    try {
+        let authEmail = email.toLowerCase().trim();
         
-        if (nivelUsuarioGlobal === 'COMANDO') { window.customAlert("Acesso apenas pelo Painel Público.", "Restrito"); setTimeout(()=> { auth.signOut(); window.location.href = "https://dichitech.github.io/ranking"; }, 3000); return; }
-        if (nivelUsuarioGlobal === 'LIDER' || nivelUsuarioGlobal === 'VICE-LIDER') { document.getElementById('admin-only-menus').style.display = 'flex'; document.getElementById('admin-drag-controls').style.display = 'flex'; renderTabelaAcessos(); document.getElementById('box-editor-privacidade').innerHTML = buildEditorHTML('editor-privacidade', 'Carregando...'); }
-        if (nivelUsuarioGlobal === 'SUPERVISOR') { document.getElementById('menu-avais').style.display = 'none'; document.getElementById('menu-feedbacks').style.display = 'none'; document.getElementById('menu-estrelas').style.display = 'none'; }
-        window.switchSection('modulo-metas', document.getElementById('menu-metas')); window.liberarPainel();
-    } else { window.customAlert("ACESSO NEGADO.", "Erro"); setTimeout(()=>auth.signOut(), 3000); }
+        let planSnap = await db.collection("sistema").doc("acessos_planilha").get();
+        if(planSnap.exists && planSnap.data().dados) { try { planilhaAcessos = JSON.parse(planSnap.data().dados); } catch(e){} }
+        
+        let manualSnap = await db.collection("acessos").get();
+        acessosData = [];
+        manualSnap.forEach(doc => { acessosData.push({ id: doc.id, ...doc.data() }); });
+
+        // Procura ignorando espaços ocultos
+        let userManual = acessosData.find(u => (u.email || '').toLowerCase().trim() === authEmail);
+        let userPlan = null;
+        for(let key in planilhaAcessos) {
+            if(key.toLowerCase().trim() === authEmail) { userPlan = planilhaAcessos[key]; break; }
+        }
+
+        let autorizado = false;
+
+        // Prioridade de Liderança da Planilha
+        if(userPlan && (userPlan.nivel.includes("LIDER") || userPlan.nivel.includes("VICE"))) {
+            autorizado = true; nivelUsuarioGlobal = userPlan.nivel; usuarioLogadoNick = userPlan.nick;
+        } else if(userManual) { 
+            autorizado = true; nivelUsuarioGlobal = userManual.nivel; usuarioLogadoNick = userManual.nick; 
+        } else if(userPlan) { 
+            autorizado = true; nivelUsuarioGlobal = userPlan.nivel; usuarioLogadoNick = userPlan.nick; 
+        }
+
+        if (autorizado) {
+            nivelUsuarioGlobal = nivelUsuarioGlobal.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
+            if(nivelUsuarioGlobal === 'VICELIDER') nivelUsuarioGlobal = 'VICE-LIDER'; if(nivelUsuarioGlobal === 'SUBLIDER') nivelUsuarioGlobal = 'SUB-LIDER';
+            
+            if (nivelUsuarioGlobal === 'COMANDO') { window.customAlert("Acesso de Comando restrito ao Painel Público.", "Aviso"); setTimeout(()=> { auth.signOut(); window.location.href = "https://dichitech.github.io/ranking"; }, 3000); return; }
+            if (nivelUsuarioGlobal === 'LIDER' || nivelUsuarioGlobal === 'VICE-LIDER') { document.getElementById('admin-only-menus').style.display = 'flex'; document.getElementById('admin-drag-controls').style.display = 'flex'; renderTabelaAcessos(); }
+            if (nivelUsuarioGlobal === 'SUPERVISOR') { let menuAv = document.getElementById('menu-avais'); if(menuAv) menuAv.style.display = 'none'; let menuFb = document.getElementById('menu-feedbacks'); if(menuFb) menuFb.style.display = 'none'; let menuEs = document.getElementById('menu-estrelas'); if(menuEs) menuEs.style.display = 'none'; }
+            
+            window.switchSection('modulo-metas', document.getElementById('menu-metas')); 
+            window.liberarPainel();
+        } else { 
+            window.customAlert(`ACESSO NEGADO.<br><br>O e-mail <b>${authEmail}</b> não foi encontrado com permissões ativas.<br>Caso o e-mail esteja correto, procure a liderança.`, "Falha de Permissão"); 
+            setTimeout(()=>auth.signOut(), 5000); 
+        }
+    } catch (err) {
+        window.customAlert("Erro na comunicação com o banco de dados: " + err.message, "Erro Crítico");
+    }
 }
 
 window.loginGoogle = function() { const provider = new firebase.auth.GoogleAuthProvider(); document.getElementById('loginCard').style.display = 'none'; document.getElementById('loginLoader').style.display = 'block'; auth.signInWithPopup(provider).catch(() => { document.getElementById('loginLoader').style.display = 'none'; document.getElementById('loginCard').style.display = 'block'; document.getElementById('login-error').style.display = 'block'; }); }
 window.fazerLogout = function() { auth.signOut(); }
 window.switchSection = function(idModulo, btnElement) { document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active')); document.querySelectorAll('.btn-sidebar').forEach(el => el.classList.remove('active')); document.getElementById(idModulo).classList.add('active'); btnElement.classList.add('active'); }
 
+// ==========================================
+// ESTRELAS E VALIDAÇÃO EM LOTE
+// ==========================================
 let militaresEstrelasData = [];
 function escutarCargos() { db.collection("sistema").doc("cargos").onSnapshot((doc) => { if (doc.exists && doc.data().dados) { try { cargosMap = JSON.parse(doc.data().dados); renderTabelaEstrelas(); } catch(e) {} } }); }
 function escutarMilitaresEstrelas() { db.collection("militares").onSnapshot((snapshot) => { militaresEstrelasData = []; snapshot.forEach((docSnap) => { militaresEstrelasData.push({ id: docSnap.id, ...docSnap.data() }); }); renderTabelaEstrelas(); }); }
@@ -87,13 +110,14 @@ function renderTabelaEstrelas() {
 
 function registrarLogEstrela(bene, acao, idProm, detalhes) { db.collection("logs_estrelas").add({ timestamp: new Date().getTime(), data_hora: new Date().toLocaleString('pt-BR'), autor: usuarioLogadoNick, beneficiado: bene, acao: acao, id_promocao: idProm || '-', detalhes: detalhes }); }
 
-// LOTE
+// LOTE DE VALIDAÇÕES
 window.buscarPromocoesLote = async function() {
     let dateVal = document.getElementById('lote-data').value;
     if(!dateVal) return window.mostrarToast("Selecione uma data para a validação.", "error");
 
     let [y, m, d] = dateVal.split('-'); let dataBr = `${d}/${m}/${y}`;
-    let excluidosStr = document.getElementById('lote-excluidos').value; let excluidosArr = excluidosStr.split(',').map(s => s.trim()).filter(s => s !== "");
+    let excluidosStr = document.getElementById('lote-excluidos').value;
+    let excluidosArr = excluidosStr.split(',').map(s => s.trim()).filter(s => s !== "");
 
     let docSnap = await db.collection("sistema").doc("promocoes").get();
     if(!docSnap.exists) return window.customAlert("A planilha oficial ainda não enviou os dados de promoções para o sistema.", "Erro de Sincronização");
@@ -121,22 +145,40 @@ window.confirmarLote = async function(contagem, idsColetados) {
         let qtd = contagem[nick];
         let officialNick = Object.keys(cargosMap).find(k => k.toLowerCase() === nick.toLowerCase());
         let dbNick = officialNick || nick;
+
         let ref = db.collection("militares").doc(dbNick);
         let docM = await ref.get();
+        
         let p = 0; let e = 0; let pr = 0; let status = 'Ativo';
-        if(docM.exists) { let dados = docM.data(); if(dados.status === 'Suspenso') continue; p = dados.promocoes_realizadas || 0; e = dados.estrelas || 0; pr = dados.premios_acumulados || 0; status = dados.status; }
+        if(docM.exists) {
+            let dados = docM.data();
+            if(dados.status === 'Suspenso') continue; 
+            p = dados.promocoes_realizadas || 0; e = dados.estrelas || 0; pr = dados.premios_acumulados || 0; status = dados.status;
+        }
 
-        let estrelasAntes = e; p += qtd; let estrelasGanhas = Math.floor(p / 3); p = p % 3; e += estrelasGanhas;
-        let detailLog = `Validou ${qtd} promoção(ões). `; if(estrelasGanhas > 0) detailLog += `Conquistou ${estrelasGanhas} estrela(s)! `;
+        let estrelasAntes = e;
+        p += qtd;
+        let estrelasGanhas = Math.floor(p / 3);
+        p = p % 3; 
+        e += estrelasGanhas;
 
-        if (Math.floor(estrelasAntes / 10) < Math.floor(e / 10)) { 
+        let detailLog = `Validou ${qtd} promoção(ões). `;
+        if(estrelasGanhas > 0) detailLog += `Conquistou ${estrelasGanhas} estrela(s)! `;
+
+        // Aviso visual sem resetar a pontuação automaticamente
+        let atingiuPremio = Math.floor(estrelasAntes / 10) < Math.floor(e / 10);
+        if (atingiuPremio) {
              window.customAlert(`🏅 O policial ${dbNick} acaba de atingir ${e} estrelas no sistema!<br><br>Avise o Comando para realizar o pagamento oficial destas 10 estrelas.`, "Aguardando Pagamento!");
              detailLog += " Atingiu cota para prêmio. (Aguardando Comando)";
         }
+
         await ref.set({ nome: dbNick, status: status, promocoes_realizadas: p, estrelas: e, premios_acumulados: pr }, {merge:true});
         registrarLogEstrela(dbNick, "Validação em Lote", idLoteStr, detailLog);
     }
-    window.mostrarToast("Lote processado com sucesso!", "success"); document.getElementById('resultado-lote').style.display = 'none'; document.getElementById('lote-data').value = ''; document.getElementById('lote-excluidos').value = '';
+
+    window.mostrarToast("Lote processado com sucesso!", "success");
+    document.getElementById('resultado-lote').style.display = 'none';
+    document.getElementById('lote-data').value = ''; document.getElementById('lote-excluidos').value = '';
 }
 
 function escutarLogsEstrelas() {
@@ -150,6 +192,7 @@ function escutarLogsEstrelas() {
     });
 }
 
+// DASHBOARD & EVENTOS, PONTOS EXTRAS E ARRASTO
 window.abrirDashboard = function() { document.getElementById('modal-dashboard').style.display = 'flex'; renderAdminEventosList(); }
 window.fecharDashboard = function() { document.getElementById('modal-dashboard').style.display = 'none'; }
 function formatarDataBR(dataStr) { if(!dataStr) return ""; let d = new Date(dataStr + "T00:00:00"); return d.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}); }
@@ -177,7 +220,6 @@ function escutarConfigDashboard() {
                 let tg = document.getElementById('dash-toggle-evento'); if(tg) tg.checked = eventoAtivo; let ml = document.getElementById('dash-mult-evento'); if(ml) ml.value = eventoMult; let pr = document.getElementById('dash-txt-patrocinio'); if(pr) pr.value = d.textoPatrocinio || '';
             }
             
-            // Oculta botão de PONTOS EXTRAS se não houver evento ativo
             let btnPE = document.getElementById('btn-pontos-extras');
             if(btnPE && (nivelUsuarioGlobal === 'LIDER' || nivelUsuarioGlobal === 'VICE-LIDER')) {
                 btnPE.style.display = eventoAtivo ? 'inline-flex' : 'none';
@@ -248,10 +290,16 @@ function getPontuacaoFinal(m) { return (m.total_base * eventoMult) + (pontosExtr
 function processarPodio() { if(isEditMode) return; let a1 = document.getElementById('avatar-1'); let m1 = document.getElementById('medal-1'); let n1 = document.getElementById('nick-1'); let a2 = document.getElementById('avatar-2'); let m2 = document.getElementById('medal-2'); let n2 = document.getElementById('nick-2'); let ae1 = document.getElementById('avatar-empate-1'); let te1 = document.getElementById('txt-empate-1'); let ae2 = document.getElementById('avatar-empate-2'); let te2 = document.getElementById('txt-empate-2'); [a1,m1,n1,a2,m2,n2,ae1,te1,ae2,te2].forEach(el => el.style.display = 'none'); if(membrosDataArray.length === 0) return; let top = [...membrosDataArray].sort((a,b) => getPontuacaoFinal(b) - getPontuacaoFinal(a)); let p1 = getPontuacaoFinal(top[0]); let p2 = (top.length > 1) ? getPontuacaoFinal(top[1]) : 0; if(top.length >= 2 && p1 > 0 && p1 === p2) { ae1.src = ae2.src = "https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b"; [ae1,te1,ae2,te2].forEach(el => el.style.display = 'block'); } else if(top.length > 0 && p1 > 0) { a1.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[0].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`; n1.innerText = top[0].nick; [a1,m1,n1].forEach(el => el.style.display = 'block'); if(top.length > 1 && p2 > 0) { a2.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[1].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`; n2.innerText = top[1].nick; [a2,m2,n2].forEach(el => el.style.display = 'block'); } } }
 window.renderMemberDetails = function() { let nick = document.getElementById('select-membro').value; let m = membrosDataArray.find(x => x.nick === nick); if(!m) return; document.getElementById('area-detalhes-membro').style.display = 'flex'; setTimeout(() => { document.getElementById('area-detalhes-membro').style.opacity = '1'; }, 50); let tCalc = getPontuacaoFinal(m); let ptsExtra = pontosExtrasMap[m.nick] || 0; document.getElementById('avatar-selecionado').src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${m.nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`; document.getElementById('det-total').innerHTML = `<span>${tCalc}</span>` + (ptsExtra > 0 ? `<span style="font-size:16px; color:#4caf50; font-weight:normal;">(+${ptsExtra} bônus)</span>` : ''); document.getElementById('det-convite').innerText = m.convite * eventoMult; document.getElementById('det-ppp').innerText = m.ppp * eventoMult; document.getElementById('det-rels').innerText = m.rels * eventoMult; document.getElementById('det-relcg').innerText = m.relcg * eventoMult; document.getElementById('det-avisos').innerText = m.avisos * eventoMult; let stEl = document.getElementById('det-status'); let sFinal = m.status_base; if(tCalc >= 5) sFinal = "CUMPRIDA"; stEl.innerText = sFinal; stEl.style.color = sFinal.toLowerCase().includes('não') ? '#ef4444' : '#4caf50'; }
 
+// ==========================================
+// PRIVACIDADE E AVAIS
+// ==========================================
 function carregarPrivacidade() { db.collection("sistema").doc("config_geral").get().then((doc) => { let htmlPadrao = `<p>Escreva aqui a Política de Privacidade.</p>`; if (doc.exists && doc.data().textoPrivacidade) document.getElementById('editor-privacidade').innerHTML = doc.data().textoPrivacidade; else document.getElementById('editor-privacidade').innerHTML = htmlPadrao; }); }
 window.salvarPrivacidade = function() { db.collection("sistema").doc("config_geral").set({ textoPrivacidade: document.getElementById('editor-privacidade').innerHTML }, { merge: true }).then(() => window.mostrarToast("Política de Privacidade salva!", "success")); }
 window.processarCalculo = function() { const d1 = document.getElementById('data-login').value; const d2 = document.getElementById('data-aval').value; const dAval = parseInt(document.getElementById('dias-aval').value); const d3 = document.getElementById('data-consulta').value; if (!d1 || !d2 || isNaN(dAval) || !d3) return window.customAlert("Preencha todos os campos corretamente.", "Atenção"); const u = new Date(d1+'T00:00:00'); const i = new Date(d2+'T00:00:00'); const c = new Date(d3+'T00:00:00'); const f = new Date(i); f.setDate(i.getDate() + dAval - 1); const UM_DIA = 1000*60*60*24; const dif = (ant, nov) => Math.floor((nov - ant)/UM_DIA); let m = ""; if (u > f) { m = `Aval obsoleto (terminou antes do último login). Ausência de <strong>${Math.max(0, dif(u,c))} dia(s)</strong>.`; } else if (c <= i) { m = `O aval ainda não começou. Ausência normal de <strong>${Math.max(0, dif(u,c))} dia(s)</strong>.`; } else { let a1 = Math.max(0, dif(u,i) - 1); if(c > f) { let a2 = Math.max(0, dif(f,c)); m = `Ausência pré-aval: <strong>${a1} dia(s)</strong><br>Ausência pós-aval: <strong>${a2} dia(s)</strong><br><span style="display:block; margin-top:10px;">Total: <strong>${a1+a2} dia(s)</strong></span>`; } else { m = `Militar em período de aval.<br>Ausência antes do aval: <strong>${a1} dia(s)</strong>.`; } } document.getElementById('texto-resultado').innerHTML = m; document.getElementById('resultado-aval').style.display = 'block'; }
 
+// ==========================================
+// GERENCIADOR DE ACESSOS (Planilha + Manual)
+// ==========================================
 function renderTabelaAcessos() { 
     var tbody = document.querySelector('#tbAcessos tbody'); tbody.innerHTML = ''; 
     let rendered = new Set();
@@ -263,12 +311,11 @@ function renderTabelaAcessos() {
         }
     }
 }
-
 function criarRowAcesso(item, origem) { 
     var tr = document.createElement('tr'); 
     let sL = item.nivel === 'LIDER' ? 'selected' : ''; let sV = item.nivel === 'VICE-LIDER' ? 'selected' : ''; let sS = item.nivel === 'SUB-LIDER' ? 'selected' : ''; let sSup = item.nivel === 'SUPERVISOR' ? 'selected' : ''; let hideAcoes = (nivelUsuarioGlobal === 'VICE-LIDER' && item.nivel === 'LIDER') ? 'display:none;' : ''; 
     let tBadge = origem === 'planilha' ? '<span style="background:rgba(251,191,36,0.2); color:var(--sup-neon); padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px;">PLANILHA</span>' : '<span style="background:rgba(76,175,80,0.2); color:#4caf50; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px;">MANUAL</span>';
-    let acoes = origem === 'planilha' ? '<span style="color:#888; font-size:11px;">Apenas Planilha</span>' : `<button class="btn-admin-icon btn-admin-edit" onclick="window.toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button><button class="btn-admin-icon btn-admin-del" onclick="this.closest('tr').remove()" title="Excluir"><i class="fas fa-trash"></i></button>`;
+    let acoes = origem === 'planilha' ? '<span style="color:#888; font-size:11px;">Via Planilha</span>' : `<button class="btn-admin-icon btn-admin-edit" onclick="window.toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button><button class="btn-admin-icon btn-admin-del" onclick="this.closest('tr').remove()" title="Excluir"><i class="fas fa-trash"></i></button>`;
     tr.innerHTML = `<td><input type="text" class="admin-input inp-email" value="${item.email || ''}" readonly style="width:70%; display:inline-block; margin-right:5px;">${tBadge}</td><td><input type="text" class="admin-input inp-nick" value="${item.nick || ''}" readonly></td><td><select class="admin-input inp-nivel" disabled><option value="LIDER" ${sL}>Líder</option><option value="VICE-LIDER" ${sV}>Vice-Líder</option><option value="SUB-LIDER" ${sS}>Sub-Líder</option><option value="SUPERVISOR" ${sSup}>Supervisor</option></select></td><td class="action-cell" style="${hideAcoes}" data-origem="${origem}">${acoes}</td>`; return tr; 
 }
 window.addLinhaAcesso = function() { var tbody = document.querySelector('#tbAcessos tbody'); var tr = criarRowAcesso({ email: '', nick: '', nivel: 'SUPERVISOR' }, 'manual'); tbody.appendChild(tr); window.toggleEditRow(tr.querySelector('.btn-admin-edit')); }
@@ -279,10 +326,7 @@ window.salvarAcessos = function() {
     window.acessosData.forEach(ac => { batch.delete(db.collection("acessos").doc(ac.email)); }); 
     rows.forEach(r => { 
         let isManual = r.querySelector('.action-cell').getAttribute('data-origem') === 'manual';
-        if(isManual) {
-            var email = r.querySelector('.inp-email').value.trim().toLowerCase(); 
-            if(email) { batch.set(db.collection("acessos").doc(email), { email: email, nick: r.querySelector('.inp-nick').value.trim(), nivel: r.querySelector('.inp-nivel').value.toUpperCase() }); }
-        }
+        if(isManual) { var email = r.querySelector('.inp-email').value.trim().toLowerCase(); if(email) { batch.set(db.collection("acessos").doc(email), { email: email, nick: r.querySelector('.inp-nick').value.trim(), nivel: r.querySelector('.inp-nivel').value.toUpperCase() }); } }
     }); 
-    batch.commit().then(() => { window.mostrarToast("Acessos manuais salvos com sucesso!", "success"); }).catch((e) => { window.mostrarToast("Erro: " + e.message, "error"); }); 
+    batch.commit().then(() => { window.mostrarToast("Acessos manuais salvos!", "success"); }).catch((e) => { window.mostrarToast("Erro: " + e.message, "error"); }); 
 }
