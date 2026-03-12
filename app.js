@@ -83,7 +83,7 @@ function renderTabelaEstrelas() {
 
 function registrarLogEstrela(bene, acao, idProm, detalhes) { db.collection("logs_estrelas").add({ timestamp: new Date().getTime(), data_hora: new Date().toLocaleString('pt-BR'), autor: usuarioLogadoNick, beneficiado: bene, acao: acao, id_promocao: idProm || '-', detalhes: detalhes }); }
 
-// LOTE
+// LOTE DE VALIDAÇÕES
 window.buscarPromocoesLote = async function() {
     let dateVal = document.getElementById('lote-data').value;
     if(!dateVal) return window.mostrarToast("Selecione uma data para a validação.", "error");
@@ -106,7 +106,7 @@ window.buscarPromocoesLote = async function() {
 
     let html = `<div style="color:#fff; margin-bottom:10px; font-size:15px;"><i class="fas fa-check-circle" style="color:#4caf50;"></i> ${filtradas.length} promoções válidas localizadas.</div><ul style="color:var(--text-sub); margin-bottom:15px;">`;
     for(let nick in contagem) { html += `<li><strong style="color:var(--sup-neon);">${nick}</strong>: validou ${contagem[nick]} promoção(ões)</li>`; }
-    html += `</ul><button class="btn-tech btn-save" style="width:100%;" onclick='confirmarLote(${JSON.stringify(contagem)}, ${JSON.stringify(idsColetados)})'><i class="fas fa-check-double"></i> Atribuir Ciclos Oficiais</button>`;
+    html += `</ul><button class="btn-tech btn-save" style="width:100%;" onclick='window.confirmarLote(${JSON.stringify(contagem)}, ${JSON.stringify(idsColetados)})'><i class="fas fa-check-double"></i> Atribuir Ciclos Oficiais</button>`;
 
     document.getElementById('resultado-lote').innerHTML = html; document.getElementById('resultado-lote').style.display = 'block';
 }
@@ -138,10 +138,11 @@ window.confirmarLote = async function(contagem, idsColetados) {
         let detailLog = `Validou ${qtd} promoção(ões). `;
         if(estrelasGanhas > 0) detailLog += `Conquistou ${estrelasGanhas} estrela(s)! `;
 
+        // Aviso visual sem resetar a pontuação automaticamente
         let atingiuPremio = Math.floor(estrelasAntes / 10) < Math.floor(e / 10);
         if (atingiuPremio) {
-             window.customAlert(`🏅 O policial ${dbNick} acaba de atingir ${e} estrelas no sistema!<br><br>Avise o Comando para realizar o pagamento das 10 estrelas.`, "Aguardando Pagamento!");
-             detailLog += " Atingiu cota para prêmio.";
+             window.customAlert(`🏅 O policial ${dbNick} acaba de atingir ${e} estrelas no sistema!<br><br>Avise o Comando para realizar o pagamento oficial destas 10 estrelas.`, "Aguardando Pagamento!");
+             detailLog += " Atingiu cota para prêmio. (Aguardando Comando)";
         }
 
         await ref.set({ nome: dbNick, status: status, promocoes_realizadas: p, estrelas: e, premios_acumulados: pr }, {merge:true});
@@ -164,7 +165,9 @@ function escutarLogsEstrelas() {
     });
 }
 
-// DASHBOARD & EVENTOS, PONTOS EXTRAS E ARRASTO CONTINUAM IDENTICOS...
+// ==========================================
+// DASHBOARD & MULTI-EVENTOS
+// ==========================================
 window.abrirDashboard = function() { document.getElementById('modal-dashboard').style.display = 'flex'; renderAdminEventosList(); }
 window.fecharDashboard = function() { document.getElementById('modal-dashboard').style.display = 'none'; }
 function formatarDataBR(dataStr) { if(!dataStr) return ""; let d = new Date(dataStr + "T00:00:00"); return d.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}); }
@@ -220,16 +223,20 @@ function escutarConfigDashboard() {
     });
 }
 
+// PONTOS EXTRAS
 window.abrirModalPontosExtras = function() { document.getElementById('modal-pontos-extras').style.display = 'flex'; let sel = document.getElementById('pe-select-membro'); sel.innerHTML = '<option value="" disabled selected>Selecione...</option>'; [...membrosDataArray].sort((a,b) => a.nick.localeCompare(b.nick)).forEach(m => { sel.innerHTML += `<option value="${m.nick}">${m.nick}</option>`; }); renderTabelaPontosExtras(); }
 window.fecharModalPontosExtras = function() { document.getElementById('modal-pontos-extras').style.display = 'none'; }
 window.salvarPontoExtra = function() { let nick = document.getElementById('pe-select-membro').value; let pts = parseInt(document.getElementById('pe-input-pontos').value); if(!nick || isNaN(pts)) return window.mostrarToast("Selecione um membro e digite a pontuação.", "error"); pontosExtrasMap[nick] = pts; db.collection("sistema").doc("config_metas").set({ pontosExtras: pontosExtrasMap }, {merge:true}).then(() => { document.getElementById('pe-input-pontos').value = ''; window.mostrarToast(`+${pts} pontos para ${nick}`, "success"); }); }
 window.removerPontoExtra = function(nick) { delete pontosExtrasMap[nick]; db.collection("sistema").doc("config_metas").set({ pontosExtras: pontosExtrasMap }, {merge:true}); }
 function renderTabelaPontosExtras() { let tbody = document.querySelector('#tb-pontos-extras tbody'); tbody.innerHTML = ''; for(let n in pontosExtrasMap) { tbody.innerHTML += `<tr><td>${n}</td><td style="text-align:center; color:var(--sup-neon); font-weight:bold;">+${pontosExtrasMap[n]}</td><td style="text-align:right;"><button class="btn-admin-icon btn-admin-del" onclick="window.removerPontoExtra('${n}')"><i class="fas fa-trash"></i></button></td></tr>`; } if(Object.keys(pontosExtrasMap).length === 0) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-sub);">Nenhum ponto extra.</td></tr>'; }
 
+// ==========================================
+// ARRASTAR E REDIMENSIONAR
+// ==========================================
 function aplicarPosicoes() { for(let id in layoutConfig) { if(id === 'sponsorInner') continue; let el = document.getElementById(id); if(el) { if(layoutConfig[id].left) el.style.left = layoutConfig[id].left; if(layoutConfig[id].top) el.style.top = layoutConfig[id].top; if(layoutConfig[id].width) el.style.width = layoutConfig[id].width; } } aplicarSponsorInner(); }
 function aplicarSponsorInner() { let conf = layoutConfig['sponsorInner'] || {width: '60px', left: '0px', top: '-10px'}; document.querySelectorAll('.sponsor-avatar img').forEach(img => { if(conf.left) img.style.left = conf.left; if(conf.top) img.style.top = conf.top; if(conf.width) img.style.width = conf.width; }); }
 function carregarLayoutConfig() { db.collection("sistema").doc("config_layout").get().then((doc) => { if(doc.exists && doc.data().posicoes) { let loaded = doc.data().posicoes; for(let k in loaded) { layoutConfig[k] = { ...layoutConfig[k], ...loaded[k] }; } } aplicarPosicoes(); }); }
-window.savePositions = function() { db.collection("sistema").doc("config_layout").set({ posicoes: layoutConfig }, {merge: true}).then(() => { window.mostrarToast("Posições salvas!", "success"); if(isEditMode) window.toggleEditMode(); }).catch((e) => window.mostrarToast("Erro ao salvar posições: " + e.message, "error")); }
+window.savePositions = function() { db.collection("sistema").doc("config_layout").set({ posicoes: layoutConfig }, {merge: true}).then(() => { window.mostrarToast("Posições salvas!", "success"); if(isEditMode) window.toggleEditMode(); }); }
 
 window.toggleEditMode = function() {
     isEditMode = !isEditMode; let btn = document.getElementById('btn-edit-pos'); let dica = document.getElementById('dica-resize'); let elsDrag = document.querySelectorAll('.draggable-item'); let elsSponImg = document.querySelectorAll('.sponsor-avatar img'); let elsPrize = document.querySelectorAll('.resizable-prize'); let areaDet = document.getElementById('area-detalhes-membro');
@@ -246,21 +253,66 @@ window.toggleEditMode = function() {
         processarPodio(); 
     }
 }
-
 function setupPrizesResizable() { document.querySelectorAll('.resizable-prize').forEach(img => { if(img.dataset.dragReady) return; img.dataset.dragReady = "true"; img.ondragstart = () => false; img.addEventListener('wheel', (e) => { if(!isEditMode) return; e.preventDefault(); e.stopPropagation(); let w = parseFloat(img.style.width) || img.offsetWidth; w += e.deltaY < 0 ? 5 : -5; if(w < 15) w = 15; img.style.width = w + 'px'; layoutConfig[img.id] = layoutConfig[img.id] || {}; layoutConfig[img.id].width = w + 'px'; }, { passive: false }); }); }
 function setupAllDraggables() { document.querySelectorAll('.draggable-item').forEach(el => { if(el.dataset.dragReady) return; el.dataset.dragReady = "true"; el.ondragstart = () => false; el.addEventListener('mousedown', (e) => { if(!isEditMode) return; e.preventDefault(); e.stopPropagation(); let startX = e.clientX; let startY = e.clientY; let startLeft = el.offsetLeft; let startTop = el.offsetTop; const onMouseMove = (mEv) => { mEv.preventDefault(); el.style.left = (startLeft + (mEv.clientX - startX)) + 'px'; el.style.top = (startTop + (mEv.clientY - startY)) + 'px'; }; const onMouseUp = () => { document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); layoutConfig[el.id] = layoutConfig[el.id] || {}; layoutConfig[el.id].left = el.style.left; layoutConfig[el.id].top = el.style.top; }; document.addEventListener('mousemove', onMouseMove); document.addEventListener('mouseup', onMouseUp); }); el.addEventListener('wheel', (e) => { if(!isEditMode) return; e.preventDefault(); e.stopPropagation(); let w = parseFloat(window.getComputedStyle(el).width) || el.offsetWidth; w += e.deltaY < 0 ? 5 : -5; if(w < 15) w = 15; el.style.width = w + 'px'; layoutConfig[el.id] = layoutConfig[el.id] || {}; layoutConfig[el.id].width = el.style.width; }, { passive: false }); }); }
 
-function escutarMetasDoFirebase() { db.collection("sistema").doc("metas").onSnapshot((doc) => { if (doc.exists && doc.data().dados) { let rows = []; try { rows = JSON.parse(doc.data().dados); } catch(e) { return; } if(rows.length > 17 && rows[17][1]) document.getElementById('meta-week-title').innerText = rows[17][1]; membrosDataArray = []; let sponsorsList = []; for(let i = 3; i < rows.length; i++) { if(rows[i][15]) sponsorsList.push(rows[i][15]); if(rows[i][16]) sponsorsList.push(rows[i][16]); if(rows[i][17]) sponsorsList.push(rows[i][17]); } renderSponsors(sponsorsList); for(let i = 20; i < rows.length; i++) { if(!rows[i][3]) continue; membrosDataArray.push({ cargo: rows[i][2] || '', nick: rows[i][3].trim(), convite: parseInt(rows[i][5]) || 0, ppp: parseInt(rows[i][6]) || 0, rels: parseInt(rows[i][7]) || 0, relcg: parseInt(rows[i][9]) || 0, avisos: parseInt(rows[i][10]) || 0, total_base: parseInt(rows[i][11]) || 0, status_base: (rows[i][12] || '').toString().trim() }); } popularSelectMembros(); processarPodio(); } }); }
-
+// ==========================================
+// METAS E PÓDIO
+// ==========================================
+function escutarMetasDoFirebase() {
+    db.collection("sistema").doc("metas").onSnapshot((doc) => {
+        if (doc.exists && doc.data().dados) {
+            let rows = []; try { rows = JSON.parse(doc.data().dados); } catch(e) { return; }
+            if(rows.length > 17 && rows[17][1]) document.getElementById('meta-week-title').innerText = rows[17][1];
+            membrosDataArray = []; let sponsorsList = [];
+            for(let i = 3; i < rows.length; i++) { if(rows[i][15]) sponsorsList.push(rows[i][15]); if(rows[i][16]) sponsorsList.push(rows[i][16]); if(rows[i][17]) sponsorsList.push(rows[i][17]); }
+            renderSponsors(sponsorsList);
+            for(let i = 20; i < rows.length; i++) {
+                if(!rows[i][3]) continue;
+                membrosDataArray.push({ cargo: rows[i][2] || '', nick: rows[i][3].trim(), convite: parseInt(rows[i][5]) || 0, ppp: parseInt(rows[i][6]) || 0, rels: parseInt(rows[i][7]) || 0, relcg: parseInt(rows[i][9]) || 0, avisos: parseInt(rows[i][10]) || 0, total_base: parseInt(rows[i][11]) || 0, status_base: (rows[i][12] || '').toString().trim() });
+            }
+            popularSelectMembros(); processarPodio();
+        }
+    });
+}
 function renderSponsors(lista) { let unique = [...new Set(lista.filter(n => n.trim() !== ''))]; let container = document.getElementById('sponsors-container'); container.innerHTML = ''; unique.forEach(nick => { container.innerHTML += `<div class="sponsor-avatar" title="${nick.trim()}"><img src="https://www.habbo.com.br/habbo-imaging/avatarimage?user=${nick.trim()}&action=std&direction=2&head_direction=2&gesture=sml&size=b" draggable="false"></div>`; }); aplicarSponsorInner(); document.querySelectorAll('.sponsor-avatar img').forEach(img => { if (img.dataset.dragReady) return; img.dataset.dragReady = "true"; img.ondragstart = () => false; img.addEventListener('mousedown', (e) => { if(!isEditMode) return; e.preventDefault(); e.stopPropagation(); let sX = e.clientX; let sY = e.clientY; let sL = img.offsetLeft; let sT = img.offsetTop; const onMv = (mEv) => { mEv.preventDefault(); layoutConfig['sponsorInner'] = layoutConfig['sponsorInner'] || {}; layoutConfig['sponsorInner'].left = (sL + (mEv.clientX - sX)) + 'px'; layoutConfig['sponsorInner'].top = (sT + (mEv.clientY - sY)) + 'px'; aplicarSponsorInner(); }; const onUp = () => { document.removeEventListener('mousemove', onMv); document.removeEventListener('mouseup', onUp); }; document.addEventListener('mousemove', onMv); document.addEventListener('mouseup', onUp); }); img.addEventListener('wheel', (e) => { if(!isEditMode) return; e.preventDefault(); e.stopPropagation(); let w = parseFloat(window.getComputedStyle(img).width) || img.offsetWidth; w += e.deltaY < 0 ? 3 : -3; if(w < 10) w = 10; layoutConfig['sponsorInner'] = layoutConfig['sponsorInner'] || {}; layoutConfig['sponsorInner'].width = w + 'px'; aplicarSponsorInner(); }, { passive: false }); if(isEditMode) img.classList.add('sponsor-edit', 'edit-mode'); }); }
 function popularSelectMembros() { let sel = document.getElementById('select-membro'); let valAtual = sel.value; sel.innerHTML = '<option value="" disabled selected>Selecione um membro...</option>'; let sorted = [...membrosDataArray].sort((a,b) => a.nick.localeCompare(b.nick)); sorted.forEach(m => { sel.innerHTML += `<option value="${m.nick}">${m.cargo} ${m.nick}</option>`; }); if(valAtual) sel.value = valAtual; }
 function getPontuacaoFinal(m) { return (m.total_base * eventoMult) + (pontosExtrasMap[m.nick] || 0); }
-function processarPodio() { if(isEditMode) return; let a1 = document.getElementById('avatar-1'); let m1 = document.getElementById('medal-1'); let n1 = document.getElementById('nick-1'); let a2 = document.getElementById('avatar-2'); let m2 = document.getElementById('medal-2'); let n2 = document.getElementById('nick-2'); let ae1 = document.getElementById('avatar-empate-1'); let te1 = document.getElementById('txt-empate-1'); let ae2 = document.getElementById('avatar-empate-2'); let te2 = document.getElementById('txt-empate-2'); [a1,m1,n1,a2,m2,n2,ae1,te1,ae2,te2].forEach(el => el.style.display = 'none'); if(membrosDataArray.length === 0) return; let top = [...membrosDataArray].sort((a,b) => getPontuacaoFinal(b) - getPontuacaoFinal(a)); let p1 = getPontuacaoFinal(top[0]); let p2 = (top.length > 1) ? getPontuacaoFinal(top[1]) : 0; if(top.length >= 2 && p1 > 0 && p1 === p2) { ae1.src = ae2.src = "https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b"; [ae1,te1,ae2,te2].forEach(el => el.style.display = 'block'); } else if(top.length > 0 && p1 > 0) { a1.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[0].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`; n1.innerText = top[0].nick; [a1,m1,n1].forEach(el => el.style.display = 'block'); if(top.length > 1 && p2 > 0) { a2.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[1].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`; n2.innerText = top[1].nick; [a2,m2,n2].forEach(el => el.style.display = 'block'); } } }
-window.renderMemberDetails = function() { let nick = document.getElementById('select-membro').value; let m = membrosDataArray.find(x => x.nick === nick); if(!m) return; document.getElementById('area-detalhes-membro').style.display = 'flex'; setTimeout(() => { document.getElementById('area-detalhes-membro').style.opacity = '1'; }, 50); let tCalc = getPontuacaoFinal(m); let ptsExtra = pontosExtrasMap[m.nick] || 0; document.getElementById('avatar-selecionado').src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${m.nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`; document.getElementById('det-total').innerHTML = `<span>${tCalc}</span>` + (ptsExtra > 0 ? `<span style="font-size:16px; color:#4caf50; font-weight:normal;">(+${ptsExtra} bônus)</span>` : ''); document.getElementById('det-convite').innerText = m.convite * eventoMult; document.getElementById('det-ppp').innerText = m.ppp * eventoMult; document.getElementById('det-rels').innerText = m.rels * eventoMult; document.getElementById('det-relcg').innerText = m.relcg * eventoMult; document.getElementById('det-avisos').innerText = m.avisos * eventoMult; let stEl = document.getElementById('det-status'); let sFinal = m.status_base; if(tCalc >= 5) sFinal = "CUMPRIDA"; stEl.innerText = sFinal; stEl.style.color = sFinal.toLowerCase().includes('não') ? '#ef4444' : '#4caf50'; }
+function processarPodio() {
+    if(isEditMode) return; 
+    let a1 = document.getElementById('avatar-1'); let m1 = document.getElementById('medal-1'); let n1 = document.getElementById('nick-1'); let a2 = document.getElementById('avatar-2'); let m2 = document.getElementById('medal-2'); let n2 = document.getElementById('nick-2'); let ae1 = document.getElementById('avatar-empate-1'); let te1 = document.getElementById('txt-empate-1'); let ae2 = document.getElementById('avatar-empate-2'); let te2 = document.getElementById('txt-empate-2');
+    [a1,m1,n1,a2,m2,n2,ae1,te1,ae2,te2].forEach(el => el.style.display = 'none');
+    if(membrosDataArray.length === 0) return;
+    let top = [...membrosDataArray].sort((a,b) => getPontuacaoFinal(b) - getPontuacaoFinal(a)); let p1 = getPontuacaoFinal(top[0]); let p2 = (top.length > 1) ? getPontuacaoFinal(top[1]) : 0;
+    if(top.length >= 2 && p1 > 0 && p1 === p2) { ae1.src = ae2.src = "https://www.habbo.com.br/habbo-imaging/avatarimage?user=DIC-Sp&action=std&direction=2&head_direction=2&gesture=sml&size=b"; [ae1,te1,ae2,te2].forEach(el => el.style.display = 'block'); } else if(top.length > 0 && p1 > 0) { a1.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[0].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`; n1.innerText = top[0].nick; [a1,m1,n1].forEach(el => el.style.display = 'block'); if(top.length > 1 && p2 > 0) { a2.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[1].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`; n2.innerText = top[1].nick; [a2,m2,n2].forEach(el => el.style.display = 'block'); } }
+}
+window.renderMemberDetails = function() {
+    let nick = document.getElementById('select-membro').value; let m = membrosDataArray.find(x => x.nick === nick); if(!m) return;
+    document.getElementById('area-detalhes-membro').style.display = 'flex'; setTimeout(() => { document.getElementById('area-detalhes-membro').style.opacity = '1'; }, 50);
+    let tCalc = getPontuacaoFinal(m); let ptsExtra = pontosExtrasMap[m.nick] || 0;
+    document.getElementById('avatar-selecionado').src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${m.nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b`;
+    document.getElementById('det-total').innerHTML = `<span>${tCalc}</span>` + (ptsExtra > 0 ? `<span style="font-size:16px; color:#4caf50; font-weight:normal;">(+${ptsExtra} bônus)</span>` : '');
+    document.getElementById('det-convite').innerText = m.convite * eventoMult; document.getElementById('det-ppp').innerText = m.ppp * eventoMult; document.getElementById('det-rels').innerText = m.rels * eventoMult; document.getElementById('det-relcg').innerText = m.relcg * eventoMult; document.getElementById('det-avisos').innerText = m.avisos * eventoMult;
+    let stEl = document.getElementById('det-status'); let sFinal = m.status_base; if(tCalc >= 5) sFinal = "CUMPRIDA"; stEl.innerText = sFinal; stEl.style.color = sFinal.toLowerCase().includes('não') ? '#ef4444' : '#4caf50';
+}
 
+// ==========================================
+// PRIVACIDADE, AVAIS E ACESSOS
+// ==========================================
 function carregarPrivacidade() { db.collection("sistema").doc("config_geral").get().then((doc) => { let htmlPadrao = `<p>Escreva aqui a Política de Privacidade.</p>`; if (doc.exists && doc.data().textoPrivacidade) document.getElementById('editor-privacidade').innerHTML = doc.data().textoPrivacidade; else document.getElementById('editor-privacidade').innerHTML = htmlPadrao; }); }
 window.salvarPrivacidade = function() { db.collection("sistema").doc("config_geral").set({ textoPrivacidade: document.getElementById('editor-privacidade').innerHTML }, { merge: true }).then(() => window.mostrarToast("Política de Privacidade salva!", "success")); }
-window.processarCalculo = function() { const d1 = document.getElementById('data-login').value; const d2 = document.getElementById('data-aval').value; const dAval = parseInt(document.getElementById('dias-aval').value); const d3 = document.getElementById('data-consulta').value; if (!d1 || !d2 || isNaN(dAval) || !d3) return window.customAlert("Preencha todos os campos corretamente.", "Atenção"); const u = new Date(d1+'T00:00:00'); const i = new Date(d2+'T00:00:00'); const c = new Date(d3+'T00:00:00'); const f = new Date(i); f.setDate(i.getDate() + dAval - 1); const UM_DIA = 1000*60*60*24; const dif = (ant, nov) => Math.floor((nov - ant)/UM_DIA); let m = ""; if(c <= i) { m = `O aval ainda não começou. Ausência normal de <strong>${dif(u,c)} dia(s)</strong>.`; } else { let a1 = dif(u,i); if(c > f) { let a2 = dif(f,c); m = `Ausência pré-aval: <strong>${a1} dia(s)</strong><br>Ausência pós-aval: <strong>${a2} dia(s)</strong><br><span style="display:block; margin-top:10px;">Total: <strong>${a1+a2} dia(s)</strong></span>`; } else { m = `Militar em período de aval.<br>Ausência antes do aval: <strong>${a1} dia(s)</strong>.`; } } document.getElementById('texto-resultado').innerHTML = m; document.getElementById('resultado-aval').style.display = 'block'; }
+
+window.processarCalculo = function() {
+    const d1 = document.getElementById('data-login').value; const d2 = document.getElementById('data-aval').value; const dAval = parseInt(document.getElementById('dias-aval').value); const d3 = document.getElementById('data-consulta').value;
+    if (!d1 || !d2 || isNaN(dAval) || !d3) return window.customAlert("Preencha todos os campos corretamente.", "Atenção");
+    const u = new Date(d1+'T00:00:00'); const i = new Date(d2+'T00:00:00'); const c = new Date(d3+'T00:00:00'); const f = new Date(i); f.setDate(i.getDate() + dAval - 1);
+    const UM_DIA = 1000*60*60*24; const dif = (ant, nov) => Math.floor((nov - ant)/UM_DIA); let m = "";
+    
+    if (u > f) { m = `Aval obsoleto (terminou antes do último login). Ausência de <strong>${Math.max(0, dif(u,c))} dia(s)</strong>.`; }
+    else if (c <= i) { m = `O aval ainda não começou. Ausência normal de <strong>${Math.max(0, dif(u,c))} dia(s)</strong>.`; } 
+    else { let a1 = Math.max(0, dif(u,i) - 1); if(c > f) { let a2 = Math.max(0, dif(f,c)); m = `Ausência pré-aval: <strong>${a1} dia(s)</strong><br>Ausência pós-aval: <strong>${a2} dia(s)</strong><br><span style="display:block; margin-top:10px;">Total: <strong>${a1+a2} dia(s)</strong></span>`; } else { m = `Militar em período de aval.<br>Ausência antes do aval: <strong>${a1} dia(s)</strong>.`; } }
+    document.getElementById('texto-resultado').innerHTML = m; document.getElementById('resultado-aval').style.display = 'block';
+}
 
 function renderTabelaAcessos() { var tbody = document.querySelector('#tbAcessos tbody'); tbody.innerHTML = ''; acessosData.forEach(item => tbody.appendChild(criarRowAcesso(item))); }
 function criarRowAcesso(item) { var tr = document.createElement('tr'); let sLider = item.nivel === 'LIDER' ? 'selected' : ''; let sVice = item.nivel === 'VICE-LIDER' ? 'selected' : ''; let sSub = item.nivel === 'SUB-LIDER' ? 'selected' : ''; let sSup = item.nivel === 'SUPERVISOR' ? 'selected' : ''; let hideAcoes = (nivelUsuarioGlobal === 'VICE-LIDER' && item.nivel === 'LIDER') ? 'display:none;' : ''; tr.innerHTML = `<td><input type="text" class="admin-input inp-email" value="${item.email || ''}" readonly></td><td><input type="text" class="admin-input inp-nick" value="${item.nick || ''}" readonly></td><td><select class="admin-input inp-nivel" disabled><option value="LIDER" ${sLider}>Líder</option><option value="VICE-LIDER" ${sVice}>Vice-Líder</option><option value="SUB-LIDER" ${sSub}>Sub-Líder</option><option value="SUPERVISOR" ${sSup}>Supervisor</option></select></td><td class="action-cell" style="${hideAcoes}"><button class="btn-admin-icon btn-admin-edit" onclick="window.toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button><button class="btn-admin-icon btn-admin-del" onclick="this.closest('tr').remove()" title="Excluir"><i class="fas fa-trash"></i></button></td>`; return tr; }
