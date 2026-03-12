@@ -1,6 +1,3 @@
-const auth = window.auth;
-const db = window.db;
-
 auth.onAuthStateChanged((user) => {
     if (user) {
         window.usuarioLogadoEmail = user.email.toLowerCase();

@@ -285,7 +285,9 @@ window.escutarConfigDashboard = function() {
             }
 
             let tSpon = document.getElementById('ui-txt-patrocinio');
-            if (tSpon) tSpon.innerText = d.textoPatrocinio || 'Deseja patrocinar algum dos eventos e ajudar a divisão? Procure a Liderança!';
+            if (tSpon) {
+                tSpon.innerText = d.textoPatrocinio || 'Deseja patrocinar algum dos eventos e ajudar a divisão? Procure a Liderança!';
+            }
 
             let uiLista = document.getElementById('ui-lista-eventos');
             if (uiLista) {
@@ -295,8 +297,11 @@ window.escutarConfigDashboard = function() {
                 } else {
                     window.dashboardEventosData.forEach((ev, i) => {
                         let dtTxt = '';
-                        if (ev.dataInicio && ev.dataFim) dtTxt = `${window.formatarDataBR(ev.dataInicio)} a ${window.formatarDataBR(ev.dataFim)}`;
-                        else if (ev.dataInicio) dtTxt = `A partir de ${window.formatarDataBR(ev.dataInicio)}`;
+                        if (ev.dataInicio && ev.dataFim) {
+                            dtTxt = `${window.formatarDataBR(ev.dataInicio)} a ${window.formatarDataBR(ev.dataFim)}`;
+                        } else if (ev.dataInicio) {
+                            dtTxt = `A partir de ${window.formatarDataBR(ev.dataInicio)}`;
+                        }
                         
                         let pUI = '';
                         if (ev.premiosTexto || ev.hc || ev.moedas) {
@@ -326,6 +331,7 @@ window.escutarConfigDashboard = function() {
             }
             
             window.setupPrizesResizable();
+            
             if (window.membrosDataArray.length > 0) {
                 window.processarPodio();
                 if (document.getElementById('select-membro').value) {

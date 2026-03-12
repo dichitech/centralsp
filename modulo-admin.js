@@ -1,5 +1,3 @@
-const db = window.db;
-
 window.carregarPrivacidade = function() {
     db.collection("sistema").doc("config_geral").get().then((doc) => {
         let htmlPadrao = `<p>Escreva aqui a Política de Privacidade.</p>`;
