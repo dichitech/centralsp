@@ -67,6 +67,9 @@
 
     .btn-tech { background: rgba(251, 191, 36, 0.05); border: 1px solid var(--dynamic-neon); border-color: rgba(251, 191, 36, 0.5); color: var(--text-main); padding: 12px 24px; border-radius: 6px; font-family: var(--font-ui); font-size: 15px; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
     .btn-tech:hover { background: var(--dynamic-neon); border-color: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px var(--dynamic-glow); }
+    .admin-controls-bottom { display: flex; gap: 15px; margin-top: 25px; align-items: center; justify-content: flex-end; }
+    .btn-add { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--dynamic-neon); }
+    .btn-add:hover { background: rgba(251, 191, 36, 0.2); border-color: var(--dynamic-neon); }
     .btn-save { background: var(--dynamic-neon); color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
     .btn-save:hover { background: #f59e0b; transform: translateY(-2px); }
 
@@ -143,7 +146,6 @@
       <h2>Central de Sistemas</h2>
       <p>Acesso restrito à Liderança e Supervisores</p>
       <button onclick="window.loginGoogle()" class="btn-tech" style="width:100%; font-size:16px;"><i class="fab fa-google"></i> Entrar com o Google</button>
-      <p id="login-error" style="color: #ff2a2a; font-size: 14px; margin-top: 15px; display: none; font-weight: 600;"><i class="fas fa-exclamation-triangle"></i> Erro ao logar.</p>
     </div>
   </div>
 
@@ -160,7 +162,9 @@
   <div id="custom-prompt-modal" class="modal" style="z-index: 9999999;">
       <div class="modal-content" style="max-width: 400px; text-align: center;">
           <h3 style="color: var(--sup-neon); margin-bottom: 15px;"><i class="fas fa-link"></i> Inserir Link</h3>
-          <div class="input-block"><input type="text" id="custom-prompt-input" placeholder="Ex: https://google.com"></div>
+          <div class="input-block">
+              <input type="text" id="custom-prompt-input" placeholder="Ex: https://google.com">
+          </div>
           <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
               <button class="btn-tech" onclick="window.fecharCustomPrompt()">Cancelar</button>
               <button class="btn-tech btn-save" onclick="window.confirmarCustomPrompt()">Inserir</button>
@@ -176,9 +180,17 @@
         <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 8px; border: 1px dashed rgba(251,191,36,0.3); margin-bottom: 25px;">
            <h4 style="color:#fff; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px; font-size:14px;"><i class="fas fa-bolt"></i> Multiplicador Global de Pontos</h4>
            <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
-               <div style="display: flex; align-items: center;"><label class="switch" title="Ativar Bônus"><input type="checkbox" id="dash-toggle-evento"><span class="slider"></span></label><span style="color: var(--text-sub); font-size: 14px; font-weight:bold;">ATIVAR BÔNUS</span></div>
+               <div style="display: flex; align-items: center;">
+                   <label class="switch" title="Ativar Bônus"><input type="checkbox" id="dash-toggle-evento"><span class="slider"></span></label>
+                   <span style="color: var(--text-sub); font-size: 14px; font-weight:bold;">ATIVAR BÔNUS</span>
+               </div>
                <div class="input-block" style="margin:0; width: 150px;">
-                   <select id="dash-mult-evento"><option value="1">1x (Normal)</option><option value="2">2x Pontos</option><option value="3">3x Pontos</option><option value="4">4x Pontos</option></select>
+                   <select id="dash-mult-evento">
+                       <option value="1">1x (Normal)</option>
+                       <option value="2">2x Pontos</option>
+                       <option value="3">3x Pontos</option>
+                       <option value="4">4x Pontos</option>
+                   </select>
                </div>
            </div>
         </div>
@@ -187,9 +199,12 @@
             <h4 style="color:#fff; font-size:16px; text-transform:uppercase; margin:0;"><i class="far fa-calendar-alt"></i> Eventos do Mês</h4>
             <button class="btn-tech" onclick="window.adicionarNovoEventoBox()" style="padding: 5px 10px; font-size: 12px;"><i class="fas fa-plus"></i> Adicionar Evento</button>
         </div>
+
         <div id="dash-eventos-container"></div>
+
         <label class="tech-label" style="margin-top: 15px;">Frase de Patrocínio Padrão</label>
         <input type="text" id="dash-txt-patrocinio" class="admin-input" style="margin-bottom:20px;" placeholder="Deseja patrocinar algum dos eventos...">
+
         <button class="btn-tech btn-save" onclick="window.salvarDashboard()" style="width: 100%; margin-top: 10px; padding: 15px; font-size: 16px;"><i class="fas fa-save"></i> Salvar e Atualizar Painel</button>
      </div>
   </div>
@@ -200,8 +215,14 @@
           <h3 style="color: var(--sup-neon); margin-bottom: 20px;"><i class="fas fa-star"></i> Gerenciar Pontos Extras</h3>
           <p class="subtext">Atribua pontuações adicionais individualmente.</p>
           <div style="display:flex; gap:15px; align-items:center; margin-bottom: 25px;">
-              <div class="input-block" style="flex:2; margin:0;"><i class="fas fa-user"></i><select id="pe-select-membro"><option value="" disabled selected>Selecione...</option></select></div>
-              <div class="input-block" style="flex:1; margin:0;"><i class="fas fa-plus"></i><input type="number" id="pe-input-pontos" placeholder="Ex: 5" style="text-align:center;"></div>
+              <div class="input-block" style="flex:2; margin:0;">
+                 <i class="fas fa-user"></i>
+                 <select id="pe-select-membro"><option value="" disabled selected>Selecione...</option></select>
+              </div>
+              <div class="input-block" style="flex:1; margin:0;">
+                 <i class="fas fa-plus"></i>
+                 <input type="number" id="pe-input-pontos" placeholder="Ex: 5" style="text-align:center;">
+              </div>
               <button class="btn-tech btn-save" onclick="window.salvarPontoExtra()"><i class="fas fa-check"></i> Atribuir</button>
           </div>
           <h4 style="color:#fff; margin-bottom:10px; font-size:14px; text-transform:uppercase; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom:5px;">Membros com Extras</h4>
@@ -222,7 +243,7 @@
     <header>
       <div class="header-frame">
         <img src="https://www.habbo.com.br/habbo-imaging/badge/b10134s12017s43014t12104s170129cb6c41f26a37e0c3192016b851550a7.gif" alt="Logo">
-        <div class="title-area"><h1>Central de Sistemas</h1><h2>Equipe dos Supervisores</h2></div>
+        <div class="title-area"><h1>Central de Sistemas</h1><h2>Supervisores</h2></div>
       </div>
     </header>
 
@@ -243,6 +264,7 @@
       </div>
 
       <div class="admin-main-content">
+        
         <div id="modulo-metas" class="admin-section active">
           <div id="evento-banner">
               <span><i class="fas fa-star" style="color: var(--sup-neon); font-size: 20px;"></i> <span id="evento-banner-txt">EVENTO ATIVO</span></span>
@@ -264,12 +286,15 @@
              <div class="podium-box" id="podium-container">
                 <div class="podium-glow"></div>
                 <img id="img-podio-base" src="https://i.imgur.com/sWg6BNh.png" draggable="false" class="draggable-item" style="z-index: 2;">
+                
                 <img id="avatar-1" src="" draggable="false" class="draggable-item" style="z-index: 3; display:none;">
                 <img id="medal-1" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgk1prBqI84-KMlRtMxa_d7zVr-rqtK98qCwWnW_mFOZt_kDyhbSOKp6WgbwGyhuPR2Cej0BDvaFHTgOzWRb13qQ5glBYnTO-WLVmD2Mc7GBy5_eeycsqI1xeYIyZuqGK0IKmU-QUi0y8M/s1600/ITC21.gif" draggable="false" class="draggable-item medal-float" style="z-index: 4; display:none;">
                 <div id="nick-1" class="draggable-item podium-nick" style="z-index: 6; display:none;"></div>
+                
                 <img id="avatar-2" src="" draggable="false" class="draggable-item" style="z-index: 3; display:none;">
                 <img id="medal-2" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuP4oSwMUvEeMDglW96CfvqrDASdaiQIHPsO6hx3CDFgBKZINyAX3dqlQrOJgGLsBDafGL_vVqS-9su5ijkKP87T-yQHM4YCe3zaHcYXPhBas5RjG12vh_6RPuoQemKimWHAhV-bQEVBc/s1600/ITC20.gif" draggable="false" class="draggable-item medal-float" style="z-index: 4; display:none;">
                 <div id="nick-2" class="draggable-item podium-nick" style="z-index: 6; display:none;"></div>
+                
                 <img id="avatar-empate-1" src="" draggable="false" class="draggable-item" style="z-index: 3; display:none;">
                 <div id="txt-empate-1" class="draggable-item empate-text" style="display:none;">EMPATE</div>
                 <img id="avatar-empate-2" src="" draggable="false" class="draggable-item" style="z-index: 3; display:none;">
@@ -277,19 +302,28 @@
              </div>
 
              <div class="events-box" id="events-container">
-                <div class="events-title"><span><i class="fas fa-calendar-alt"></i> MURAL DE EVENTOS</span><span id="mes-atual" style="color:#fff; font-size:14px;"></span></div>
+                <div class="events-title">
+                   <span><i class="fas fa-calendar-alt"></i> MURAL DE EVENTOS</span>
+                   <span id="mes-atual" style="color:#fff; font-size:14px;"></span>
+                </div>
                 <div id="ui-lista-eventos" style="flex:1;"></div>
                 <div class="events-title" style="font-size: 15px; margin-top:10px;"><i class="fas fa-star"></i> Patrocinadores Oficiais</div>
                 <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px; position:relative;">
                    <img src="https://www.habbo.com.br/habbo-imaging/badge/b09134s12017s55012t12014s4301414a5c32c3d12825df4b3496e1fb8ba98.gif" alt="Badge" style="width: 50px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); pointer-events: none;">
                    <div id="sponsors-container" class="sponsor-list"></div>
                 </div>
-                <div class="sponsor-text">"<span id="ui-txt-patrocinio"></span>"<br><br><span style="color: var(--sup-neon); font-weight:bold;">Supervisor por amor, gestor por essência. #SAGE</span></div>
+                <div class="sponsor-text">
+                   "<span id="ui-txt-patrocinio">Deseja patrocinar algum dos eventos e ajudar a divisão? Procure a Liderança!</span>"<br><br>
+                   <span style="color: var(--sup-neon); font-weight:bold;">Supervisor por amor, gestor por essência. #SAGE</span>
+                </div>
              </div>
           </div>
 
           <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
-              <div class="input-block" style="max-width: 300px; margin:0;"><i class="fas fa-search"></i><select id="select-membro" onchange="window.renderMemberDetails()"><option value="" disabled selected>Selecione um membro...</option></select></div>
+              <div class="input-block" style="max-width: 300px; margin:0;">
+                 <i class="fas fa-search"></i>
+                 <select id="select-membro" onchange="window.renderMemberDetails()"><option value="" disabled selected>Selecione um membro...</option></select>
+              </div>
           </div>
 
           <div class="member-details-layout" id="area-detalhes-membro" style="display:none; opacity:0; transition: opacity 0.4s;">
