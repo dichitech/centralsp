@@ -20,10 +20,6 @@ window.abrirModalLink = function() { event.preventDefault(); window.saveSelectio
 window.fecharCustomPrompt = function() { document.getElementById('custom-prompt-modal').style.display = 'none'; }
 window.confirmarCustomPrompt = function() { let url = document.getElementById('custom-prompt-input').value.trim(); window.fecharCustomPrompt(); window.restoreSelection(); if(url) { document.execCommand("createLink", false, url); } }
 
-window.buildEditorHTML = function(id, content = '') {
-    return `<div class="editor-toolbar"><button type="button" onmousedown="window.applyStyle('bold')"><i class="fas fa-bold"></i></button><button type="button" onmousedown="window.applyStyle('italic')"><i class="fas fa-italic"></i></button><button type="button" onmousedown="window.applyStyle('underline')"><i class="fas fa-underline"></i></button><button type="button" onmousedown="window.abrirModalLink()"><i class="fas fa-link"></i></button><input type="color" title="Cor" onchange="window.applyStyle('foreColor', this.value)" style="margin-left:5px;"></div><div class="rich-editor admin-input ev-desc" contenteditable="true" id="${id}">${content}</div>`;
-}
-
 window.liberarPainel = function() {
     document.getElementById('loginCard').style.display = 'none'; document.getElementById('loginLoader').style.display = 'none'; document.getElementById('loginScreen').style.opacity = '0';
     setTimeout(() => { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('appWrapper').style.display = 'flex'; }, 300);
@@ -72,7 +68,8 @@ async function verificarAcessoBD(email) {
             nivelUsuarioGlobal = nivelUsuarioGlobal.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
             if(nivelUsuarioGlobal === 'VICELIDER') nivelUsuarioGlobal = 'VICE-LIDER'; if(nivelUsuarioGlobal === 'SUBLIDER') nivelUsuarioGlobal = 'SUB-LIDER';
             
-            if (nivelUsuarioGlobal === 'COMANDO') { window.customAlert("Acesso de Comando restrito ao Painel Público.", "Aviso"); setTimeout(()=> { auth.signOut(); window.location.href = "https://dichitech.github.io/ranking"; }, 3000); return; }
+            // Aqui a regra do COMANDO entra em ação: Manda ele pro site de estrelas
+            if (nivelUsuarioGlobal === 'COMANDO') { window.customAlert("Acesso de Comando restrito ao Painel Público.", "Área Restrita"); setTimeout(()=> { auth.signOut(); window.location.href = "https://dichitech.github.io/ranking"; }, 3000); return; }
             if (nivelUsuarioGlobal === 'LIDER' || nivelUsuarioGlobal === 'VICE-LIDER') { document.getElementById('admin-only-menus').style.display = 'flex'; document.getElementById('admin-drag-controls').style.display = 'flex'; renderTabelaAcessos(); document.getElementById('box-editor-privacidade').innerHTML = window.buildEditorHTML('editor-privacidade', 'Carregando...'); }
             if (nivelUsuarioGlobal === 'SUPERVISOR') { let menuAv = document.getElementById('menu-avais'); if(menuAv) menuAv.style.display = 'none'; let menuFb = document.getElementById('menu-feedbacks'); if(menuFb) menuFb.style.display = 'none'; let menuEs = document.getElementById('menu-estrelas'); if(menuEs) menuEs.style.display = 'none'; }
             
@@ -114,7 +111,6 @@ function renderTabelaEstrelas() {
 
 function registrarLogEstrela(bene, acao, idProm, detalhes) { db.collection("logs_estrelas").add({ timestamp: new Date().getTime(), data_hora: new Date().toLocaleString('pt-BR'), autor: usuarioLogadoNick, beneficiado: bene, acao: acao, id_promocao: idProm || '-', detalhes: detalhes }); }
 
-// LOTE DE VALIDAÇÕES
 window.buscarPromocoesLote = async function() {
     let dateVal = document.getElementById('lote-data').value;
     if(!dateVal) return window.mostrarToast("Selecione uma data para a validação.", "error");
@@ -169,7 +165,6 @@ window.confirmarLote = async function(contagem, idsColetados) {
         let detailLog = `Validou ${qtd} promoção(ões). `;
         if(estrelasGanhas > 0) detailLog += `Conquistou ${estrelasGanhas} estrela(s)! `;
 
-        // Aviso visual sem resetar a pontuação automaticamente
         let atingiuPremio = Math.floor(estrelasAntes / 10) < Math.floor(e / 10);
         if (atingiuPremio) {
              window.customAlert(`🏅 O policial ${dbNick} acaba de atingir ${e} estrelas no sistema!<br><br>Avise o Comando para realizar o pagamento oficial destas 10 estrelas.`, "Aguardando Pagamento!");
@@ -320,6 +315,7 @@ window.processarCalculo = function() {
     document.getElementById('texto-resultado').innerHTML = m; document.getElementById('resultado-aval').style.display = 'block';
 }
 
+// GERENCIADOR DE ACESSOS
 function renderTabelaAcessos() { 
     var tbody = document.querySelector('#tbAcessos tbody'); if(!tbody) return; tbody.innerHTML = ''; 
     let rendered = new Set();
@@ -333,10 +329,10 @@ function renderTabelaAcessos() {
 }
 function criarRowAcesso(item, origem) { 
     var tr = document.createElement('tr'); 
-    let sL = item.nivel === 'LIDER' ? 'selected' : ''; let sV = item.nivel === 'VICE-LIDER' ? 'selected' : ''; let sS = item.nivel === 'SUB-LIDER' ? 'selected' : ''; let sSup = item.nivel === 'SUPERVISOR' ? 'selected' : ''; let hideAcoes = (nivelUsuarioGlobal === 'VICE-LIDER' && item.nivel === 'LIDER') ? 'display:none;' : ''; 
+    let sL = item.nivel === 'LIDER' ? 'selected' : ''; let sV = item.nivel === 'VICE-LIDER' ? 'selected' : ''; let sS = item.nivel === 'SUB-LIDER' ? 'selected' : ''; let sSup = item.nivel === 'SUPERVISOR' ? 'selected' : ''; let sC = item.nivel === 'COMANDO' ? 'selected' : ''; let hideAcoes = (nivelUsuarioGlobal === 'VICE-LIDER' && item.nivel === 'LIDER') ? 'display:none;' : ''; 
     let tBadge = origem === 'planilha' ? '<span style="background:rgba(251,191,36,0.2); color:var(--sup-neon); padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px;">PLANILHA</span>' : '<span style="background:rgba(76,175,80,0.2); color:#4caf50; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px;">MANUAL</span>';
     let acoes = origem === 'planilha' ? '<span style="color:#888; font-size:11px;">Via Planilha</span>' : `<button class="btn-admin-icon btn-admin-edit" onclick="window.toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button><button class="btn-admin-icon btn-admin-del" onclick="this.closest('tr').remove()" title="Excluir"><i class="fas fa-trash"></i></button>`;
-    tr.innerHTML = `<td><input type="text" class="admin-input inp-email" value="${item.email || ''}" readonly style="width:70%; display:inline-block; margin-right:5px;">${tBadge}</td><td><input type="text" class="admin-input inp-nick" value="${item.nick || ''}" readonly></td><td><select class="admin-input inp-nivel" disabled><option value="LIDER" ${sL}>Líder</option><option value="VICE-LIDER" ${sV}>Vice-Líder</option><option value="SUB-LIDER" ${sS}>Sub-Líder</option><option value="SUPERVISOR" ${sSup}>Supervisor</option></select></td><td class="action-cell" style="${hideAcoes}" data-origem="${origem}">${acoes}</td>`; return tr; 
+    tr.innerHTML = `<td><input type="text" class="admin-input inp-email" value="${item.email || ''}" readonly style="width:70%; display:inline-block; margin-right:5px;">${tBadge}</td><td><input type="text" class="admin-input inp-nick" value="${item.nick || ''}" readonly></td><td><select class="admin-input inp-nivel" disabled><option value="LIDER" ${sL}>Líder</option><option value="VICE-LIDER" ${sV}>Vice-Líder</option><option value="SUB-LIDER" ${sS}>Sub-Líder</option><option value="SUPERVISOR" ${sSup}>Supervisor</option><option value="COMANDO" ${sC}>Comando</option></select></td><td class="action-cell" style="${hideAcoes}" data-origem="${origem}">${acoes}</td>`; return tr; 
 }
 window.addLinhaAcesso = function() { var tbody = document.querySelector('#tbAcessos tbody'); var tr = criarRowAcesso({ email: '', nick: '', nivel: 'SUPERVISOR' }, 'manual'); tbody.appendChild(tr); window.toggleEditRow(tr.querySelector('.btn-admin-edit')); }
 window.toggleEditRow = function(btn) { var tr = btn.closest('tr'); tr.querySelectorAll('input, select').forEach(inp => inp.removeAttribute('disabled')); tr.querySelectorAll('input').forEach(inp => inp.removeAttribute('readonly')); btn.innerHTML = '<i class="fas fa-check"></i>'; btn.className = 'btn-admin-icon btn-admin-check'; btn.onclick = function() { window.confirmEditRow(btn); }; }
