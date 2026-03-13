@@ -18,39 +18,125 @@ window.salvarPrivacidade = function() {
     });
 }
 
+// NOVO: Adiciona a caixa visual para um novo aval
+window.adicionarAval = function() {
+    let container = document.getElementById('lista-avais-container');
+    let count = container.querySelectorAll('.aval-item').length + 1;
+    let div = document.createElement('div');
+    div.className = 'row aval-item';
+    div.style.display = 'flex';
+    div.style.gap = '20px';
+    div.style.flexWrap = 'wrap';
+    div.style.marginTop = '15px';
+    div.style.paddingTop = '15px';
+    div.style.borderTop = '1px dashed rgba(251,191,36,0.2)';
+    div.style.position = 'relative';
+    
+    div.innerHTML = `
+        <button type="button" onclick="this.closest('.aval-item').remove()" style="position:absolute; right:0; top:-15px; background:rgba(255,42,42,0.1); border:none; color:#ef4444; width:30px; height:30px; border-radius:50%; cursor:pointer; z-index:10;"><i class="fas fa-times"></i></button>
+        <div class="form-group" style="flex:1; min-width:200px;"><label class="tech-label">Início do Aval ${count}</label><div class="input-block"><i class="fas fa-hourglass-start"></i><input type="date" class="data-aval-input"></div></div>
+        <div class="form-group" style="flex:1; min-width:200px;"><label class="tech-label">Dias de Aval</label><div class="input-block"><i class="fas fa-sort-numeric-up"></i><input type="number" class="dias-aval-input" min="1" placeholder="Ex: 7"></div></div>
+    `;
+    container.appendChild(div);
+}
+
+// NOVO: Motor de cálculo dia-a-dia para cruzar todos os avais inseridos
 window.processarCalculo = function() {
     const d1 = document.getElementById('data-login').value;
-    const d2 = document.getElementById('data-aval').value;
-    const dAval = parseInt(document.getElementById('dias-aval').value);
     const d3 = document.getElementById('data-consulta').value;
     
-    if (!d1 || !d2 || isNaN(dAval) || !d3) return window.customAlert("Preencha todos os campos corretamente.", "Atenção");
+    if (!d1 || !d3) return window.customAlert("Preencha Último Login e Data da Consulta.", "Atenção");
     
     const u = new Date(d1 + 'T00:00:00');
-    const i = new Date(d2 + 'T00:00:00');
     const c = new Date(d3 + 'T00:00:00');
-    const f = new Date(i);
-    f.setDate(i.getDate() + dAval - 1);
     
-    const UM_DIA = 1000 * 60 * 60 * 24;
-    const dif = (ant, nov) => Math.floor((nov - ant) / UM_DIA);
-    let m = "";
+    if (c < u) return window.customAlert("A Data da Consulta não pode ser anterior ao Último Login.", "Erro");
     
-    if (u > f) { m = `Aval obsoleto (terminou antes do último login). Ausência de <strong>${Math.max(0, dif(u, c))} dia(s)</strong>.`; } 
-    else if (c <= i) { m = `O aval ainda não começou. Ausência normal de <strong>${Math.max(0, dif(u, c))} dia(s)</strong>.`; } 
-    else {
-        let a1 = Math.max(0, dif(u, i) - 1);
-        if (c > f) {
-            let a2 = Math.max(0, dif(f, c));
-            m = `Ausência pré-aval: <strong>${a1} dia(s)</strong><br>Ausência pós-aval: <strong>${a2} dia(s)</strong><br><span style="display:block; margin-top:10px;">Total: <strong>${a1 + a2} dia(s)</strong></span>`;
+    let periodos = [];
+    document.querySelectorAll('.aval-item').forEach(node => {
+        let dt = node.querySelector('.data-aval-input').value;
+        let ds = parseInt(node.querySelector('.dias-aval-input').value);
+        if(dt && !isNaN(ds) && ds > 0) {
+            let ini = new Date(dt + 'T00:00:00');
+            let fim = new Date(ini);
+            fim.setDate(ini.getDate() + ds - 1);
+            periodos.push({ i: ini, f: fim });
+        }
+    });
+    
+    let totalAusencia = 0;
+    let emAval = false;
+    
+    for(let p of periodos) {
+        if(c >= p.i && c <= p.f) emAval = true;
+    }
+    
+    let curr = new Date(u);
+    curr.setDate(curr.getDate() + 1); // A contagem começa 1 dia após o último login oficial
+    
+    let gaps = [];
+    let curGapStart = null;
+    let curGapLen = 0;
+    
+    // Percorre todos os dias entre o último login e a data da consulta
+    while(curr <= c) {
+        let covered = false;
+        // Checa se o dia atual cai dentro de qualquer um dos avais (mesmo que se cruzem)
+        for(let p of periodos) {
+            if(curr >= p.i && curr <= p.f) { covered = true; break; }
+        }
+        
+        if(!covered) {
+            totalAusencia++;
+            curGapLen++;
+            if(!curGapStart) curGapStart = new Date(curr);
         } else {
-            m = `Militar em período de aval.<br>Ausência antes do aval: <strong>${a1} dia(s)</strong>.`;
+            if(curGapStart) {
+                let endGap = new Date(curr);
+                endGap.setDate(endGap.getDate() - 1);
+                gaps.push({ s: curGapStart, e: endGap, len: curGapLen });
+                curGapStart = null;
+                curGapLen = 0;
+            }
+        }
+        curr.setDate(curr.getDate() + 1);
+    }
+    
+    // Se terminou a contagem com um "buraco" ainda aberto
+    if(curGapStart) {
+        let endGap = new Date(c);
+        gaps.push({ s: curGapStart, e: endGap, len: curGapLen });
+    }
+    
+    const fmtDt = (dt) => dt.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric'});
+    
+    let html = "";
+    if (periodos.length === 0) {
+        html += `Nenhum aval registrado.<br>Ausência contínua de <strong>${totalAusencia} dia(s)</strong>.`;
+    } else {
+        if (emAval) html += `<div style="color:var(--sup-neon); font-weight:bold; margin-bottom:15px; font-size:16px;"><i class="fas fa-check-circle"></i> O militar encontra-se de Aval no dia de hoje.</div>`;
+        
+        if (totalAusencia === 0) {
+            html += `<span style="color:#4caf50;">O período está 100% coberto pelos avais indicados. Nenhuma ausência extra.</span>`;
+        } else {
+            html += `<div style="margin-bottom:10px; color:var(--text-sub); font-size:14px; text-transform:uppercase;">Extrato de Dias Descobertos (Buracos):</div>`;
+            gaps.forEach(g => {
+                let ds = fmtDt(g.s);
+                let de = fmtDt(g.e);
+                let txt = ds === de ? `${ds}` : `${ds} até ${de}`;
+                html += `<div style="margin-bottom:6px; background:rgba(255,42,42,0.1); border:1px solid rgba(239,68,68,0.2); padding:8px 12px; border-radius:4px; color:#fff;"><i class="fas fa-exclamation-triangle" style="color:#ff2a2a; margin-right:5px;"></i> ${txt}: <strong>${g.len} dia(s)</strong></div>`;
+            });
         }
     }
     
-    document.getElementById('texto-resultado').innerHTML = m;
+    if (totalAusencia > 0 || periodos.length > 0) {
+        let corFinal = totalAusencia === 0 ? "#4caf50" : "#ff2a2a";
+        html += `<div style="margin-top:20px; border-top:1px dashed rgba(251,191,36,0.3); padding-top:15px; font-size:18px; font-weight:bold;">Ausência Efetiva Resultante: <span style="color:${corFinal};">${totalAusencia} dia(s)</span></div>`;
+    }
+    
+    document.getElementById('texto-resultado').innerHTML = html;
     document.getElementById('resultado-aval').style.display = 'block';
-    window.registrarLogAtividade("Cálculo de Aval", `Realizou cálculo com base em ${d1} e ${d2}.`);
+    window.registrarLogAtividade("Cálculo de Aval", `Calculou avais múltiplos resultando em ${totalAusencia} dia(s) de falta.`);
 }
 
 window.renderTabelaAcessos = function() {
@@ -77,14 +163,13 @@ window.criarRowAcesso = function(item, origem) {
     var tr = document.createElement('tr');
     
     let sL = item.nivel === 'LIDER' ? 'selected' : '';
-    let sA = item.nivel === 'ADMIN' ? 'selected' : ''; // NOVO: Admin
+    let sA = item.nivel === 'ADMIN' ? 'selected' : '';
     let sV = item.nivel === 'VICE-LIDER' ? 'selected' : '';
     let sS = item.nivel === 'SUB-LIDER' ? 'selected' : '';
     let sAux = item.nivel === 'AUXILIAR' ? 'selected' : '';
     let sSup = item.nivel === 'SUPERVISOR' ? 'selected' : '';
     let sC = item.nivel === 'COMANDO' ? 'selected' : '';
     
-    // Oculta botões de edição se um Vice-Líder tentar alterar um Líder ou um Admin
     let hideAcoes = (window.nivelUsuarioGlobal === 'VICE-LIDER' && (item.nivel === 'LIDER' || item.nivel === 'ADMIN')) ? 'display:none;' : '';
     let tBadge = origem === 'planilha' ? '<span style="background:rgba(251,191,36,0.2); color:var(--sup-neon); padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px;">PLANILHA</span>' : '<span style="background:rgba(76,175,80,0.2); color:#4caf50; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px;">MANUAL</span>';
     let acoes = origem === 'planilha' ? '<span style="color:#888; font-size:11px;">Via Planilha</span>' : `<button class="btn-admin-icon btn-admin-edit" onclick="window.toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button><button class="btn-admin-icon btn-admin-del" onclick="this.closest('tr').remove()" title="Excluir"><i class="fas fa-trash"></i></button>`;
