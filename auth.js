@@ -20,11 +20,13 @@ window.liberarPainel = function() {
     
     let lvl = window.nivelUsuarioGlobal;
     
-    if (['SUB-LIDER', 'VICE-LIDER', 'LIDER'].includes(lvl)) {
+    // Libera Estrelas para Sub-Liderança, Vice, Líder e ADMIN
+    if (['SUB-LIDER', 'VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl)) {
         window.escutarMilitaresEstrelas();
     }
     
-    if (['VICE-LIDER', 'LIDER'].includes(lvl)) {
+    // Libera Ferramentas de Gestão e Logs para Vice, Líder e ADMIN
+    if (['VICE-LIDER', 'LIDER', 'ADMIN'].includes(lvl)) {
         window.carregarPrivacidade();
         window.escutarLogsEstrelas();
         window.escutarLogsAtividades();
@@ -73,7 +75,7 @@ window.verificarAcessoBD = async function(email) {
 
         let autorizado = false;
 
-        if (userPlan && (userPlan.nivel.includes("LIDER") || userPlan.nivel.includes("VICE"))) {
+        if (userPlan && (userPlan.nivel.includes("LIDER") || userPlan.nivel.includes("VICE") || userPlan.nivel.includes("ADMIN"))) {
             autorizado = true; window.nivelUsuarioGlobal = userPlan.nivel; window.usuarioLogadoNick = userPlan.nick;
         } else if (userManual) {
             autorizado = true; window.nivelUsuarioGlobal = userManual.nivel; window.usuarioLogadoNick = userManual.nick;
@@ -109,11 +111,9 @@ window.verificarAcessoBD = async function(email) {
                 if(menuAvais) menuAvais.style.display = 'none';
                 if(menuFeedbacks) menuFeedbacks.style.display = 'none';
                 if(menuEstrelas) menuEstrelas.style.display = 'none';
-                // Controle de Grupos agora está liberado!
             } 
             else if (lvl === 'AUXILIAR') {
                 if(menuEstrelas) menuEstrelas.style.display = 'none';
-                // Controle de Grupos agora está liberado!
             } 
             else if (lvl === 'SUB-LIDER') {
                 if(dragControls) dragControls.style.display = 'flex';
@@ -121,7 +121,8 @@ window.verificarAcessoBD = async function(email) {
                 if(btnSavePos) btnSavePos.style.display = 'none';
                 if(dicaResize) dicaResize.style.display = 'none';
             } 
-            else if (lvl === 'VICE-LIDER' || lvl === 'LIDER') {
+            // Libera Menu Admin e Edições para Líder, Vice-Líder e ADMIN
+            else if (lvl === 'VICE-LIDER' || lvl === 'LIDER' || lvl === 'ADMIN') {
                 if(menuAdmin) menuAdmin.style.display = 'flex';
                 if(dragControls) dragControls.style.display = 'flex';
                 window.renderTabelaAcessos();
