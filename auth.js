@@ -1,3 +1,38 @@
+// O "Motor de Partida" do painel que faz a tela abrir
+window.liberarPainel = function() {
+    document.getElementById('loginCard').style.display = 'none';
+    document.getElementById('loginLoader').style.display = 'none';
+    document.getElementById('loginScreen').style.opacity = '0';
+    
+    setTimeout(() => {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appWrapper').style.display = 'flex';
+    }, 300);
+    
+    document.getElementById('data-consulta').valueAsDate = new Date();
+    
+    const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    document.getElementById('mes-atual').innerText = meses[new Date().getMonth()] + " de " + new Date().getFullYear();
+    
+    // Dispara todos os módulos para puxar dados
+    window.carregarLayoutConfig();
+    window.escutarCargos();
+    window.escutarConfigDashboard();
+    window.escutarMetasDoFirebase();
+    
+    if (window.nivelUsuarioGlobal !== 'SUPERVISOR') {
+        window.escutarMilitaresEstrelas();
+    }
+    
+    if (window.nivelUsuarioGlobal === 'LIDER' || window.nivelUsuarioGlobal === 'VICE-LIDER') {
+        window.carregarPrivacidade();
+        window.escutarLogsEstrelas();
+    }
+    
+    window.setupAllDraggables();
+}
+
+// Ouvinte de Login do Firebase
 auth.onAuthStateChanged((user) => {
     if (user) {
         window.usuarioLogadoEmail = user.email.toLowerCase();
@@ -12,6 +47,7 @@ auth.onAuthStateChanged((user) => {
     }
 });
 
+// Verificação de Segurança das Permissões
 window.verificarAcessoBD = async function(email) {
     try {
         let authEmail = email.toLowerCase().trim();
@@ -106,6 +142,8 @@ window.verificarAcessoBD = async function(email) {
             }
             
             window.switchSection('modulo-metas', document.getElementById('menu-metas'));
+            
+            // Agora ele chama a função e libera a tela
             window.liberarPainel();
         } else {
             window.customAlert(`ACESSO NEGADO.<br><br>O e-mail <b>${authEmail}</b> não foi encontrado com permissões ativas.`, "Falha de Permissão");
@@ -116,6 +154,7 @@ window.verificarAcessoBD = async function(email) {
     }
 }
 
+// Botões de Ação do Login e Menu
 window.loginGoogle = function() {
     const provider = new firebase.auth.GoogleAuthProvider();
     document.getElementById('loginCard').style.display = 'none';
