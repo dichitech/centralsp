@@ -1,5 +1,5 @@
 window.carregarPrivacidade = function() {
-    db.collection("sistema").doc("config_geral").get().then((doc) => {
+    window.db.collection("sistema").doc("config_geral").get().then((doc) => {
         let htmlPadrao = `<p>Escreva aqui a Política de Privacidade.</p>`;
         if (doc.exists && doc.data().textoPrivacidade) {
             document.getElementById('editor-privacidade').innerHTML = doc.data().textoPrivacidade;
@@ -10,9 +10,12 @@ window.carregarPrivacidade = function() {
 }
 
 window.salvarPrivacidade = function() {
-    db.collection("sistema").doc("config_geral").set({ 
+    window.db.collection("sistema").doc("config_geral").set({ 
         textoPrivacidade: document.getElementById('editor-privacidade').innerHTML 
-    }, { merge: true }).then(() => window.mostrarToast("Política de Privacidade salva!", "success"));
+    }, { merge: true }).then(() => {
+        window.mostrarToast("Política de Privacidade salva!", "success");
+        window.registrarLogAtividade("Editou Privacidade", "Modificou a política pública.");
+    });
 }
 
 window.processarCalculo = function() {
@@ -33,11 +36,9 @@ window.processarCalculo = function() {
     const dif = (ant, nov) => Math.floor((nov - ant) / UM_DIA);
     let m = "";
     
-    if (u > f) {
-        m = `Aval obsoleto (terminou antes do último login). Ausência de <strong>${Math.max(0, dif(u, c))} dia(s)</strong>.`;
-    } else if (c <= i) {
-        m = `O aval ainda não começou. Ausência normal de <strong>${Math.max(0, dif(u, c))} dia(s)</strong>.`;
-    } else {
+    if (u > f) { m = `Aval obsoleto (terminou antes do último login). Ausência de <strong>${Math.max(0, dif(u, c))} dia(s)</strong>.`; } 
+    else if (c <= i) { m = `O aval ainda não começou. Ausência normal de <strong>${Math.max(0, dif(u, c))} dia(s)</strong>.`; } 
+    else {
         let a1 = Math.max(0, dif(u, i) - 1);
         if (c > f) {
             let a2 = Math.max(0, dif(f, c));
@@ -49,6 +50,7 @@ window.processarCalculo = function() {
     
     document.getElementById('texto-resultado').innerHTML = m;
     document.getElementById('resultado-aval').style.display = 'block';
+    window.registrarLogAtividade("Cálculo de Aval", `Realizou cálculo com base em ${d1} e ${d2}.`);
 }
 
 window.renderTabelaAcessos = function() {
@@ -82,9 +84,7 @@ window.criarRowAcesso = function(item, origem) {
     let sC = item.nivel === 'COMANDO' ? 'selected' : '';
     
     let hideAcoes = (window.nivelUsuarioGlobal === 'VICE-LIDER' && item.nivel === 'LIDER') ? 'display:none;' : '';
-    
     let tBadge = origem === 'planilha' ? '<span style="background:rgba(251,191,36,0.2); color:var(--sup-neon); padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px;">PLANILHA</span>' : '<span style="background:rgba(76,175,80,0.2); color:#4caf50; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:8px;">MANUAL</span>';
-    
     let acoes = origem === 'planilha' ? '<span style="color:#888; font-size:11px;">Via Planilha</span>' : `<button class="btn-admin-icon btn-admin-edit" onclick="window.toggleEditRow(this)" title="Editar"><i class="fas fa-pencil-alt"></i></button><button class="btn-admin-icon btn-admin-del" onclick="this.closest('tr').remove()" title="Excluir"><i class="fas fa-trash"></i></button>`;
     
     tr.innerHTML = `
@@ -132,10 +132,10 @@ window.confirmEditRow = function(btn) {
 
 window.salvarAcessos = function() {
     var rows = document.querySelectorAll('#tbAcessos tbody tr');
-    const batch = db.batch();
+    const batch = window.db.batch();
     
     window.acessosData.forEach(ac => {
-        batch.delete(db.collection("acessos").doc(ac.email));
+        batch.delete(window.db.collection("acessos").doc(ac.email));
     });
     
     rows.forEach(r => {
@@ -143,7 +143,7 @@ window.salvarAcessos = function() {
         if (isManual) {
             var email = r.querySelector('.inp-email').value.trim().toLowerCase();
             if (email) {
-                batch.set(db.collection("acessos").doc(email), {
+                batch.set(window.db.collection("acessos").doc(email), {
                     email: email,
                     nick: r.querySelector('.inp-nick').value.trim(),
                     nivel: r.querySelector('.inp-nivel').value.toUpperCase()
@@ -154,7 +154,20 @@ window.salvarAcessos = function() {
     
     batch.commit().then(() => {
         window.mostrarToast("Acessos manuais salvos!", "success");
+        window.registrarLogAtividade("Editou Acessos", "Modificou as permissões manuais do sistema.");
     }).catch((e) => {
         window.mostrarToast("Erro: " + e.message, "error");
+    });
+}
+
+window.escutarLogsAtividades = function() {
+    window.db.collection("logs_atividades").orderBy("timestamp", "desc").limit(100).onSnapshot(snap => {
+        let tbody = document.querySelector('#tb-logs-atividades tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        snap.forEach(doc => {
+            let d = doc.data();
+            tbody.innerHTML += `<tr><td style="font-size:12px; color:var(--text-sub);">${d.data_hora}</td><td><strong style="color:var(--sup-neon);">${d.autor}</strong></td><td style="font-weight:bold; color:#fff;">${d.acao}</td><td style="font-size:13px; color:#aaa;">${d.detalhes}</td></tr>`;
+        });
     });
 }

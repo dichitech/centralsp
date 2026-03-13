@@ -1,5 +1,5 @@
 window.escutarMetasDoFirebase = function() {
-    db.collection("sistema").doc("metas").onSnapshot((doc) => {
+    window.db.collection("sistema").doc("metas").onSnapshot((doc) => {
         if (doc.exists && doc.data().dados) {
             let rows = [];
             try { rows = JSON.parse(doc.data().dados); } catch (e) { return; }
@@ -105,18 +105,14 @@ window.popularSelectMembros = function() {
     let valAtual = sel.value;
     sel.innerHTML = '<option value="" disabled selected>Selecione um membro...</option>';
     let sorted = [...window.membrosDataArray].sort((a, b) => a.nick.localeCompare(b.nick));
-    
     sorted.forEach(m => { sel.innerHTML += `<option value="${m.nick}">${m.cargo} ${m.nick}</option>`; });
     if (valAtual) sel.value = valAtual;
 }
 
-window.getPontuacaoFinal = function(m) {
-    return (m.total_base * window.eventoMult) + (window.pontosExtrasMap[m.nick] || 0);
-}
+window.getPontuacaoFinal = function(m) { return (m.total_base * window.eventoMult) + (window.pontosExtrasMap[m.nick] || 0); }
 
 window.processarPodio = function() {
     if (window.isEditMode) return;
-    
     let a1 = document.getElementById('avatar-1'); let m1 = document.getElementById('medal-1'); let n1 = document.getElementById('nick-1');
     let a2 = document.getElementById('avatar-2'); let m2 = document.getElementById('medal-2'); let n2 = document.getElementById('nick-2');
     let ae1 = document.getElementById('avatar-empate-1'); let te1 = document.getElementById('txt-empate-1');
@@ -139,7 +135,6 @@ window.processarPodio = function() {
         a1.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[0].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b&time=${ts}`;
         n1.innerText = top[0].nick;
         [a1, m1, n1].forEach(el => el.style.display = 'block');
-        
         if (top.length > 1 && p2 > 0) {
             a2.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=${top[1].nick}&action=std&direction=2&head_direction=2&gesture=sml&size=b&time=${ts}`;
             n2.innerText = top[1].nick;
@@ -245,7 +240,7 @@ window.salvarDashboard = function() {
         });
     });
     
-    db.collection("sistema").doc("config_metas").set({
+    window.db.collection("sistema").doc("config_metas").set({
         eventoAtivo: document.getElementById('dash-toggle-evento').checked,
         eventoMult: parseInt(document.getElementById('dash-mult-evento').value) || 1,
         textoPatrocinio: document.getElementById('dash-txt-patrocinio').value,
@@ -253,11 +248,12 @@ window.salvarDashboard = function() {
     }, { merge: true }).then(() => {
         window.mostrarToast("Painel Atualizado!", "success");
         window.fecharDashboard();
+        window.registrarLogAtividade("Editou Dashboard", "Atualizou mural de eventos ou multiplicador.");
     }).catch((e) => window.mostrarToast("Erro ao salvar Dashboard.", "error"));
 }
 
 window.escutarConfigDashboard = function() {
-    db.collection("sistema").doc("config_metas").onSnapshot((doc) => {
+    window.db.collection("sistema").doc("config_metas").onSnapshot((doc) => {
         if (doc.exists) {
             let d = doc.data();
             window.eventoAtivo = d.eventoAtivo || false;
@@ -265,14 +261,12 @@ window.escutarConfigDashboard = function() {
             window.pontosExtrasMap = d.pontosExtras || {};
             window.dashboardEventosData = d.eventos || [];
             
-            // Sub-Liderança também tem acesso aos controles do Dashboard
             if (['LIDER', 'VICE-LIDER', 'SUB-LIDER'].includes(window.nivelUsuarioGlobal)) {
                 let tg = document.getElementById('dash-toggle-evento'); if (tg) tg.checked = window.eventoAtivo;
                 let ml = document.getElementById('dash-mult-evento'); if (ml) ml.value = window.eventoMult;
                 let pr = document.getElementById('dash-txt-patrocinio'); if (pr) pr.value = d.textoPatrocinio || '';
             }
 
-            // Exibe o botão de Pontos Extras apenas se o evento estiver ativo E se tiver permissão
             let btnPE = document.getElementById('btn-pontos-extras');
             if (btnPE && ['LIDER', 'VICE-LIDER', 'SUB-LIDER'].includes(window.nivelUsuarioGlobal)) {
                 btnPE.style.display = window.eventoAtivo ? 'inline-flex' : 'none';
@@ -287,9 +281,7 @@ window.escutarConfigDashboard = function() {
             }
 
             let tSpon = document.getElementById('ui-txt-patrocinio');
-            if (tSpon) {
-                tSpon.innerText = d.textoPatrocinio || 'Deseja patrocinar algum dos eventos e ajudar a divisão? Procure a Liderança!';
-            }
+            if (tSpon) tSpon.innerText = d.textoPatrocinio || 'Deseja patrocinar algum dos eventos e ajudar a divisão? Procure a Liderança!';
 
             let uiLista = document.getElementById('ui-lista-eventos');
             if (uiLista) {
@@ -299,11 +291,8 @@ window.escutarConfigDashboard = function() {
                 } else {
                     window.dashboardEventosData.forEach((ev, i) => {
                         let dtTxt = '';
-                        if (ev.dataInicio && ev.dataFim) {
-                            dtTxt = `${window.formatarDataBR(ev.dataInicio)} a ${window.formatarDataBR(ev.dataFim)}`;
-                        } else if (ev.dataInicio) {
-                            dtTxt = `A partir de ${window.formatarDataBR(ev.dataInicio)}`;
-                        }
+                        if (ev.dataInicio && ev.dataFim) dtTxt = `${window.formatarDataBR(ev.dataInicio)} a ${window.formatarDataBR(ev.dataFim)}`;
+                        else if (ev.dataInicio) dtTxt = `A partir de ${window.formatarDataBR(ev.dataInicio)}`;
                         
                         let pUI = '';
                         if (ev.premiosTexto || ev.hc || ev.moedas) {
@@ -320,25 +309,14 @@ window.escutarConfigDashboard = function() {
                             pUI += `</div>`;
                         }
                         
-                        uiLista.insertAdjacentHTML('beforeend', `
-                            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border-left: 3px solid var(--sup-neon); margin-bottom: 15px;">
-                                <h4 style="color:var(--sup-neon); margin-bottom: 5px; font-size: 18px; text-transform: uppercase;">${ev.nome || 'Evento'}</h4>
-                                ${dtTxt ? `<div style="color: var(--text-sub); font-size: 13px; margin-bottom: 10px; display:flex; align-items:center; gap:5px; font-weight:600;"><i class="far fa-calendar-day"></i> <span>${dtTxt}</span></div>` : ''}
-                                <div style="color: #fff; font-size: 14px; line-height: 1.5;">${ev.descricao || ''}</div>
-                                ${pUI}
-                            </div>
-                        `);
+                        uiLista.insertAdjacentHTML('beforeend', `<div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border-left: 3px solid var(--sup-neon); margin-bottom: 15px;"><h4 style="color:var(--sup-neon); margin-bottom: 5px; font-size: 18px; text-transform: uppercase;">${ev.nome || 'Evento'}</h4>${dtTxt ? `<div style="color: var(--text-sub); font-size: 13px; margin-bottom: 10px; display:flex; align-items:center; gap:5px; font-weight:600;"><i class="far fa-calendar-day"></i> <span>${dtTxt}</span></div>` : ''}<div style="color: #fff; font-size: 14px; line-height: 1.5;">${ev.descricao || ''}</div>${pUI}</div>`);
                     });
                 }
             }
-            
             window.setupPrizesResizable();
-            
             if (window.membrosDataArray.length > 0) {
                 window.processarPodio();
-                if (document.getElementById('select-membro').value) {
-                    window.renderMemberDetails();
-                }
+                if (document.getElementById('select-membro').value) window.renderMemberDetails();
                 window.renderTabelaPontosExtras();
             }
         }
@@ -349,17 +327,11 @@ window.abrirModalPontosExtras = function() {
     document.getElementById('modal-pontos-extras').style.display = 'flex';
     let sel = document.getElementById('pe-select-membro');
     sel.innerHTML = '<option value="" disabled selected>Selecione...</option>';
-    
-    [...window.membrosDataArray].sort((a, b) => a.nick.localeCompare(b.nick)).forEach(m => {
-        sel.innerHTML += `<option value="${m.nick}">${m.nick}</option>`;
-    });
-    
+    [...window.membrosDataArray].sort((a, b) => a.nick.localeCompare(b.nick)).forEach(m => { sel.innerHTML += `<option value="${m.nick}">${m.nick}</option>`; });
     window.renderTabelaPontosExtras();
 }
 
-window.fecharModalPontosExtras = function() {
-    document.getElementById('modal-pontos-extras').style.display = 'none';
-}
+window.fecharModalPontosExtras = function() { document.getElementById('modal-pontos-extras').style.display = 'none'; }
 
 window.salvarPontoExtra = function() {
     let nick = document.getElementById('pe-select-membro').value;
@@ -368,27 +340,22 @@ window.salvarPontoExtra = function() {
     if (!nick || isNaN(pts)) return window.mostrarToast("Selecione um membro e digite a pontuação.", "error");
     
     window.pontosExtrasMap[nick] = pts;
-    
-    db.collection("sistema").doc("config_metas").set({ pontosExtras: window.pontosExtrasMap }, { merge: true }).then(() => {
+    window.db.collection("sistema").doc("config_metas").set({ pontosExtras: window.pontosExtrasMap }, { merge: true }).then(() => {
         document.getElementById('pe-input-pontos').value = '';
         window.mostrarToast(`+${pts} pontos para ${nick}`, "success");
+        window.registrarLogAtividade("Adicionou Ponto Extra", `Atribuiu +${pts} pontos para ${nick}.`);
     });
 }
 
 window.removerPontoExtra = function(nick) {
     delete window.pontosExtrasMap[nick];
-    db.collection("sistema").doc("config_metas").set({ pontosExtras: window.pontosExtrasMap }, { merge: true });
+    window.db.collection("sistema").doc("config_metas").set({ pontosExtras: window.pontosExtrasMap }, { merge: true });
+    window.registrarLogAtividade("Removeu Ponto Extra", `Removeu o bônus do militar ${nick}.`);
 }
 
 window.renderTabelaPontosExtras = function() {
     let tbody = document.querySelector('#tb-pontos-extras tbody');
     tbody.innerHTML = '';
-    
-    for (let n in window.pontosExtrasMap) {
-        tbody.innerHTML += `<tr><td>${n}</td><td style="text-align:center; color:var(--sup-neon); font-weight:bold;">+${window.pontosExtrasMap[n]}</td><td style="text-align:right;"><button class="btn-admin-icon btn-admin-del" onclick="window.removerPontoExtra('${n}')"><i class="fas fa-trash"></i></button></td></tr>`;
-    }
-    
-    if (Object.keys(window.pontosExtrasMap).length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-sub);">Nenhum ponto extra.</td></tr>';
-    }
+    for (let n in window.pontosExtrasMap) { tbody.innerHTML += `<tr><td>${n}</td><td style="text-align:center; color:var(--sup-neon); font-weight:bold;">+${window.pontosExtrasMap[n]}</td><td style="text-align:right;"><button class="btn-admin-icon btn-admin-del" onclick="window.removerPontoExtra('${n}')"><i class="fas fa-trash"></i></button></td></tr>`; }
+    if (Object.keys(window.pontosExtrasMap).length === 0) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-sub);">Nenhum ponto extra.</td></tr>'; }
 }

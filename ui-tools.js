@@ -1,3 +1,14 @@
+window.registrarLogAtividade = function(acao, detalhes) {
+    if (!window.usuarioLogadoNick) return;
+    window.db.collection("logs_atividades").add({
+        timestamp: new Date().getTime(),
+        data_hora: new Date().toLocaleString('pt-BR'),
+        autor: window.usuarioLogadoNick,
+        acao: acao,
+        detalhes: detalhes || '-'
+    }).catch(e => console.error("Erro ao registrar log de atividade:", e));
+}
+
 window.mostrarToast = function(msg, type = 'success') {
     let container = document.getElementById('toastContainer');
     let toast = document.createElement('div');
@@ -95,7 +106,7 @@ window.aplicarSponsorInner = function() {
 }
 
 window.carregarLayoutConfig = function() {
-    db.collection("sistema").doc("config_layout").get().then((doc) => {
+    window.db.collection("sistema").doc("config_layout").get().then((doc) => {
         if (doc.exists && doc.data().posicoes) {
             let loaded = doc.data().posicoes;
             for (let k in loaded) { window.layoutConfig[k] = { ...window.layoutConfig[k], ...loaded[k] }; }
@@ -105,8 +116,9 @@ window.carregarLayoutConfig = function() {
 }
 
 window.savePositions = function() {
-    db.collection("sistema").doc("config_layout").set({ posicoes: window.layoutConfig }, { merge: true }).then(() => {
+    window.db.collection("sistema").doc("config_layout").set({ posicoes: window.layoutConfig }, { merge: true }).then(() => {
         window.mostrarToast("Posições salvas!", "success");
+        window.registrarLogAtividade("Editou Layout", "Alterou a posição de elementos na aba Consulta de Metas.");
         if (window.isEditMode) window.toggleEditMode();
     }).catch((e) => window.mostrarToast("Erro ao salvar posições: " + e.message, "error"));
 }
@@ -122,20 +134,15 @@ window.toggleEditMode = function() {
     
     if (window.isEditMode) {
         btn.innerHTML = '<i class="fas fa-times"></i> Concluir Edição';
-        btn.style.borderColor = '#ef4444';
-        btn.style.color = '#ef4444';
-        dica.style.display = 'inline';
-        areaDet.style.display = 'flex';
-        areaDet.style.opacity = '1';
+        btn.style.borderColor = '#ef4444'; btn.style.color = '#ef4444'; dica.style.display = 'inline';
+        areaDet.style.display = 'flex'; areaDet.style.opacity = '1';
         
         let ts = new Date().getTime();
         let fbacks = [{ id: 'avatar-1' }, { id: 'avatar-2' }, { id: 'avatar-selecionado' }, { id: 'avatar-empate-1' }, { id: 'avatar-empate-2' }];
         
         fbacks.forEach(f => {
             let img = document.getElementById(f.id);
-            if (img && (!img.src || img.src.endsWith('='))) {
-                img.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=Admin&action=std&direction=2&head_direction=2&gesture=sml&size=b&time=${ts}`;
-            }
+            if (img && (!img.src || img.src.endsWith('='))) img.src = `https://www.habbo.com.br/habbo-imaging/avatarimage?user=Admin&action=std&direction=2&head_direction=2&gesture=sml&size=b&time=${ts}`;
         });
         
         document.getElementById('nick-1').innerText = "NICK 1"; document.getElementById('nick-1').style.display = "block";

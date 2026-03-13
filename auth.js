@@ -9,11 +9,9 @@ window.liberarPainel = function() {
     }, 300);
     
     document.getElementById('data-consulta').valueAsDate = new Date();
-    
     const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     document.getElementById('mes-atual').innerText = meses[new Date().getMonth()] + " de " + new Date().getFullYear();
     
-    // Dispara todos os módulos globais
     window.carregarLayoutConfig();
     window.escutarCargos();
     window.escutarConfigDashboard();
@@ -21,18 +19,19 @@ window.liberarPainel = function() {
     
     let lvl = window.nivelUsuarioGlobal;
     
-    // Módulo de Estrelas: Apenas Sub-Líder, Vice e Líder
     if (['SUB-LIDER', 'VICE-LIDER', 'LIDER'].includes(lvl)) {
         window.escutarMilitaresEstrelas();
     }
     
-    // Gestão de Liderança (Privacidade e Logs): Apenas Vice e Líder
     if (['VICE-LIDER', 'LIDER'].includes(lvl)) {
         window.carregarPrivacidade();
         window.escutarLogsEstrelas();
+        window.escutarLogsAtividades();
     }
     
     window.setupAllDraggables();
+    
+    if(window.registrarLogAtividade) window.registrarLogAtividade("Login Efetuado", "Acessou a Central de Sistemas.");
 }
 
 auth.onAuthStateChanged((user) => {
@@ -50,18 +49,17 @@ auth.onAuthStateChanged((user) => {
 window.verificarAcessoBD = async function(email) {
     try {
         let authEmail = email.toLowerCase().trim();
-        
-        let planSnap = await db.collection("sistema").doc("acessos_planilha").get();
+        let planSnap = await window.db.collection("sistema").doc("acessos_planilha").get();
         if (planSnap.exists && planSnap.data().dados) {
             try { window.planilhaAcessos = JSON.parse(planSnap.data().dados); } catch (e) {}
         }
         
-        let manualSnap = await db.collection("acessos").get();
+        let manualSnap = await window.db.collection("acessos").get();
         window.acessosData = [];
         manualSnap.forEach(doc => { window.acessosData.push({ id: doc.id, ...doc.data() }); });
 
         if (window.acessosData.length === 0 && Object.keys(window.planilhaAcessos).length === 0) {
-            await db.collection("acessos").doc(authEmail).set({ email: authEmail, nick: 'Admin', nivel: "LIDER" });
+            await window.db.collection("acessos").doc(authEmail).set({ email: authEmail, nick: 'Admin', nivel: "LIDER" });
             window.location.reload(); return;
         }
 
@@ -88,14 +86,12 @@ window.verificarAcessoBD = async function(email) {
             
             let lvl = window.nivelUsuarioGlobal;
 
-            // COMANDO: Redireciona para fora da Central
             if (lvl === 'COMANDO') {
                 window.customAlert("Acesso de Comando restrito ao Painel Público.", "Aviso");
-                setTimeout(() => { auth.signOut(); window.location.href = "https://dichbtech.github.io/estrelas/"; }, 3000);
+                setTimeout(() => { auth.signOut(); window.location.href = "https://dichbtech.github.io/estrelas"; }, 3000);
                 return;
             }
 
-            // Elementos de Menus e Controles
             let menuAvais = document.getElementById('menu-avais');
             let menuFeedbacks = document.getElementById('menu-feedbacks');
             let menuEstrelas = document.getElementById('menu-estrelas');
@@ -106,33 +102,26 @@ window.verificarAcessoBD = async function(email) {
             let btnSavePos = document.querySelector('button[onclick="window.savePositions()"]');
             let dicaResize = document.getElementById('dica-resize');
 
-            // 1. SUPERVISOR: Apenas Metas (Esconde todo o resto)
             if (lvl === 'SUPERVISOR') {
                 if(menuAvais) menuAvais.style.display = 'none';
                 if(menuFeedbacks) menuFeedbacks.style.display = 'none';
                 if(menuEstrelas) menuEstrelas.style.display = 'none';
             } 
-            // 2. AUXILIAR: Metas, Avais e Feedbacks (Esconde Estrelas)
             else if (lvl === 'AUXILIAR') {
                 if(menuEstrelas) menuEstrelas.style.display = 'none';
             } 
-            // 3. SUB-LÍDER: Metas (Com botões Extras e Dash), Avais, Feedbacks, Estrelas. (Esconde Layout/Admin)
             else if (lvl === 'SUB-LIDER') {
-                if(dragControls) dragControls.style.display = 'flex'; // Exibe a barra, mas esconde a edição abaixo
+                if(dragControls) dragControls.style.display = 'flex';
                 if(btnEditPos) btnEditPos.style.display = 'none';
                 if(btnSavePos) btnSavePos.style.display = 'none';
                 if(dicaResize) dicaResize.style.display = 'none';
             } 
-            // 4. LÍDER e VICE-LÍDER: Tudo liberado
             else if (lvl === 'VICE-LIDER' || lvl === 'LIDER') {
                 if(menuAdmin) menuAdmin.style.display = 'flex';
                 if(dragControls) dragControls.style.display = 'flex';
-                
                 window.renderTabelaAcessos();
                 let boxPrivacidade = document.getElementById('box-editor-privacidade');
-                if (boxPrivacidade) {
-                    boxPrivacidade.innerHTML = window.buildEditorHTML('editor-privacidade', 'Carregando...');
-                }
+                if (boxPrivacidade) { boxPrivacidade.innerHTML = window.buildEditorHTML('editor-privacidade', 'Carregando...'); }
             }
             
             window.switchSection('modulo-metas', document.getElementById('menu-metas'));
@@ -158,13 +147,18 @@ window.loginGoogle = function() {
     });
 }
 
-window.fazerLogout = function() { auth.signOut(); }
+window.fazerLogout = function() { 
+    if(window.registrarLogAtividade) window.registrarLogAtividade("Logout", "Saiu do sistema.");
+    auth.signOut(); 
+}
 
 window.switchSection = function(idModulo, btnElement) {
     document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.btn-sidebar').forEach(el => el.classList.remove('active'));
     document.getElementById(idModulo).classList.add('active');
     btnElement.classList.add('active');
-
+    
+    if(window.registrarLogAtividade) {
+        window.registrarLogAtividade("Navegação de Módulo", `Acessou a aba: ${btnElement.innerText.trim()}`);
+    }
 }
-

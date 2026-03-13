@@ -1,7 +1,7 @@
 let militaresEstrelasData = [];
 
 window.escutarCargos = function() {
-    db.collection("sistema").doc("cargos").onSnapshot((doc) => {
+    window.db.collection("sistema").doc("cargos").onSnapshot((doc) => {
         if (doc.exists && doc.data().dados) {
             try {
                 window.cargosMap = JSON.parse(doc.data().dados);
@@ -14,7 +14,7 @@ window.escutarCargos = function() {
 }
 
 window.escutarMilitaresEstrelas = function() {
-    db.collection("militares").onSnapshot((snapshot) => {
+    window.db.collection("militares").onSnapshot((snapshot) => {
         militaresEstrelasData = [];
         snapshot.forEach((docSnap) => {
             militaresEstrelasData.push({ id: docSnap.id, ...docSnap.data() });
@@ -71,7 +71,7 @@ window.renderTabelaEstrelas = function() {
 }
 
 window.registrarLogEstrela = function(bene, acao, idProm, detalhes) {
-    db.collection("logs_estrelas").add({
+    window.db.collection("logs_estrelas").add({
         timestamp: new Date().getTime(),
         data_hora: new Date().toLocaleString('pt-BR'),
         autor: window.usuarioLogadoNick,
@@ -92,7 +92,7 @@ window.buscarPromocoesLote = async function() {
     let excluidosStr = document.getElementById('lote-excluidos').value;
     let excluidosArr = excluidosStr.split(',').map(s => s.trim()).filter(s => s !== "");
 
-    let docSnap = await db.collection("sistema").doc("promocoes").get();
+    let docSnap = await window.db.collection("sistema").doc("promocoes").get();
     if (!docSnap.exists) return window.customAlert("A planilha oficial ainda não enviou os dados de promoções para o sistema.", "Erro de Sincronização");
 
     let promocoes = [];
@@ -105,7 +105,6 @@ window.buscarPromocoesLote = async function() {
     let filtradas = promocoes.filter(p => p.data === dataBr && !excluidosArr.includes(p.id));
     if (filtradas.length === 0) return window.customAlert(`Nenhuma promoção válida encontrada para a data ${dataBr}.`, "Busca Vazia");
 
-    // Agrupa os IDs por promotor
     let promotorData = {};
     let idsColetados = [];
     
@@ -115,10 +114,8 @@ window.buscarPromocoesLote = async function() {
         idsColetados.push(p.id);
     });
 
-    // Link geral para o System com a data buscada
     let sysLink = `https://dic.systemhb.net/promocao?filtro%5Bdata_inicio%5D=${dateVal}&filtro%5Bdata_termino%5D=${dateVal}&filtro%5Blista%5D=todas`;
 
-    // Monta o cabeçalho do resultado
     let html = `
     <div style="color:#fff; margin-bottom:15px; font-size:15px; display:flex; flex-direction:column; gap:8px; background: rgba(76,175,80,0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(76,175,80,0.3);">
         <div><i class="fas fa-check-circle" style="color:#4caf50;"></i> ${filtradas.length} promoções válidas localizadas.</div>
@@ -126,7 +123,6 @@ window.buscarPromocoesLote = async function() {
     </div>
     <ul style="color:var(--text-sub); margin-bottom:15px; list-style: none; padding: 0; display:flex; flex-direction:column; gap:10px;">`;
     
-    // Contagem simplificada que será enviada para a função de salvar
     let contagemParaConfirmacao = {};
 
     for (let nick in promotorData) {
@@ -134,10 +130,7 @@ window.buscarPromocoesLote = async function() {
         let qtd = ids.length;
         contagemParaConfirmacao[nick] = qtd;
         
-        // Tratamento de plural e singular
         let txtPromo = qtd === 1 ? "promoção válida" : "promoções válidas";
-        
-        // Gera os botões clicáveis de IDs
         let linksIDs = ids.map(id => `<a href="https://dic.systemhb.net/promocao/ver/${id}" target="_blank" style="color:var(--sup-neon); text-decoration:none; font-weight:bold; background:rgba(251,191,36,0.1); padding:3px 8px; border-radius:4px; margin-right:5px; border: 1px solid rgba(251,191,36,0.2); display:inline-block; margin-bottom:5px; transition:0.3s;" onmouseover="this.style.background='var(--sup-neon)'; this.style.color='#000';" onmouseout="this.style.background='rgba(251,191,36,0.1)'; this.style.color='var(--sup-neon)';">#${id}</a>`).join("");
         
         html += `
@@ -166,7 +159,7 @@ window.confirmarLote = async function(contagem, idsColetados) {
         let officialNick = Object.keys(window.cargosMap).find(k => k.toLowerCase() === nick.toLowerCase());
         let dbNick = officialNick || nick;
 
-        let ref = db.collection("militares").doc(dbNick);
+        let ref = window.db.collection("militares").doc(dbNick);
         let docM = await ref.get();
         
         let p = 0; let e = 0; let pr = 0; let status = 'Ativo';
@@ -200,13 +193,14 @@ window.confirmarLote = async function(contagem, idsColetados) {
     }
 
     window.mostrarToast("Lote processado com sucesso!", "success");
+    window.registrarLogAtividade("Validação de Lote", `Processou e validou as promoções dos IDs: ${idLoteStr}`);
     document.getElementById('resultado-lote').style.display = 'none';
     document.getElementById('lote-data').value = '';
     document.getElementById('lote-excluidos').value = '';
 }
 
 window.escutarLogsEstrelas = function() {
-    db.collection("logs_estrelas").orderBy("timestamp", "desc").limit(50).onSnapshot(snap => {
+    window.db.collection("logs_estrelas").orderBy("timestamp", "desc").limit(50).onSnapshot(snap => {
         let tbody = document.querySelector('#tb-logs tbody');
         if (!tbody) return;
         
